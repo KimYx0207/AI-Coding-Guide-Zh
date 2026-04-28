@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/kimyx0207-claude-code-x-openclaw-guide-zh-badge.png)](https://mseep.ai/app/kimyx0207-claude-code-x-openclaw-guide-zh)
+
 # Claude Code & OpenClaw 中文教程
 
 <div align="center">
