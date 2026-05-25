@@ -1,5 +1,6 @@
 # CX-04 项目指令、配置、权限与沙盒：让 App 知道怎么安全工作
 
+
 本篇是 App 主线中的项目指令、权限与安全配置篇。
 
 主要来源：OpenAI Codex Config、Rules、Hooks、Settings、CLI 官方文档。
@@ -22,6 +23,12 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-in-app-browser.webp" alt="Codex App 官方内置浏览器与页面反馈界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 

@@ -10,13 +10,19 @@
 > - **预计学时**：8-10小时
 > - **难度等级**：⭐⭐ 入门级（有Claude Code基础即可）
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25）
 > - **前置要求**：已完成Claude Code安装和Commands基础使用
 > - **🆕 专属内容**：Hooks系统、Forked Sub-Agents、Hot Reloading
 
 ---
 
 ## 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view-dark.png" alt="Claude Code 官方 Agent View 深色界面：Needs input、Working、Completed 分组" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方 CLI 任务界面：任务执行、文件变更与终端状态" width="720"/></p>
 
 完成本课学习后，你将能够：
 

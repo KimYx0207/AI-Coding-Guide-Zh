@@ -10,7 +10,7 @@
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐⭐ 进阶
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25）
 > - **信息来源**：
 >   - [Claude Code 官方文档 - Channels](https://code.claude.com/docs/en/channels)
 >   - [Claude Code 官方文档 - Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks)
@@ -19,6 +19,12 @@
 ---
 
 ## 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view-dark.png" alt="Claude Code 官方 Agent View 深色界面：Needs input、Working、Completed 分组" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方 CLI 任务界面：任务执行、文件变更与终端状态" width="720"/></p>
 
 完成本课后，你将能：
 
@@ -85,6 +91,8 @@ Channels 和计划任务，解决的是两类不同问题：
 ---
 
 ## 4. 开始前准备
+
+> **v2.1.139+ 注意**：当环境中设置 `ANTHROPIC_API_KEY`、`apiKeyHelper` 或 `ANTHROPIC_AUTH_TOKEN` 时，`/schedule`、Remote Control、claude.ai MCP connectors 和通知偏好会被禁用。Channels / 计划任务教程默认按 Claude.ai 登录路径讲解；企业 API key 环境请先核对当前 `/status`。
 
 ### 4.1 基础条件
 
@@ -589,4 +597,4 @@ claude --resume
 
 ---
 
-> **最后更新**：2026年5月8日 | **适用版本**：Claude Code v2.1.133
+> **最后更新**：2026年5月25日 | **适用版本**：Claude Code v2.1.150

@@ -1,5 +1,6 @@
 # CX-10 Review / GitHub / PR 工作流：从 App 改动到可合并结果
 
+
 本篇聚焦 App 主线里的 Review、GitHub 和 PR。
 
 主要来源：OpenAI Codex App Review、GitHub integration、Codex Cloud / Web、CLI review 官方文档。
@@ -22,6 +23,10 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -141,6 +146,8 @@ GitHub Connector / integration 适合：
 - 是否能创建分支或提交。
 
 ## 6. 从 App 到 GitHub PR
+
+<p align="center"><img src="../../images/official/codex-git-commit.webp" alt="Codex App Git commit 与 PR 操作面板" width="720"/></p>
 
 典型流程：
 

@@ -10,7 +10,7 @@
 > - **预计学时**：6-8小时
 > - **难度等级**：⭐⭐⭐ 中级进阶
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25）
 > - **信息来源**：[官方概览](https://platform.claude.com/docs/zh-CN/agent-sdk/overview)、[GitHub Python SDK](https://github.com/anthropics/claude-agent-sdk-python)、[GitHub TypeScript SDK](https://github.com/anthropics/claude-agent-sdk-typescript)
 
 > **版本说明**：Claude Agent SDK（原名Claude Code SDK）是2025年Anthropic官方发布的开发工具包。本教程基于最新官方文档编写，如有更新请以官方为准。
@@ -18,6 +18,12 @@
 ---
 
 ## 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view-dark.png" alt="Claude Code 官方 Agent View 深色界面：Needs input、Working、Completed 分组" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方 CLI 任务界面：任务执行、文件变更与终端状态" width="720"/></p>
 
 完成本课学习后，你将能够：
 

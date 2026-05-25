@@ -10,13 +10,19 @@
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25）
 > - **信息来源**：[内置命令参考](https://code.claude.com/docs/en/commands) | [Skills 官方文档](https://code.claude.com/docs/en/slash-commands) | [Claude Command Suite](https://github.com/qdhenry/Claude-Command-Suite) | [最佳实践](https://www.anthropic.com/engineering/claude-code-best-practices)
 > - **前置要求**：已完成Claude Code安装和基础使用
 
 ---
 
 ## 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view-dark.png" alt="Claude Code 官方 Agent View 深色界面：Needs input、Working、Completed 分组" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方 CLI 任务界面：任务执行、文件变更与终端状态" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -452,6 +458,8 @@ You: /hello
 
 ## 第三部分：内置命令速查（做完练习后再查）
 
+> **2026-05-25 版本差异速览（v2.1.150）**：最新版 `v2.1.150` 本身是内部基础设施更新；对日常命令最有影响的是 `v2.1.149` 的 `/usage` 分类用量、`/diff` 键盘滚动和 GFM 任务列表渲染，以及 `v2.1.146/147` 将 `/simplify` 改名为 `/code-review`。旧的 `/simplify` 打磨式行为不要再作为主路径教学。
+
 > **本节说明**：这一节是参考表，不建议第一次学习时逐行阅读。你已经在第二部分创建过一个能运行的命令；如果目标是继续实操，可以直接跳到「第四部分：自定义命令开发」。需要查命令时再回来看这张表。
 >
 > **详细教程**：请回顾「02-基础使用完整指南.md」→ 第四部分：Slash命令大全
@@ -490,7 +498,7 @@ You: /hello
 |                      | `/chrome`        | 配置 Chrome 集成 | 浏览器联动     |      |
 | **开发辅助**   | `/security-review` | 安全审查      | 检查当前 diff 的安全问题 |      |
 |                      | `/review`        | 本地 PR / 改动审查 | 通用代码审查 |      |
-|                      | `/simplify`      | 复用、质量、效率修正 | 改完后打磨 |      |
+|                      | `/code-review`      | 代码审查与正确性问题报告 | 审 PR / 提交前检查 |      |
 |                      | `/batch`         | 大规模并行改造  | 多 worktree/多 agent |      |
 |                      | `/autofix-pr`    | 远程盯 PR 并修 CI/评论 | PR 修复循环 |      |
 |                      | `/ultrareview`   | 云端多 Agent 深度审查 | 高风险 PR |      |
@@ -518,7 +526,7 @@ You: /hello
 |                      | `/mobile`        | 显示移动端二维码 | 手机端安装     |      |
 |                      | `/login` / `/logout` | 登录/退出账号 | 账号切换     |      |
 |                      | `/privacy-settings` | 隐私设置      | Pro/Max 用户   |      |
-|                      | `/extra-usage`   | 配置额外用量    | 限额后继续工作 |      |
+|                      | `/usage-credits`   | 配置 usage credits | 需要额外额度时查看 |      |
 |                      | `/passes`        | 分享体验资格    | 符合资格时     |      |
 |                      | `/upgrade`       | 打开升级页面    | 升级套餐       |      |
 |                      | `/web-setup`     | 连接 GitHub 到 Web | Web 工作流  |      |
@@ -528,9 +536,9 @@ You: /hello
 
 > 💡 **提示**：输入 `/` 然后按 `Tab` 键可以查看所有可用命令。
 
-### v2.1.69+ 到 v2.1.133 的常用命令增量 🆕
+### v2.1.69+ 到 v2.1.150 的常用命令增量 🆕
 
-以下命令是 Claude Code 在 2.1.69 之后持续扩展、到 v2.1.133 仍然值得优先掌握的一批能力：
+以下命令是 Claude Code 在 2.1.69 之后持续扩展、到 v2.1.150 仍然值得优先掌握的一批能力：
 
 - `/powerup`：交互式课程（**v2.1.90**，官方 release 原文：*interactive lessons teaching Claude Code features with animated demos*）
 - `/loop`：bundled skill 形式的定时循环任务

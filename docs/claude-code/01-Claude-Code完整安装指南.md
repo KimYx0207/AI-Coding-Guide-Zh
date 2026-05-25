@@ -10,12 +10,14 @@
 > - **预计学时**：2-3小时（原生安装更简单！）
 > - **难度等级**：⭐ 零基础入门
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25）
 > - **重要更新**：当前同时支持原生安装与标准 npm 安装；原生更省心，npm 路径仍然受支持且需要 Node.js 18+
 
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -121,6 +123,8 @@
 ## 第一部分：Claude Code 简介
 
 ### 1.1 什么是 Claude Code
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方任务界面：后台任务状态与输入区" width="720"/></p>
 
 Claude Code 是 Anthropic 公司开发的**命令行AI编程助手**。与传统代码编辑器插件不同，它是一个独立运行的CLI工具，通过终端与开发者交互。
 
@@ -1653,6 +1657,8 @@ claude-hello-world/
 
 ### 7.1 VS Code 完整集成方案
 
+<p align="center"><img src="../../images/official/claude-code-vscode-interface.jpg" alt="Claude Code 官方 VS Code 扩展界面" width="720"/></p>
+
 > 💡 **这一节讲什么**：配置VS Code/Cursor编辑器，让它能完美运行Claude Code命令。配置后你就能在编辑器里一键调用AI助手了。
 
 #### 步骤1：VS Code基础配置
@@ -1804,19 +1810,19 @@ echo $SHELL
     {
       "label": "Claude Code: 审查当前文件",
       "type": "shell",
-      "command": "claude \"Review ${relativeFile} and suggest improvements\"",
+      "command": "claude "Review ${relativeFile} and suggest improvements"",
       "problemMatcher": []
     },
     {
       "label": "Claude Code: 解释当前文件",
       "type": "shell",
-      "command": "claude \"Explain what ${relativeFile} does\"",
+      "command": "claude "Explain what ${relativeFile} does"",
       "problemMatcher": []
     },
     {
       "label": "Claude Code: 生成测试",
       "type": "shell",
-      "command": "claude \"Generate unit tests for ${relativeFile}\"",
+      "command": "claude "Generate unit tests for ${relativeFile}"",
       "problemMatcher": []
     }
   ]

@@ -4,6 +4,32 @@
 
 ---
 
+## [v2.1.136] - 2026-05-25
+
+### 修改
+
+- 全库版本基线同步至 Claude Code v2.1.150、OpenClaw 稳定版 v2026.5.22、Codex CLI v0.133.0 / Codex App 26.519
+- README 与三条教程线补充官方图片资源，并在正文关键章节插入场景图，不再只在文档顶部展示图片
+- Claude Code 教程补充 v2.1.134→v2.1.150 差量：
+  - 新增 Agent View（`claude agents`）、`/goal` 长目标、`/scroll-speed`、`/resume` 后台会话、`claude agents --json`、后台会话固定、后台子代理完成耗时、转录视图快捷导航等工作流内容
+  - 同步 `/simplify` 改名为 `/code-review`，并补充 effort 参数、PR inline comment、旧清理行为移除等说明
+  - 同步 `/usage` 分类用量、`/diff` 键盘滚动、GFM task list 渲染、`/plugin` 组件清单 / token cost / 最近更新时间 / LSP server 展示等 CLI 体验变化
+  - 补充 Hooks、MCP、Plugins、企业治理和权限相关变化：`terminalSequence`、hook `args` exec form、`continueOnBlock`、`CLAUDE_PROJECT_DIR`、`allowAllClaudeAiMcps`、`settings.autoMode.hard_deny`、`ANTHROPIC_WORKSPACE_ID`、`forceLoginOrgUUID` / `forceLoginMethod` enforcement 等
+  - 修订 Windows / PowerShell / worktree / sandbox / auto-updater 相关注意事项，包括 PowerShell 权限绕过修复、worktree 写入白名单收窄、PowerShell prefix allow 规则、Windows Terminal 显示和 paste 问题、`pwsh` 安装路径兼容等
+- OpenClaw 教程补充 v2026.4.24→稳定版 v2026.5.22 差量：
+  - 同步 Node.js 24 推荐、Node.js 22.19+ 兼容、Pi 0.75.1、Codex harness `@openai/codex` 0.132.0、macOS Peekaboo Bridge 3.2.1 等运行基线
+  - 同步 Gateway / 性能 / 启动路径变化：通道目录和插件元数据缓存、startup-idle plugin lazy-load、ACPX runtime 延迟加载、Gateway ready 信号优化、restart trace 诊断等
+  - 补充消息平台与语音能力：Discord voice 跟随用户进入语音频道、bounded profile context、会议记录插件、Telegram wildcard topic defaults、Slack / Telegram ack reactions、Feishu dynamic agents 等
+  - 补充技能、插件、浏览器、媒体和模型变化：`openclaw skills install/update --global`、Policy plugin、Upstash Box、media provider credential 说明、Gemini CLI / Antigravity media guidance、xAI device-code OAuth、OpenRouter provider routing 等
+  - 修订安全与配置口径：旧 `cat SKILL.md && printf ...` allowlist 兼容路径移除、SecretRef 和 plaintext secret 警告、trusted-proxy scope、Gateway BYOH IPv4 binding、agent subagent bootstrap 默认只带 `AGENTS.md` / `TOOLS.md` 等
+- Codex 教程补充 CLI v0.129.0→v0.133.0 / Codex App 26.519 差量：
+  - 同步 v0.131.0 的 TUI session controls、`@` mentions 统一搜索、marketplace / plugin 分享流程、remote-control daemon、Python SDK `openai-codex` / `openai_codex`、`codex doctor`、Windows sandbox 加固等
+  - 同步 v0.132.0 的 Python SDK 认证、text-only turn API、`codex exec resume --output-schema`、remote executor 标准认证、图片 fidelity 保留、goal continuation 限制、session picker 和 remote websocket 修复等
+  - 同步 v0.133.0 的 Goals 默认启用、dedicated storage、`codex remote-control` 前台化、permission profiles 列表 API / 继承 / managed `requirements.toml` / runtime refresh / Windows sandbox 集成、插件发现输出和 extension lifecycle events
+  - 更新 `/plan`、`/goal`、CLI 安装、App server / API 文档、安全企业章节和 AGENTS 指令加载可靠性说明；明确 0.134.0-alpha.3 为预发布，不作为教程稳定基线
+
+---
+
 ## [v2.1.135] - 2026-05-10
 
 ### 修改

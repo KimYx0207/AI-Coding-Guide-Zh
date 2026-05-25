@@ -10,11 +10,17 @@
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级
 > - **更新日期**：2026年4月
-> - **适用版本**：Claude Code v2.1.133（验证于 2026-05-08；v2.1.90+ 插件市场 env 见文内 release 摘录）
+> - **适用版本**：Claude Code v2.1.150（验证于 2026-05-25；v2.1.90+ 插件市场 env 见文内 release 摘录）
 
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/claude-code-agent-view-dark.png" alt="Claude Code 官方 Agent View 深色界面：Needs input、Working、Completed 分组" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-agent-view.png" alt="Claude Code 官方 Agent View：多后台会话状态" width="720"/></p>
+
+<p align="center"><img src="../../images/official/claude-code-product-ui.jpg" alt="Claude Code 官方 CLI 任务界面：任务执行、文件变更与终端状态" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -82,6 +88,8 @@
 
 ## 第1章：Plugins生态概览
 
+> **v2.1.143→v2.1.150 插件更新**：插件依赖会被强制检查；Marketplace / Browse / Details 会展示 commands、agents、skills、hooks、MCP/LSP servers、更新时间和 projected context cost；插件启用、禁用、安装、HTTPS clone 以及 root-level `SKILL.md` 暴露都有修复。教程中遇到插件清单差异时，以 `/plugin` 当前界面为准。
+
 ### 1.1 什么是Claude Code Plugin？
 
 **定义**：
@@ -126,7 +134,7 @@ Plugin = manifest + runtime resources + optional markets/scope + 文档
 
 **官方数据**：
 
-- **当前版本**：Claude Code v2.1.133（2026年5月验证）
+- **当前版本**：Claude Code v2.1.150（2026年5月验证）
 - **官方市场**：✅ 已上线，可通过 `/plugin` 和网页入口协同使用
 - **社区Plugin**：持续增长中
 
@@ -724,4 +732,4 @@ my-plugin/
 
 ---
 
-> **最后更新**：2026年5月8日 | **适用版本**：Claude Code v2.1.133
+> **最后更新**：2026年5月25日 | **适用版本**：Claude Code v2.1.150

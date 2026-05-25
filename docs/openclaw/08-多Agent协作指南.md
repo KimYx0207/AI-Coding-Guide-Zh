@@ -15,7 +15,11 @@
 >
 > **大多数人不需要这篇！** 如果你只是个人使用，一个默认的 main Agent 就够了。只有当你需要"不同平台用不同 AI 性格"或"团队多人使用"时才需要看这篇
 
-## 什么是 Agent？
+## 什么是 Agent？
+
+<p align="center"><img src="../../images/official/openclaw-model-picker.png" alt="OpenClaw 官方模型选择与配置界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/openclaw-quick-settings-browser-tools.png" alt="OpenClaw 官方 Control UI 设置与浏览器工具界面" width="720"/></p>
 
 在 OpenClaw 的世界里，Agent 就是一个独立的 AI 助手实例。每个 Agent 有自己的"大脑"（系统指令）、"记忆"（记忆文件）、"技能"（技能集）和"身份"（认证凭证）。
 
@@ -85,6 +89,10 @@ Agent = 一个独立的 AI 员工
 ## OpenClaw 的 Agent 架构
 
 ### 架构总览
+
+<p align="center"><img src="../../images/official/openclaw-agents-ui.jpg" alt="OpenClaw 官方多 Agent UI 图" width="720"/></p>
+
+> **v2026.5.22 子代理注意**：默认子 Agent bootstrap context 已收窄到 `AGENTS.md` 与 `TOOLS.md`，不会自动把 persona、identity、user、memory、heartbeat、setup 等文件全部带入 delegated workers。多 Agent 教程里的“自动继承上下文”应按最小必要上下文理解。
 
 > ⏭️ **小白可跳过** — 这是底层运行时细节
 

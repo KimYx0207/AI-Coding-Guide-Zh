@@ -1,5 +1,6 @@
 # CX-09 Automations 完整指南：App 里的后台任务、提醒和周期检查
 
+
 本篇是 App 主线中的 Automations 后台任务篇。
 
 主要来源：OpenAI Codex App Automations、App Features、Skills、Rules、CLI / GitHub Action 官方文档。
@@ -22,6 +23,10 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -81,6 +86,8 @@ Automations 是让 Codex 在后台或按计划执行重复任务的能力。
 - 需要人工决策的高风险写操作。
 
 ## 2. App 中的创建方式
+
+<p align="center"><img src="../../images/official/codex-create-automation.webp" alt="Codex App 创建 Automation 表单" width="720"/></p>
 
 App 主线里可以直接自然语言创建：
 

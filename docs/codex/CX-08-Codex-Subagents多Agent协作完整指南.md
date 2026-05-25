@@ -1,5 +1,6 @@
 # CX-08 Subagents 完整指南：App 中的多 Agent 协作
 
+
 主要来源：OpenAI Codex Subagents、App Features、CLI Slash Commands 官方文档。
 
 ---
@@ -20,6 +21,12 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-in-app-browser.webp" alt="Codex App 官方内置浏览器与页面反馈界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 

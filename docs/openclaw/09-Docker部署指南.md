@@ -15,7 +15,13 @@
 >
 > **谁需要看这篇？** 如果你只是在自己电脑上用，不需要看这篇。这篇是给想把 OpenClaw 部署到远程服务器（比如云服务器）的人准备的
 
-## 为什么用 Docker 部署 OpenClaw？
+## 为什么用 Docker 部署 OpenClaw？
+
+<p align="center"><img src="../../images/official/openclaw-model-picker.png" alt="OpenClaw 官方模型选择与配置界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/openclaw-agents-ui.jpg" alt="OpenClaw 官方 Agent 与技能管理界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/openclaw-quick-settings-browser-tools.png" alt="OpenClaw 官方 Control UI 设置与浏览器工具界面" width="720"/></p>
 
 > **官方文档**：[docs.openclaw.ai/install/docker](https://docs.openclaw.ai/install/docker)
 
@@ -122,7 +128,7 @@ docker compose version         # 确认 Compose v2（不带横杠）
 
 ```bash
 docker pull openclaw/openclaw:latest    # 最新稳定版
-docker pull openclaw/openclaw:v2026.4.24  # 指定版本
+docker pull openclaw/openclaw:v2026.5.22  # 指定版本
 docker images | grep openclaw           # 查看本地镜像
 ```
 
@@ -148,7 +154,7 @@ docker build --build-arg OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg imagemagick" \
 | 标签 | 说明 | 适用场景 |
 |------|------|---------|
 | `latest` | 最新稳定版 | 生产环境 |
-| `vYYYY.M.D` | 指定版本号（如 `v2026.4.24`） | 需要版本锁定 |
+| `vYYYY.M.D` | 指定版本号（如 `v2026.5.22`） | 需要版本锁定 |
 | `nightly` | 每日构建 | 尝鲜新功能 |
 | `local` | 本地构建 | 自定义需求 |
 

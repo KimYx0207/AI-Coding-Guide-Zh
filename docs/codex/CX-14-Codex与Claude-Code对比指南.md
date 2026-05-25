@@ -1,5 +1,6 @@
 # CX-14 Codex 与 Claude Code 对比：从 App 主线出发做工具选择
 
+
 主要来源：OpenAI Codex App / CLI / Web 官方文档，以及 Claude Code 官方命令、插件、MCP、Hooks、Skills 文档。模型、价格和开放范围变化快，本篇不写固定数值结论。
 
 ---
@@ -20,6 +21,12 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-in-app-browser.webp" alt="Codex App 官方内置浏览器与页面反馈界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 

@@ -1,5 +1,8 @@
 # CX-12 Codex CLI 辅助指南：App 用户什么时候需要终端
 
+<p align="center"><img src="../../images/official/openai-codex-cli-splash.png" alt="OpenAI Codex 官方图" width="720"/></p>
+
+
 主要来源：OpenAI Codex CLI、CLI Slash Commands、Config、MCP、Review 官方文档。
 
 ---
@@ -20,6 +23,10 @@
 ---
 
 ## 📚 本课学习目标
+
+<p align="center"><img src="../../images/official/codex-integrated-terminal.webp" alt="Codex App 官方集成终端界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/codex-app-review-pane.webp" alt="Codex App 官方 Review 面板与 diff 实操界面" width="720"/></p>
 
 完成本课学习后，你将能够：
 
@@ -60,6 +67,8 @@
 ---
 
 ## 1. CLI 的定位
+
+> **v0.133.0 CLI 基线**：`codex remote-control` 前台化并报告 readiness；goals 默认启用；permission profiles 增加 list API、继承、managed `requirements.toml` 与 Windows sandbox 强化；plugin discovery 更容易检查；extension lifecycle 可观察 subagent start/stop、tool execution、turn metadata 和 async approval / turn processing。安装方式以官方 CLI 文档为准，不再只写 npm。
 
 CLI 是 App 的辅助工具，适合：
 

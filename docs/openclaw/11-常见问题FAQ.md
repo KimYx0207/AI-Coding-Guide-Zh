@@ -20,7 +20,13 @@
 
 ---
 
-## 一、安装和配置问题
+## 一、安装和配置问题
+
+<p align="center"><img src="../../images/official/openclaw-model-picker.png" alt="OpenClaw 官方模型选择与配置界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/openclaw-agents-ui.jpg" alt="OpenClaw 官方 Agent 与技能管理界面" width="720"/></p>
+
+<p align="center"><img src="../../images/official/openclaw-quick-settings-browser-tools.png" alt="OpenClaw 官方 Control UI 设置与浏览器工具界面" width="720"/></p>
 
 > 📌 **本节包含 15 个问题：**
 > [Q1: 命令找不到](#q1-openclaw-命令找不到command-not-found) | [Q2: Node.js 版本不兼容](#q2-nodejs-版本不兼容) | [Q3: npm 权限错误](#q3-npm-install-报权限错误eacces) | [Q4: 中国网络安装慢](#q4-中国网络环境安装慢或失败) | [Q5: node-gyp 编译错误](#q5-安装时报-node-gyp-编译错误) | [Q6: onboard 报错](#q6-openclaw-onboard-引导向导报错) | [Q7: 配置文件位置](#q7-配置文件在哪里怎么手动编辑) | [Q8: 多 API Key 配置](#q8-多个-api-key-怎么配置) | [Q9: 配置优先级](#q9-环境变量和配置文件哪个优先) | [Q10: 升级后配置丢失](#q10-升级-openclaw-后配置丢失了) | [Q11: 版本回滚](#q11-升级后功能异常怎么回滚) | [Q12: Windows Gateway 失败](#q12-windows-上安装后-gateway-启动失败) | [Q13: macOS 安全提示](#q13-macos-上安装提示无法验证开发者) | [Q14: 端口被占用](#q14-安装完成但-openclaw-gateway-start-提示端口被占用) | [Q15: 完全卸载](#q15-怎么完全卸载-openclaw)
@@ -63,7 +69,7 @@ pnpm config get global-bin-dir
 
 **现象：** 安装时报错 `engine "node" is incompatible` 或运行时出现语法错误。
 
-**原因：** OpenClaw 当前官方建议使用 Node.js 24.x；22.14+ 仍然兼容。低于兼容线时，常见报错就是 `engine incompatible`、运行时语法错误或部分 API 不可用。
+**原因：** OpenClaw 当前官方建议使用 Node.js 24.x；22.19+ 仍然兼容。低于兼容线时，常见报错就是 `engine incompatible`、运行时语法错误或部分 API 不可用。
 
 **解决方案：**
 
@@ -284,7 +290,7 @@ npm view openclaw versions --json
 npm install -g openclaw@2026.3.28
 
 # Docker 回滚
-docker pull openclaw/openclaw:v2026.3.28
+docker pull openclaw/openclaw:v2026.5.22
 # 修改 docker-compose.yml 中的 image tag 后重启
 ```
 
@@ -1792,7 +1798,7 @@ openclaw skills check my-awesome-skill --input "测试"
 | 维度 | ChatGPT | OpenClaw |
 |------|---------|----------|
 | 本质 | AI 聊天产品 | AI Agent 框架 |
-| 模型 | 只能用 OpenAI 的模型 | 支持 29+ 提供商 |
+| 模型 | 只能用 OpenAI 的模型 | 支持多个主流提供商 |
 | 平台 | 网页/App | WhatsApp/Telegram/Discord 等 |
 | 工具 | 有限的插件 | 可扩展的工具和技能系统 |
 | 记忆 | 平台管理 | 你自己控制（本地 Markdown） |
@@ -1887,12 +1893,14 @@ Gateway 是基础设施层，Agent 是业务逻辑层。一个 Gateway 可以服
 
 ---
 
-## 十一、版本升级与迁移（v2026.3.28 → v2026.4.24）
+## 十一、版本升级与迁移（v2026.3.28 → v2026.5.22）
 
 > 📌 **本节包含 4 个问题：**
 > [Q80: 升级要点](#q80-从-v202632x-升级到-v202642x-有哪些注意事项) | [Q81: 反向代理配置变更](#q81-升级后反向代理配置需要改吗) | [Q82: 插件白名单变更](#q82-升级后-allowlist-相关操作报权限错误) | [Q83: 性能提升](#q83-升级后启动变快了是正常的吗)
 
-### Q80: 从 v2026.3.2x 升级到 v2026.4.2x 有哪些注意事项？
+### Q80: 从 v2026.3.2x 升级到 v2026.5.22 有哪些注意事项？
+
+> **v2026.5.22 新增关注点**：除了 v2026.4.24 的 Google Meet、DeepSeek V4、浏览器坐标点击和模型目录 manifest 化之外，v2026.5.22 还重点改进 Gateway 启动性能、插件 metadata 缓存、Meeting Notes 外部插件、package shrinkwrap / runtime deps、`protobufjs` 8.4.0 安全更新，以及默认子 Agent bootstrap context 收窄。升级后如果发现模型、通道或插件行为变化，先运行 `openclaw doctor`，再对照当前 release notes。
 
 **说明：** v2026.4.x 系列包含多项安全加固和功能改进。大部分配置向后兼容，但以下几点需要注意：
 
