@@ -13,7 +13,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年5月30日
+> - **更新日期**：2026年6月18日
 > - **信息来源**：OpenAI Codex CLI、CLI Slash Commands、Config、MCP、Review 官方文档
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md)
 
@@ -117,7 +117,7 @@ CLI 离 Git、shell、CI 更近，所以更要保守：
 ## 1. CLI 的定位
 
 
-> **v0.138.0 CLI 辅助基线**：CLI 仍服务 Codex App 主线。v0.136.0 增强了 TUI 可读性、归档、app-server、远程执行和 Windows sandbox 诊断；v0.137.0 增强了 remote-control grants、cloud-managed config、plugin JSON、parallel web/image/code-mode 与多 agent 元数据；v0.138.0 增加 `/app` 向 Codex Desktop 交接当前 CLI 线程、图片路径暴露、personal access token v2、插件 structured output、goal/TUI/config/启动修复。安装方式以官方 CLI 文档为准，不再只写 npm。
+> **v0.141.0 CLI 辅助基线**：CLI 仍服务 Codex App 主线。v0.139.0 增强 code mode web search、MCP schema、doctor 诊断和 plugin marketplace；v0.140.0 增加 `/usage`、`/goal` 大文本 / 图片、`/import`、`codex delete` / `/delete`、统一 `@` mentions 和加密凭证；v0.141.0 强化远程执行 E2E relay、native cwd / shell / permission path 保留、executor plugin stdio MCP、PostToolUse blocking、插件路由、Windows sandbox stale credentials 与企业代理 TLS 修复。安装方式以官方 CLI 文档为准，不再只写 npm。
 
 CLI 是 App 的辅助工具，适合：
 
@@ -159,7 +159,7 @@ App 用户学习 CLI 的顺序：
 
 不要先背参数表。CLI 版本变化快，本机 `--help` 比教程里的静态列表可靠。
 
-### 2.1 v0.129.0 到 v0.138.0：先用本机命令确认差量
+### 2.1 v0.129.0 到 v0.141.0：先用本机命令确认差量
 
 这几版变化集中在 CLI 可观测性、远程执行、权限配置和 SDK，而不是“多背几个参数”。升级后先做四个确认：
 
@@ -168,6 +168,7 @@ codex --version
 codex doctor
 codex remote-control --help
 codex plugin marketplace list
+codex --help
 ```
 
 重点看这些能力是否已在你本机暴露：
@@ -184,6 +185,9 @@ codex plugin marketplace list
 | v0.136.0 | TUI 链接和表格可读性、session archive、app-server stdio / MCP status、remote execution 注册、Windows sandbox setup alpha | 先用 `codex doctor`、archive 和 app-server 诊断收敛问题，不把远程执行当新手入口 |
 | v0.137.0 | F13-F24 / paste / reasoning-only 状态、cloud-managed config、remote-control grants、plugin JSON、parallel web/image/code-mode、多 agent v2 元数据 | 企业配置、插件排查和远程控制要先看结构化输出和当前配置来源 |
 | v0.138.0 | `/app` 交接到 Codex Desktop、图片文件路径暴露、personal access token v2、plugin add/remove / marketplace `--json`、goal/TUI/config/启动修复 | CLI 可以把排查线程带回 App；插件自动化和 CI 报告优先用 JSON 证据 |
+| v0.139.0 | code mode web search、MCP schema oneOf / allOf 保留、doctor editor / pager 诊断、plugin marketplace JSON / cache | 排查 MCP、插件和终端体验时先用 doctor 和 marketplace 列表确认本机状态 |
+| v0.140.0 | `/usage`、`/import`、`/delete` / `codex delete`、统一 `@` mentions、加密 Bedrock / API / MCP OAuth 凭证 | CLI 迁移、用量查看和敏感凭证管理进入辅助路径 |
+| v0.141.0 | 远程执行 E2E relay、native cwd / shell / permission path 保留、executor plugin stdio MCP、PostToolUse blocking、Windows sandbox 修复 | 远程执行、code mode hooks、企业代理和 Windows 排障时优先核对本机版本 |
 
 这些版本还补了很多“看起来小、实际影响学习体验”的 TUI 和启动修复：链接、表格、取消提示、目标续跑、配置错误展示、OAuth/MCP 刷新和 workspace instruction 加载都更稳。写教程和排障时，不需要让新手背每个变更，但要解释“为什么升级后终端界面、App handoff 和插件排查突然更稳了”。
 
@@ -971,7 +975,7 @@ CLI 的课程难点不在命令少，而在读者很容易把它学成一张孤�
 4. 给出下一步排查顺序。
 ```
 
-第二层是把 CLI 接进脚本和 CI。这里最重要的不是“会跑”，而是输出可解析、权限可控、密钥不外泄。
+第二层是把 CLI 接进脚本和 CI。这里最重要的不是"会跑"，而是输出可解析、权限可控、密钥不外泄。
 
 ```text
 需要掌握：
@@ -1046,7 +1050,7 @@ npm test 2>&1 |
   "
 ```
 
-这个命令的重点是 `--sandbox read-only`。你不是让 Codex 在 CI 上修项目，而是让它读日志、压缩信息、给下一步。这样即使日志很长，也不会把错误分析和文件写入混在一起。
+这个命令的重点是 `--sandbox read-only`。你让它读日志、压缩信息、给下一步。这样即使日志很长，也不会把错误分析和文件写入混在一起。
 
 第二步，把结果带回 App。
 
@@ -1257,7 +1261,7 @@ Cloud 返回后，仍然回到 App 或本地 Review：
 4. 我本地应该再跑什么命令。
 ```
 
-CLI 的高阶能力不是“更快把任务扔出去”，而是把任务边界写清楚、把结果带回来、把人工判断保留下来。
+CLI 的高阶能力不是"更快把任务扔出去"，而是把任务边界写清楚、把结果带回来、把人工判断保留下来。
 
 ## 34. CLI 课程案例：把终端输出变成团队知识
 
@@ -1390,7 +1394,7 @@ Do not modify files.
 - [ ] 不把CLI教程写成Codex主线
 - [ ] CI中遵循最小权限、不输出密钥、人工合并原则
 
-**如果以上全部勾选，恭喜你掌握Codex CLI辅助！**
+**全部勾选后即掌握 Codex CLI 辅助。**
 
 ---
 
@@ -1418,7 +1422,7 @@ Do not modify files.
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

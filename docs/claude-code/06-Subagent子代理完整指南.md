@@ -9,14 +9,16 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：1-2小时
 > - **难度等级**：⭐⭐⭐ 中级
-> - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **更新日期**：2026年6月18日
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 
 ---
 
 ## 📚 本课学习目标
 
 老金我把子代理当成分工工具，不当成神奇按钮；多开一个 agent 之前，先问清它到底负责什么。
+
+> **2026-06-18 操作口径**：v2.1.172 后 subagent 可以继续派生 subagent，后台运行最多支持 5 层；v2.1.178 后嵌套 `.claude/agents`、`.claude/skills`、workflows 和 output styles 会按当前工作目录就近优先。课程演示时先讲“边界清晰的一层委派”，再讲多层委派；不要把多层代理当成默认做法。
 
 完成本课学习后，你将能够：
 
@@ -52,7 +54,7 @@
 ## 🎯 官方主路径：先理解，再扩展
 
 
-官方 Subagents 的最小闭环不是“先去装一个第三方代理包”，而是：
+官方 Subagents 的最小闭环不是"先去装一个第三方代理包"，而是：
 
 1. **知道 Claude Code 可以用 Agent 工具委派子任务**
 2. **知道项目级 / 用户级子代理定义文件放在哪里**
@@ -82,6 +84,7 @@
 
 - 在 Claude Code 里用 `/agents` 查看当前已启用的子代理
 - 项目级定义优先于用户级定义
+- 如果仓库里存在多层 `.claude/agents` 或 `.claude/skills`，以当前工作目录最近的配置为准；排障时先确认你是在仓库根目录还是子目录启动的会话
 - 子代理最适合做**边界清晰、可独立完成**的任务，不适合把主流程完全拆碎
 
 ---
@@ -138,7 +141,7 @@ chmod +x install-agents.sh
 | [backend-developer](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/backend-developer.md) | 可扩展 API 的服务器端专家 |
 | [electron-pro](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/electron-pro.md) | 桌面应用程序专家 |
 | [frontend-developer](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/frontend-developer.md) | React、Vue 和 Angular 的 UI/UX 专家 |
-| [fullstack-developer](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/fullstack-developer.md) | 端到端功能开发 |
+| [fullstack-developer](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/fullstack-developer.md) | 完整功能开发（前后端） |
 | [graphql-architect](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/graphql-architect.md) | GraphQL Schema 和 Federation 专家 |
 | [microservices-architect](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/microservices-architect.md) | 分布式系统设计师 |
 | [mobile-developer](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/01-core-dev/mobile-developer.md) | 跨平台移动专家 |

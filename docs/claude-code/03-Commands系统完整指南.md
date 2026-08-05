@@ -10,7 +10,7 @@
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级
 > - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 > - **信息来源**：[内置命令参考](https://code.claude.com/docs/en/commands) | [Skills 官方文档](https://code.claude.com/docs/en/slash-commands) | [Claude Command Suite](https://github.com/qdhenry/Claude-Command-Suite) | [最佳实践](https://www.anthropic.com/engineering/claude-code-best-practices)
 > - **前置要求**：已完成Claude Code安装和基础使用
 
@@ -27,7 +27,7 @@
 3. **分清 legacy commands 与 Skills**：知道什么时候继续用 `.claude/commands/`，什么时候应该迁移到 Skills
 4. **掌握内置命令的新表面**：了解 `/plan`、`/plugin`、`/release-notes`、`/rewind`、`/insights`、`/schedule`、`/statusline`
 5. **组合命令构建工作流**：将多个命令串联成自动化流程
-6. **排查命令故障**：独立解决90%的常见配置和执行问题
+6. **排查命令故障**：解决大多数常见配置和执行问题
 7. **掌握frontmatter配置**：使用description、allowed-tools、model等高级配置
 8. **精通$ARGUMENTS参数**：接收和解析用户输入参数
 
@@ -617,7 +617,7 @@ You: /powerup
 /effort low     # ○ 快速简洁
 /effort medium  # ◐ 平衡模式
 /effort high    # ● 深度推理
-/effort xhigh   # ◉ 深度推理（推荐 Opus 4.7 默认）
+/effort xhigh   # ◉ 深度推理（推荐 Opus 4.8 默认）
 /effort max     # ⬤ 极限推理
 /effort auto    # 重置为自动判断
 ```
@@ -627,7 +627,7 @@ You: /powerup
 | low | ○ | 最少 | 简单问答、格式转换 |
 | medium | ◐ | 中等 | 日常开发、代码修改 |
 | high | ● | 较多 | 架构设计、复杂调试 |
-| **xhigh** | ◉ | 多 | **深度推理，Opus 4.7 推荐默认** |
+| **xhigh** | ◉ | 多 | **深度推理，Opus 4.8 推荐默认** |
 | max | ⬤ | 最多 | 极限推理，关键决策 |
 
 > 💡 **省钱技巧**：批量处理简单任务时切换到 `low`，关键决策时切换到 `xhigh`。
@@ -713,7 +713,7 @@ allowed-tools:
   - Read
   - Write
   - WebSearch
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 
 # 公众号文章创作
@@ -815,7 +815,7 @@ allowed-tools:
   - Grep
 
 # 指定使用的模型
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 
 # 禁用模型调用（用于纯文本替换命令）
 # disable-model-invocation: true
@@ -879,7 +879,7 @@ allowed-tools:
 **4. model（指定模型）**
 
 ```yaml
-model: claude-opus-4-6
+model: claude-opus-4-8
 ```
 
 作用：强制使用指定模型执行命令（覆盖当前会话模型）。
@@ -1547,7 +1547,7 @@ $ARGUMENTS 格式：<主题> [风格] [字数]
 
 ```yaml
 ---
-model: claude-opus-4-6
+model: claude-opus-4-8
 ---
 ```
 
@@ -1874,7 +1874,7 @@ Read("$ARGUMENTS")
 
 ```markdown
 ---
-description: 每日内容创作工作流 - 从热点到成稿一站式完成
+description: 每日内容创作工作流 - 从热点到成稿全流程完成
 argument-hint: [热点关键词（可选）]
 allowed-tools:
   - Read
@@ -2011,7 +2011,7 @@ allowed-tools:
   - WebSearch
   - Glob
   - Grep
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 version: 1.0.0
 author: 作者名
 ---

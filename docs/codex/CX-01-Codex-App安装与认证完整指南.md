@@ -2,7 +2,7 @@
 
 本篇只解决一件事：把 **Codex App** 正确装好、登上号、打开本地项目，并跑通第一个安全任务。
 
-官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-06-09 可查官方文档、Codex App 26.602 与 Codex CLI 0.138.0 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。
+官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-06-18 可查官方文档、Codex App 26.609 与 Codex CLI 0.141.0 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。
 
 ---
 
@@ -103,7 +103,7 @@
 
 ## 安装课的心智模型
 
-你不是在安装一个“聊天软件”，而是在本机建立一条开发执行链路：
+你不是在安装一个"聊天软件"，而是在本机建立一条开发执行链路：
 
 ```text
 App 能打开
@@ -142,7 +142,7 @@ App 能打开
 
 老金我把 Codex 第一课放在 App 安装和认证，是因为这条主线先解决“能不能安全打开本地项目”。
 
-本系列不是从 CLI 开始，而是从 App 开始。你安装成功的标准不是“终端里有 `codex` 命令”，而是：
+本系列不是从 CLI 开始，而是从 App 开始。你安装成功的标准不是"终端里有 codex 命令"，而是：
 
 1. 桌面 Codex App 能打开。
 2. 能登录 ChatGPT / OpenAI 账号。
@@ -580,7 +580,7 @@ codex exec "Read this repo and report the test command. Do not modify files."
 
 ## 15. 安装排障总表：按症状定位，不要乱重装
 
-安装课最怕学生遇到问题后反复卸载重装。Codex App 的安装问题通常不是“软件坏了”，而是系统、账号、Git、终端、权限或项目目录其中一环没对齐。排障时先定位症状，再选择动作。
+安装课最怕学生遇到问题后反复卸载重装。Codex App 的安装问题通常不是"软件坏了"，而是系统、账号、Git、终端、权限或项目目录其中一环没对齐。排障时先定位症状，再选择动作。
 
 | 症状 | 常见原因 | 第一反应 |
 |------|----------|----------|
@@ -880,7 +880,7 @@ Claude Code 的厚课程强在“学完能做事”。Codex App 安装课也要�
 
 ## 21. 大型综合工坊：从一台新电脑到可交付的 Codex 工作台
 
-这个工坊适合直播课最后 40 分钟，也适合企业新人入职当天完成。目标不是“把软件装上”，而是让学习者完成一条真实工作流：安装、登录、打开项目、只读分析、小改动、Review、复盘。
+这个工坊适合直播课最后 40 分钟，也适合企业新人入职当天完成。目标不是"把软件装上"，而是让学习者完成一条真实工作流：安装、登录、打开项目、只读分析、小改动、Review、复盘。
 
 ### 21.1 工坊准备
 
@@ -1496,7 +1496,7 @@ C 类：先退出写入练习
 - [ ] 完成第一个安全可写任务（小改动在Review中看到diff）
 - [ ] 没有默认开启 full access
 
-**如果以上全部勾选，恭喜你完成Codex App安装！**
+**全部勾选后即完成 Codex App 安装。**
 
 ---
 
@@ -1529,7 +1529,7 @@ codex exec "任务描述"   # 无头执行一次任务
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

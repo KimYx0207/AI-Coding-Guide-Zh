@@ -82,7 +82,7 @@ Review 篇的核心是：Codex 改完不等于你可以合并。你要能读懂 
 
 老金我把 Review 单独成课，是因为能看懂 diff、评论和 PR 状态，才算真正掌握 Codex App 工作流。
 
-App Review 面板不是“Codex 的成果展示页”，而是 Git diff 工作台：
+App Review 面板不是"Codex 的成果展示页"，而是 Git diff 工作台：
 
 ```text
 工作区产生改动
@@ -1438,7 +1438,7 @@ Not changed:
 - [ ] 不在main分支上直接提交
 - [ ] 知道什么时候用Cloud处理PR，什么时候留在App
 
-**如果以上全部勾选，恭喜你掌握Codex Review与PR工作流！**
+**全部勾选后即掌握 Codex Review 与 PR 工作流。**
 
 ---
 
@@ -1476,7 +1476,7 @@ Not changed:
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

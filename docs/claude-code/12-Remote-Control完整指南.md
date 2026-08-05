@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：1-2小时
 > - **难度等级**：⭐⭐ 进阶
-> - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **更新日期**：2026年6月18日
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 > - **信息来源**：[Claude Code 官方文档 - Remote Control](https://code.claude.com/docs/en/remote-control)
 
 ---
@@ -18,6 +18,8 @@
 ## 本课学习目标
 
 老金我把 Remote Control 写成辅助协作，而不是远程放飞，是因为移动端接力也必须有边界。
+
+> **2026-06-18 操作口径**：v2.1.181 后 Remote Control 也支持 `/config key=value` 配置入口，并新增 `CLAUDE_CLIENT_PRESENCE_FILE` 用于客户端 presence 状态集成。移动端接力前，仍然先确认登录方式、workspace trust、权限模式和当前项目路径，避免在手机上误以为切到了另一个本地仓库。
 
 完成本课后，你将能：
 
@@ -32,7 +34,7 @@
 ## 1. 先说结论
 
 
-Remote Control 不是“把你的本地项目同步到云端”，而是：
+Remote Control 不是"把你的本地项目同步到云端"，而是：
 
 > 让 `claude.ai/code` 或 Claude 手机 App 变成你本地 Claude Code 会话的远程窗口。
 
@@ -328,7 +330,7 @@ Team 和 Enterprise 下，Remote Control 默认可能是关闭的。
 
 ### 9.3 更高版本增强（v2.1.93 → v2.1.158）
 
-v2.1.152 到 v2.1.158 这轮更新里，Remote / 后台相关变化主要不是“多一个入口”，而是稳定性和可控性增强：
+v2.1.152 到 v2.1.158 这轮更新里，Remote / 后台相关变化主要不是"多一个入口"，而是稳定性和可控性增强：
 
 - `claude agents` 可用 `! <command>` 启动可附着的后台 shell，命令行等价入口是 `claude --bg --exec '<command>'`。
 - `/remote-control` autocomplete 会在已连接时显示断开入口，Chrome 集成可通过 `/chrome` 选择连接的浏览器。
@@ -465,4 +467,4 @@ claude --remote-control
 
 ---
 
-> **最后更新**：2026年6月9日 | **适用版本**：Claude Code v2.1.169
+> **最后更新**：2026年6月18日 | **适用版本**：Claude Code v2.1.181

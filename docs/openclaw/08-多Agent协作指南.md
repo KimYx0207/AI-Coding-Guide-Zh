@@ -20,7 +20,7 @@
 老金我把多 Agent 协作讲成责任拆分，而不是热闹分身；每个 agent 都要有清楚的交付物。
 
 
-> **v2026.6.1 复核补充**：多 Agent 不只是“多开几个会话”。新版继续强化 interrupted tool calls、stale session bindings、compaction handoffs、media delivery retries、Workboard、agent coordination tools、session metadata 和 Gateway runtime state。排查多 Agent 卡住时，先看 Activity / transcript / Gateway 日志、Workboard 状态和具体 channel / provider，再判断是不是 agent 设计问题。
+> **v2026.6.8 复核补充**：多 Agent 不只是“多开几个会话”。新版继续强化 interrupted tool calls、stale session bindings、compaction handoffs、media delivery retries、Workboard、agent coordination tools、agent run recovery、session metadata 和 Gateway runtime state。排查多 Agent 卡住时，先看 Activity / transcript / Gateway 日志、Workboard 状态和具体 channel / provider，再判断是不是 agent 设计问题。
 
 在 OpenClaw 的世界里，Agent 就是一个独立的 AI 助手实例。每个 Agent 有自己的"大脑"（系统指令）、"记忆"（记忆文件）、"技能"（技能集）和"身份"（认证凭证）。
 
@@ -95,7 +95,7 @@ Agent = 一个独立的 AI 员工
 
 > ⏭️ **小白可跳过** — 这是底层运行时细节
 
-OpenClaw 的多 Agent 架构基于 Pi agent runtime（RPC 模式）运行，采用**扁平路由模型**，不是层级管理模型。没有"管理者 Agent"来调度其他 Agent，而是由 Gateway 根据消息来源直接路由到对应的 Agent。每个 Agent 通过 channel routing（消息路由，决定哪条消息由哪个 Agent 处理）配置绑定到不同的频道或账号。
+OpenClaw 的多 Agent 架构基于 Pi agent runtime（RPC 模式）运行，采用**扁平路由模型**（不是层级管理模型）。Gateway 根据消息来源直接路由消息到对应的 Agent，没有"管理者 Agent"在其中调度。每个 Agent 通过 channel routing（消息路由，决定哪条消息由哪个 Agent 处理）配置绑定到不同的频道或账号。
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -236,7 +236,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
 {
   "agents": {
     "defaults": {
-      "model": "anthropic/claude-opus-4-6",
+      "model": "anthropic/claude-opus-4-8",
       "sandbox": {
         // 非主会话在 Docker 沙箱中运行
         "mode": "non-main",
@@ -246,12 +246,12 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
       {
         "id": "main",
         "workspace": "~/.openclaw/workspace",
-        "model": "anthropic/claude-opus-4-6",
+        "model": "anthropic/claude-opus-4-8",
       },
       {
         "id": "coding",
         "workspace": "~/.openclaw/workspace-coding",
-        "model": "anthropic/claude-opus-4-6",
+        "model": "anthropic/claude-opus-4-8",
         // Agent 级别的 skills 是简单的字符串数组
         "skills": ["coding-agent", "github", "gh-issues", "tmux"],
       },
@@ -264,7 +264,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
       {
         "id": "work",
         "workspace": "~/.openclaw/workspace-work",
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": "anthropic/claude-sonnet-5",
         "skills": ["gog", "slack", "notion", "trello", "summarize"],
       },
     ],
@@ -417,7 +417,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
     "list": [
       {
         "id": "coding",
-        "model": "anthropic/claude-opus-4-6",
+        "model": "anthropic/claude-opus-4-8",
         // 编程需要最强的推理能力，用最好的模型
       },
       {
@@ -427,7 +427,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
       },
       {
         "id": "work",
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": "anthropic/claude-sonnet-5",
         // 办公任务中等复杂度，用性价比最高的
       },
     ],
@@ -439,7 +439,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
 
 | 方案 | 模型 | 估算日成本 |
 |------|------|-----------|
-| 全部用 Opus | claude-opus-4-6 | ~$5-10 |
+| 全部用 Opus | claude-opus-4-8 | ~$5-10 |
 | 按需分配 | Opus + Sonnet + Mini | ~$2-4 |
 | 全部用 Mini | gpt-5.2-mini | ~$0.5-1 |
 
@@ -751,12 +751,12 @@ openclaw agents list
       {
         "id": "coding",
         "skills": ["coding-agent", "github", "gh-issues", "tmux"],
-        "model": "anthropic/claude-opus-4-6",
+        "model": "anthropic/claude-opus-4-8",
       },
       {
         "id": "office",
         "skills": ["gog", "slack", "notion", "trello", "summarize"],
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": "anthropic/claude-sonnet-5",
       },
       {
         "id": "social",
@@ -948,7 +948,7 @@ openclaw agents add tech-support
       {
         "id": "tech-support",
         "workspace": "~/.openclaw/workspace-tech-support",
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": "anthropic/claude-sonnet-5",
         "skills": ["coding-agent", "github", "summarize"],
       },
     ],
@@ -1656,7 +1656,7 @@ Agent 的 `model` 字段支持故障转移配置：
         "id": "work",
         // model 可以是对象形式，指定主模型和备用模型
         "model": {
-          "primary": "anthropic/claude-sonnet-4-6",
+          "primary": "anthropic/claude-sonnet-5",
           "fallbacks": [
             "openai/gpt-5.2-mini",
             "ollama/llama3.1",
@@ -1798,7 +1798,7 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
       {
         "id": "devops",
         "workspace": "~/.openclaw/workspace-devops",
-        "model": "anthropic/claude-sonnet-4-6",
+        "model": "anthropic/claude-sonnet-5",
         "skills": ["server-monitor", "summarize"],
       },
     ],

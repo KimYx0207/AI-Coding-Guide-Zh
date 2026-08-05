@@ -10,7 +10,7 @@
 > - **预计学时**：6-8小时
 > - **难度等级**：⭐⭐⭐ 中级进阶
 > - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 > - **信息来源**：[官方概览](https://platform.claude.com/docs/zh-CN/agent-sdk/overview)、[GitHub Python SDK](https://github.com/anthropics/claude-agent-sdk-python)、[GitHub TypeScript SDK](https://github.com/anthropics/claude-agent-sdk-typescript)
 
 > **版本说明**：Claude Agent SDK（原名Claude Code SDK）是2025年Anthropic官方发布的开发工具包。本教程基于最新官方文档编写，如有更新请以官方为准。
@@ -28,7 +28,7 @@
 3. **掌握核心概念**：深入理解Tools、Agent Loop、Context Management
 4. **独立完成3个实战项目**：从one-shot到multi-tool再到streaming模式
 5. **自定义工具开发**：创建SDK内置MCP服务器，扩展Agent能力
-6. **故障排查技能**：独立解决90%的常见问题
+6. **故障排查技能**：解决大多数常见问题
 
 ---
 
@@ -215,7 +215,7 @@ npm install @anthropic-ai/claude-agent-sdk
 - 适合：Web应用、Node.js服务端、全栈开发
 ```
 
-> **老金建议**：两种SDK功能完全相同，选你最熟悉的语言就好。本教程会同时展示两种语言的代码示例。
+> **建议**：两种SDK功能完全相同，选你最熟悉的语言就好。本教程会同时展示两种语言的代码示例。
 
 ### 1.4 版本演进说明
 
@@ -365,7 +365,7 @@ async def main():
 
     # 配置选项
     options = ClaudeAgentOptions(
-        model='claude-sonnet-4-6'  # Sonnet 4.6（推荐模型）
+        model='claude-sonnet-5'  # Sonnet 5（推荐模型）
     )
 
     # 执行查询，返回流式响应
@@ -414,7 +414,7 @@ async function main() {
   const stream: Query = query({
     prompt: '你好！请用一句话介绍你能做什么？',
     options: {
-      model: 'claude-sonnet-4-6'  // Sonnet 4.6(推荐)
+      model: 'claude-sonnet-5'  // Sonnet 5(推荐)
     }
   });
 
@@ -443,7 +443,7 @@ npx ts-node src/hello-agent.ts
 
 ### 2.5 验证安装成功
 
-如果你看到了Agent的回复，恭喜！安装成功！
+如果看到了 Agent 的回复，说明安装成功。
 
 **常见问题快速排查**：
 
@@ -496,7 +496,7 @@ from claude_agent_sdk import ClaudeAgentOptions
 
 options = ClaudeAgentOptions(
     # 模型选择
-    model='claude-sonnet-4-6',  # Sonnet 4.6(推荐),也可选Opus 4.6或Haiku 4.5
+    model='claude-sonnet-5',  # Sonnet 5(推荐),也可选Opus 4.8或Haiku 4.5
 
     # 系统提示词（定义Agent的角色和行为）
     system_prompt='你是一个Python专家，专注于代码质量和最佳实践。',
@@ -855,7 +855,7 @@ async def analyze_code(file_path: str) -> None:
 
     # 配置Agent
     options = ClaudeAgentOptions(
-        model='claude-sonnet-4-6',
+        model='claude-sonnet-5',
         cwd=str(Path.cwd()),
         allowed_tools=['Read', 'Glob', 'Grep'],  # 只给读取权限
         max_turns=5,
@@ -938,7 +938,7 @@ async def run_multi_tool_agent(task: str) -> None:
     print("=" * 60)
 
     options = ClaudeAgentOptions(
-        model='claude-sonnet-4-6',  # Sonnet 4.6
+        model='claude-sonnet-5',  # Sonnet 5
         cwd=str(Path.cwd()),
         allowed_tools=['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep'],
         max_turns=15,
@@ -1111,7 +1111,7 @@ custom_tools = create_sdk_mcp_server(
 # Agent配置
 def get_options():
     return ClaudeAgentOptions(
-        model='claude-sonnet-4-6',  # Sonnet 4.6(推荐)
+        model='claude-sonnet-5',  # Sonnet 5(推荐)
         mcp_servers={"custom": custom_tools},
         allowed_tools=[
             "Read", "Write", "Bash",
@@ -1569,13 +1569,13 @@ async for message in query(prompt="...", options=options):
 
 | 场景 | 推荐模型 | 理由 |
 |------|---------|------|
-| 日常开发 | claude-sonnet-4-6 | 能力强、速度快、价格适中 |
-| 复杂推理 | claude-opus-4-6 | 最强能力，但价格高 |
+| 日常开发 | claude-sonnet-5 | 能力强、速度快、价格适中 |
+| 复杂推理 | claude-opus-4-8 | 最强能力，但价格高 |
 | 简单任务 | claude-haiku-4-5-20251001 | 最便宜，适合简单查询 |
 
 ```python
 # 性价比之选
-options = ClaudeAgentOptions(model='claude-sonnet-4-6')
+options = ClaudeAgentOptions(model='claude-sonnet-5')
 ```
 
 ---
@@ -1630,7 +1630,7 @@ options = ClaudeAgentOptions(
 ```python
 # 生产环境配置示例
 production_options = ClaudeAgentOptions(
-    model='claude-sonnet-4-6',  # 推荐模型
+    model='claude-sonnet-5',  # 推荐模型
     allowed_tools=['Read', 'Glob', 'Grep'],  # 最小权限
     permission_mode='default',  # 需要确认
     max_turns=10,
@@ -1799,14 +1799,14 @@ with open("session.json", "w") as f:
 
 **答**：支持Claude系列模型：
 
-- claude-opus-4-6（最强）
-- claude-sonnet-4-6（推荐）
+- claude-opus-4-8（最强）
+- claude-sonnet-5（推荐）
 - claude-haiku-4-5-20251001（最快最便宜）
 
 通过`model`参数指定：
 
 ```python
-options = ClaudeAgentOptions(model='claude-sonnet-4-6')
+options = ClaudeAgentOptions(model='claude-sonnet-5')
 ```
 
 ---
@@ -1909,7 +1909,7 @@ async def rate_limited_query(prompts, delay=1.0):
 ---
 
 **课程版本**：V1.2
-**最后更新**：2026年6月9日
+**最后更新**：2026年6月18日
 **作者**：老金
 
 ---
@@ -1918,7 +1918,7 @@ async def rate_limited_query(prompts, delay=1.0):
 
 | 版本 | 日期 | 修改内容 |
 |------|------|----------|
-| V1.2 | 2026-02-26 | 更新所有模型引用至最新4.6版本：Sonnet 4.6（claude-sonnet-4-6）、Opus 4.6（claude-opus-4-6）、Haiku 4.5（claude-haiku-4-5-20251001） |
+| V1.2 | 2026-02-26 | 更新所有模型引用至最新4.6版本：Sonnet 5（claude-sonnet-5）、Opus 4.8（claude-opus-4-8）、Haiku 4.5（claude-haiku-4-5-20251001） |
 | V1.1 | 2025-12-24 | 修正所有模型名称为最新4.5版本（claude-sonnet-4-5-20250929、claude-opus-4-5-20251101、claude-3-5-haiku-20241022） |
 | V1.0 | 2025-12-19 | 初版发布 |
 

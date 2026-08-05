@@ -129,11 +129,11 @@ docker compose version         # 确认 Compose v2（不带横杠）
 
 ```bash
 docker pull openclaw/openclaw:latest    # 最新稳定版
-docker pull openclaw/openclaw:v2026.6.1  # 指定稳定版本
+docker pull openclaw/openclaw:v2026.6.8  # 指定稳定版本
 docker images | grep openclaw           # 查看本地镜像
 ```
 
-> **v2026.6.1 发布校验**：Docker / npm 生产部署时，优先用官方发布包和固定 tag；自建镜像要保留 package integrity check，不要为了减小镜像随手删 lockfile / shrinkwrap。v2026.6.1 release notes 强化了 release / CI / Docker / E2E / diagnostics 证据链、bounded logs、readiness probes 和 rollback snapshots，生产升级时要把这些证据当成升级核对入口。
+> **v2026.6.8 发布校验**：Docker / npm 生产部署时，优先用官方发布包和固定 tag；自建镜像要保留 package integrity check，不要为了减小镜像随手删 lockfile / shrinkwrap。v2026.6.8 release notes 强化了 release / CI / Docker / E2E / diagnostics 证据链、bounded logs、readiness probes、latest tag parsing 和 rollback snapshots，生产升级时要把这些证据当成升级核对入口。
 
 > **安全补丁提示**：这一轮还包含 `protobufjs` 8.4.0 安全更新。生产镜像不要长期停在旧 tag；升级镜像后用 `openclaw doctor` 和容器健康检查确认 Gateway、插件和 channels 都仍能启动。
 
@@ -159,7 +159,7 @@ docker build --build-arg OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg imagemagick" \
 | 标签 | 说明 | 适用场景 |
 |------|------|---------|
 | `latest` | 最新稳定版 | 生产环境 |
-| `vYYYY.M.D` | 指定版本号（如 `v2026.6.1`） | 需要版本锁定 |
+| `vYYYY.M.D` | 指定版本号（如 `v2026.6.8`） | 需要版本锁定 |
 | `nightly` | 每日构建 | 尝鲜新功能 |
 | `local` | 本地构建 | 自定义需求 |
 
@@ -631,7 +631,7 @@ services:
 
 ### 生产上线工坊：从空 VPS 到可维护服务
 
-下面是一条适合个人、小团队和开源项目维护者的生产部署路径。它的目标不是“把容器跑起来”，而是让你以后能更新、排错、恢复。
+下面是一条适合个人、小团队和开源项目维护者的生产部署路径。它的目标不是"把容器跑起来"，而是让你以后能更新、排错、恢复。
 
 假设服务器是 Ubuntu，域名是 `openclaw.example.com`，部署目录是 `/opt/openclaw`。
 

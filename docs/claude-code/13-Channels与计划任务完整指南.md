@@ -10,7 +10,7 @@
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐⭐ 进阶
 > - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 > - **信息来源**：
 >   - [Claude Code 官方文档 - Channels](https://code.claude.com/docs/en/channels)
 >   - [Claude Code 官方文档 - Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks)
@@ -596,4 +596,4 @@ claude --resume
 
 ---
 
-> **最后更新**：2026年6月9日 | **适用版本**：Claude Code v2.1.169
+> **最后更新**：2026年6月18日 | **适用版本**：Claude Code v2.1.181

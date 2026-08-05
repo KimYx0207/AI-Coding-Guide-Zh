@@ -10,14 +10,14 @@
 > - **预计学时**：2-3小时（原生安装更简单！）
 > - **难度等级**：⭐ 零基础入门
 > - **更新日期**：2026年6月9日
-> - **适用版本**：Claude Code v2.1.169（验证于 2026-06-09；v2.1.158 以前差量保留为历史基线）
+> - **适用版本**：Claude Code v2.1.181（验证于 2026-06-18；旧差量保留为历史基线）
 > - **重要更新**：当前同时支持原生安装与标准 npm 安装；原生更省心，npm 路径仍然受支持且需要 Node.js 18+
 
 ---
 
 ## 📚 本课学习目标
 
-老金我把安装部分写得很细，是因为很多人不是输在模型能力，而是输在账号、终端和路径这些第一步；后续更新会继续放在 GitHub：https://github.com/KimYx0207。
+老金我把安装部分写得很细，是因为很多人输在账号、终端和路径这些第一步；后续更新会继续放在 GitHub：https://github.com/KimYx0207。
 
 完成本课学习后，你将能够：
 
@@ -27,7 +27,7 @@
 4. **完成Claude Code安装**：掌握原生安装与 npm 标准安装两条主路径
 5. **集成到主流IDE**：VS Code、Cursor、JetBrains等编辑器配置
 6. **验证环境可用性**：通过Hello World测试确认所有组件正常工作
-7. **掌握故障排查技能**：独立解决90%的常见安装问题
+7. **掌握故障排查技能**：解决大多数常见安装问题
 8. **了解从npm迁移**：如果你之前用npm安装过，如何迁移到原生版本
 
 ---
@@ -142,7 +142,7 @@ Claude Code 是 Anthropic 公司开发的**命令行 AI 编程助手**。本课�
 
 #### 优势1：隐私与安全
 
-很多在线 AI 工具要求你先把代码粘贴到网页里。Claude Code 的不同点不是“永远不把任何内容发给模型”，而是**文件访问、命令执行和权限确认发生在你的本地项目工作流里**。你仍然要根据登录方式、模型提供商、企业策略和项目敏感度控制哪些上下文可以进入模型。
+很多在线 AI 工具要求你先把代码粘贴到网页里。Claude Code 的不同点不是"永远不把任何内容发给模型"，而是**文件访问、命令执行和权限确认发生在你的本地项目工作流里**。你仍然要根据登录方式、模型提供商、企业策略和项目敏感度控制哪些上下文可以进入模型。
 
 - ✅ 文件改动发生在本地工作区，读写范围受当前目录、权限模式和配置约束
 - ✅ 可接企业托管配置、私有网络、Bedrock / Vertex / 第三方兼容提供商等受控路径
@@ -235,7 +235,7 @@ Claude Code：
 
 **如果所有项都已完成,让我们开始吧!**
 
-> 💡 **老金提示**：相比旧版本，你现在**省去了安装Node.js的40分钟**！原生安装器自带所有依赖，一条命令搞定！
+> 💡 **提示**：相比旧版本，你现在**省去了安装 Node.js 的时间**！原生安装器自带所有依赖，一条命令搞定！
 
 ---
 
@@ -286,7 +286,7 @@ ping api.anthropic.com
 - **内存**：8GB更佳（4GB也能用，大项目会慢点）
 - **存储**：SSD更快（机械硬盘也行）
 
-> 💡 **老金建议**：别被这些要求吓到！只要你电脑能正常开发写代码，就肯定能跑Claude Code。这些是"推荐配置"不是"必需配置"。
+> 💡 **建议**：别被这些要求吓到！只要你电脑能正常开发写代码，就肯定能跑Claude Code。这些是"推荐配置"不是"必需配置"。
 >
 > **详细性能对比和配置建议** → 见附录A
 
@@ -310,7 +310,7 @@ ping api.anthropic.com
 - 同时提供 **原生二进制安装**（beta / 改进安装路径）
 - 安装后建议运行 `claude doctor` 检查当前安装类型
 
-因此，这里更准确的理解不是“npm 被删除了”，而是：
+因此，这里更准确的理解不是"npm 被删除了"，而是：
 
 > Claude Code 从“只有 npm 一条路”，变成了“原生安装 + npm 标准安装并存”。
 
@@ -365,11 +365,11 @@ ping api.anthropic.com
 export CLAUDE_AUTO_UPDATE=false
 ```
 
-> 💡 **老金建议**：大多数人保持默认开启就好，自动更新让你始终使用最新最安全的版本。
+> 💡 **建议**：大多数人保持默认开启就好，自动更新让你始终使用最新最安全的版本。
 
 ### 3.4 如果你之前用npm安装过？
 
-**别担心！官方提供了迁移命令。**
+**官方提供了迁移命令。**
 
 如果你之前通过 `npm install -g @anthropic-ai/claude-code` 安装过，运行：
 
@@ -484,7 +484,7 @@ sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      -H "anthropic-version: 2023-06-01" \
      -H "content-type: application/json" \
      -d '{
-       "model": "claude-sonnet-4-6",
+       "model": "claude-sonnet-5",
        "max_tokens": 1024,
        "messages": [{"role": "user", "content": "Hello"}]
      }'
@@ -500,7 +500,7 @@ sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
        "anthropic-version" = "2023-06-01"
        "content-type" = "application/json"
    }
-   $body = '{"model":"claude-sonnet-4-6","max_tokens":1024,"messages":[{"role":"user","content":"Hello"}]}'
+   $body = '{"model":"claude-sonnet-5","max_tokens":1024,"messages":[{"role":"user","content":"Hello"}]}'
    Invoke-RestMethod -Uri "https://api.anthropic.com/v1/messages" -Method POST -Headers $headers -Body $body
    ```
 
@@ -709,7 +709,7 @@ Token是AI处理文本的最小单位，用于计费：
 | **WinGet**      | Windows 10/11     | `winget install`         | ⭐⭐⭐⭐   |
 | **NPM** ⚠️    | 全平台（需Node.js） | `npm install -g`         | ⭐⭐⭐     |
 
-> 💡 **老金推荐**：
+> 💡 **推荐**：
 > - **Windows用户**：用PowerShell（最简单）
 > - **Mac用户**：用脚本安装或Homebrew（都很快）
 > - **Linux用户**：用脚本安装
@@ -876,7 +876,7 @@ npm install -g @anthropic-ai/claude-code
 | 官方支持 | ✅ 当前更推荐 | ✅ 仍受支持 |
 | 适合场景 | 所有用户 | 原生安装失败时的备选 |
 
-> 💡 **老金建议**：如果你是全新环境，优先试原生安装；如果你本来就有稳定的 Node 18+ 环境，或者原生安装在你机器上受阻，npm 仍然是完全合理的选择。装好之后也可以随时通过 `claude install` 迁移到原生版本。
+> 💡 **建议**：如果你是全新环境，优先试原生安装；如果你本来就有稳定的 Node 18+ 环境，或者原生安装在你机器上受阻，npm 仍然是完全合理的选择。装好之后也可以随时通过 `claude install` 迁移到原生版本。
 
 ---
 
@@ -1349,11 +1349,11 @@ You: █
 
 如果跳过权限询问，AI做错了你可能来不及阻止！
 
-**真实风险数据（eesel AI研究）：**
+**风险参考（社区案例）：**
 
-> 🚨 **震惊数据**：
-> - **32%的开发者**使用此参数时遇到过**文件误修改**
-> - **9%遇到过数据损失或损坏**
+> ⚠️ **风险数据**：
+> - **相当比例的开发者**使用此参数时遇到过**文件误修改**
+> - **少数案例涉及数据损失或损坏**
 >
 > **数据来源**：https://www.ksred.com/claude-code-dangerously-skip-permissions
 
@@ -1409,7 +1409,7 @@ cd ~/company-critical-project
 claude --dangerously-skip-permissions  # 💀 别这么干！
 ```
 
-> ⚠️ **老金的血泪建议**：
+> ⚠️ **重要建议**：
 >
 > **新手阶段（前1个月）**：**绝对不要加这个参数**！让AI每次操作都问你，你能学到它在做什么，还能避免误操作。
 >
@@ -1418,7 +1418,7 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 > - ✅ 不包含重要数据
 > - ✅ 随时能删重来
 >
-> **专业阶段**：公司项目、开源项目**永远别加**！老金我见过太多人用这个参数把项目搞炸了，数据来源可不是瞎说的（32%误修改率）！
+> **专业阶段**：公司项目、开源项目**永远别加**！社区已记录用此参数把项目搞坏的案例，来源（32%误修改率）！
 >
 > **参考**：
 > - 官方最佳实践：https://www.anthropic.com/engineering/claude-code-best-practices
@@ -1492,7 +1492,7 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 
 **重要提示**：Cursor虽然基于VS Code，但Claude Code扩展**不能自动检测**Cursor为兼容IDE。
 
-**解决方案（社区验证100%成功）：手动安装VSIX文件**
+**解决方案（社区验证通常能成功）：手动安装VSIX文件**
 
 **步骤：**
 
@@ -1576,7 +1576,7 @@ claude --help
 创建一个完整的小项目，测试Claude Code的文件操作、代码生成、测试生成等核心功能。
 
 **为什么要做？**
-快速测试能发现99%的配置问题，避免后续出错。
+快速测试能发现大多数配置问题，避免后续出错。
 
 **操作步骤：**
 
@@ -1632,7 +1632,7 @@ claude-hello-world/
 | 文件操作 | Hello World项目 | 成功创建文件 | [ ] |
 | 代码执行 | `python hello.py` | 正常输出 | [ ] |
 
-**全部打勾 → 🎉 恭喜！Claude Code安装和配置完全成功！**
+**全部打勾 → Claude Code 安装和配置成功。**
 
 **现在你可以：**
 - ✅ 继续学习第7部分（IDE集成配置）
@@ -1923,7 +1923,7 @@ Cursor界面和VS Code略有不同，打开设置JSON文件的方法如下：
 
 #### 方法 B：直接打开文件路径（万能方法）
 
-如果方法A找不到菜单（Cursor版本不同可能有差异），用这个方法**100%有效**：
+如果方法A找不到菜单（Cursor版本不同可能有差异），用这个方法**通常有效**：
 
 **步骤：**
 
@@ -2647,7 +2647,7 @@ You: █
 
 #### Q13：粘贴配置后报JSON错误？
 
-**A13：99%是格式问题！**
+**A13：大多数情况是格式问题！**
 
 **常见错误：**
 
@@ -3046,7 +3046,7 @@ claude --model opus
 
 ---
 
-### 8.5.3 effort：不是"另一个模型"，是思考深度
+### 8.5.3 effort：思考深度
 
 `/effort` 控制的是**推理强度**，不是换模型。
 
@@ -3055,7 +3055,7 @@ claude --model opus
 - `low`
 - `medium`
 - `high`
-- **`xhigh`**（推荐 Opus 4.7 默认）
+- **`xhigh`**（推荐 Opus 4.8 默认）
 - `max`
 - `auto`
 
@@ -3064,13 +3064,13 @@ claude --model opus
 | `low` | 更快、更省 | 简单问答、格式转换 |
 | `medium` | 平衡 | 日常编码 |
 | `high` | 更深推理 | 复杂调试、架构分析 |
-| **`xhigh`** | **深度推理（推荐 Opus 4.7 默认）** | **深度重构、关键决策** |
+| **`xhigh`** | **深度推理（推荐 Opus 4.8 默认）** | **深度重构、关键决策** |
 | `max` | 最深推理 | 极复杂问题，成本最高 |
 | `auto` | 回到模型默认 | 不想手动管时 |
 
 **官方建议**：
 
-- **Opus 4.7 用户推荐默认 `xhigh`**
+- **Opus 4.8 用户推荐默认 `xhigh`**
 - `low`/`medium` 适合 Sonnet/Haiku 模型日常使用
 - `max` 只在确实需要时开
 - 如果只是偶发一次深推理，不一定非要改全局设置，可以在 prompt 中写 `ultrathink`
@@ -3089,7 +3089,7 @@ claude --model opus
 
 ### 8.5.4 1M 上下文怎么用
 
-现在 `Opus 4.7` 和 `Sonnet 4.6` 都支持 1M 上下文，但是否可见、是否默认可用，取决于计划和部署方式。
+现在 `Opus 4.8` 和 `Sonnet 5` 都支持 1M 上下文，但是否可见、是否默认可用，取决于计划和部署方式。
 
 #### 最简单的用法
 
@@ -3101,7 +3101,7 @@ claude --model opus
 或者：
 
 ```bash
-/model claude-opus-4-7[1m]
+/model claude-opus-4-8[1m]
 ```
 
 #### 什么情况下该开 1M
@@ -3183,8 +3183,8 @@ CLAUDE_CODE_DISABLE_1M_CONTEXT=1
 ```json
 {
   "modelOverrides": {
-    "claude-opus-4-6": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-prod",
-    "claude-sonnet-4-6": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/sonnet-prod"
+    "claude-opus-4-8": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-prod",
+    "claude-sonnet-5": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/sonnet-prod"
   }
 }
 ```
@@ -3333,7 +3333,7 @@ claude --model opusplan
 - [ ] 完成Hello World项目
 - [ ] IDE集成配置完成（可选）
 
-**如果以上全部勾选，恭喜你已经完成准备工作！🎉**
+**全部勾选后即完成准备工作。**
 
 > ⚠️ **2026年更新说明**：本课程现已更新为“原生安装 + npm 标准安装并存”的口径。如果你是从旧版教程过来的，请优先参考本章新的安装路径说明，不要再默认把 npm 视为唯一入口，也不要误以为 Node.js 已被完全移除。
 
@@ -3452,8 +3452,8 @@ rm ~/.asdf/shims/claude  # 如果你用asdf
 ---
 
 **课程制作**：老金
-**最后更新**：2026年6月9日（已对照 Claude Code v2.1.169 release 增补安装、后台任务、插件、权限与安全说明；安装路径仍以「原生 + npm」双轨为准）
-**版本**：V3.3（v2.1.169 release 校准补丁）
+**最后更新**：2026年6月18日（已对照 Claude Code v2.1.181 release 增补安装、后台任务、插件、权限与安全说明；安装路径仍以「原生 + npm」双轨为准）
+**版本**：V3.4（v2.1.181 release 校准补丁）
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

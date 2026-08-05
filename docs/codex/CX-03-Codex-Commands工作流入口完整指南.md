@@ -2,7 +2,7 @@
 
 本篇以 Codex App 的 slash commands 为主线。CLI slash commands 只作为核对和排查补充。
 
-主要来源：OpenAI Codex App Commands、Codex CLI Slash Commands、Codex Follow Goals 与 Plugins 官方文档。本篇按 2026-06-09 可查官方文档与 Codex App 26.602 修订；CLI slash commands 只作为辅助核对，命令会随 App 版本、实验开关、插件和权限变化，最终以你当前 App 输入 `/` 后看到的列表为准。
+主要来源：OpenAI Codex App Commands、Codex CLI Slash Commands、Codex Follow Goals 与 Plugins 官方文档。本篇按 2026-06-18 可查官方文档与 Codex App 26.609 修订；CLI slash commands 只作为辅助核对，命令会随 App 版本、实验开关、插件和权限变化，最终以你当前 App 输入 `/` 后看到的列表为准。
 
 ---
 
@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年5月31日
+> - **更新日期**：2026年6月18日
 > - **信息来源**：OpenAI Codex App Commands、CLI Slash Commands、Follow Goals 官方文档
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md) 和 [CX-02 桌面工作流](./CX-02-Codex-App桌面工作流完整指南.md)
 
@@ -24,6 +24,8 @@
 ## 📚 本课学习目标
 
 完成本课学习后，你将能够：
+
+> **2026-06-18 App 口径**：App composer 新增 `/init`，适合在新仓库里快速建立项目指令和初始化上下文；Migrate to Codex 用来把 Claude Code / Claude Cowork 既有设置迁移到 Codex 工作流。课程里不要把迁移讲成“照搬文件”，要讲成“把项目事实、权限边界和验证命令迁移成 Codex 能读懂的形态”。
 
 1. **理解Commands的本质**：掌握slash命令是App的快速工作流入口，不是高级玩具
 2. **学会发现命令**：在App中输入`/`查看当前可用命令，不依赖死记硬背
@@ -141,12 +143,12 @@ Codex App 里的 slash commands 可以分成三层：
 - 当前线程类型、项目状态和连接器。
 - CLI / App / IDE extension 的不同界面。
 
-所以教程应该教你“怎么发现和核对命令”，而不是让你背一张永远不变的表。Claude Code 的 Commands 章节之所以厚，是因为它不只是列命令，而是讲命令系统、作用域、开发方式、故障排查和 FAQ；Codex 这里也要用同样的思路：先理解命令背后的工作流。
+所以教程要教你"怎么发现和核对命令"，免去背表的负担。Claude Code 的 Commands 章节之所以厚，是因为它讲命令系统、作用域、开发方式、故障排查和 FAQ；Codex 这里也要用同样的思路：先理解命令背后的工作流。
 
 ## 1. Commands 在 App 里解决什么问题
 
 
-Commands 不是“高级玩具”，而是 App 的快速入口：
+Commands 不是"高级玩具"，而是 App 的快速入口：
 
 | 你想做什么 | 直接说也可以 | Command 更适合 |
 |---|---|---|
@@ -460,7 +462,7 @@ App 和 CLI 都有 slash commands，但它们服务的界面不同。
 
 ### 案例二：用 `/goal` 做有边界的长任务
 
-目标：学习长目标不是“无限优化”，而是带停止条件的持续任务。
+目标：学习长目标不是"无限优化"，而是带停止条件的持续任务。
 
 ```text
 /goal Fix the docs link drift in docs/codex only. Scope: markdown links inside docs/codex. Stop when every broken local link is either fixed or listed with a reason. Do not commit or push.
@@ -1579,7 +1581,7 @@ Codex：改了 checkout、payment、toast。
 - [ ] 不把CLI命令表硬搬成App命令表
 - [ ] 知道周期任务优先使用 Automations，长目标使用 `/goal`
 
-**如果以上全部勾选，恭喜你掌握Codex Commands！**
+**全部勾选后即掌握 Codex Commands。**
 
 ---
 
@@ -1606,7 +1608,7 @@ Codex：改了 checkout、payment、toast。
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

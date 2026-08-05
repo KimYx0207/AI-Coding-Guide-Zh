@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年5月30日
+> - **更新日期**：2026年6月18日
 > - **信息来源**：OpenAI Codex Config、Rules、Hooks、Settings、CLI 官方文档
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md) 和 [CX-02 桌面工作流](./CX-02-Codex-App桌面工作流完整指南.md)
 
@@ -24,6 +24,8 @@
 ## 📚 本课学习目标
 
 完成本课学习后，你将能够：
+
+> **2026-06-18 配置口径**：Codex App 26.609 增加 composer `/init` 和 Migrate to Codex，适合把已有项目规则落成 `AGENTS.md`；CLI 0.141 强化 code mode hooks、PostToolUse blocking、插件路由和 Windows sandbox 修复。App 用户仍优先在 Settings / Review 中收口，CLI 只用于配置排查、CI 和高级权限验证。
 
 1. **编写AGENTS.md**：用项目级指令文件告诉Codex项目规则、命令、风格和禁止事项
 2. **掌握多层指令结构**：理解根目录和子目录AGENTS.md的层级关系
@@ -409,7 +411,7 @@ App 用户优先通过这几处理解权限：
 | CI / 自动化 | 外部沙箱 + 最小权限 |
 | 涉及密钥 / 生产数据 | 默认拒绝，人工确认 |
 
-> **v0.133.0→v0.138.0 权限口径**：permission profiles 不再只是单个 approval mode。新版已支持 profile 列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出和配置错误展示。`--profile` 已成为 CLI / TUI permissions / sandbox flows 的主选择器，旧 profile 配置会走迁移提示；个人项目可以继续先用 App Settings，团队项目要把 profile、`AGENTS.md`、Rules、Plugins、MCP 和 sandbox 一起看。
+> **v0.133.0→v0.141.0 权限口径**：permission profiles 不再只是单个 approval mode。新版已支持 profile 列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出、配置错误展示、加密凭证、PostToolUse blocking、远程执行权限路径保留和 Windows sandbox stale credentials 修复。`--profile` 已成为 CLI / TUI permissions / sandbox flows 的主选择器，旧 profile 配置会走迁移提示；个人项目可以继续先用 App Settings，团队项目要把 profile、`AGENTS.md`、Rules、Plugins、MCP 和 sandbox 一起看。
 
 实操时按这个顺序确认：
 
@@ -731,7 +733,7 @@ tests/AGENTS.md
 
 ## 12. 配置 Cookbook：从个人仓库到团队基线
 
-这一节不是让你复制所有配置，而是给你几种常见情境的组合方式。每个组合都先说明目的，再说明用哪些层解决。
+这一节给你几种常见情境的组合方式。每个组合都先说明目的，再说明用哪些层解决。
 
 ### 12.1 个人学习仓库
 
@@ -889,7 +891,7 @@ Rules 更像命令策略；Hooks 是事件脚本。能用 Rules 解决的，不�
 
 ## 13. `AGENTS.md` 深度写作：让 Codex 读到“项目真实习惯”
 
-很多团队写 `AGENTS.md` 时会犯两个极端：要么写成口号，要么写成百科。好 `AGENTS.md` 不是长，而是让 Codex 在关键决策点不猜。
+很多团队写 `AGENTS.md` 时会犯两个极端：要么写成口号，要么写成百科。好 `AGENTS.md` 让 Codex 在关键决策点不猜。
 
 ### 13.1 `AGENTS.md` 的五类内容
 
@@ -1739,7 +1741,7 @@ prompt 里可以写：
 不要写“已验证”，除非你真的看到命令结果。
 ```
 
-配置课程要训练的不是“多写规则”，而是把含糊偏好翻译成 Codex 能执行、团队能检查的语言。
+配置课程要训练的不是"多写规则"，而是把含糊偏好翻译成 Codex 能执行、团队能检查的语言。
 
 ## 29. 配置冲突长案例：AGENTS.md、Rules、prompt 谁说了算
 
@@ -1846,7 +1848,7 @@ When the user asks for documentation-only edits:
 - [ ] 能区分Rules（命令策略）和Hooks（事件脚本）
 - [ ] 每次改完配置都做过核对
 
-**如果以上全部勾选，恭喜你掌握Codex权限与配置！**
+**全部勾选后即掌握 Codex 权限与配置。**
 
 ---
 
@@ -1933,7 +1935,7 @@ When the user asks for documentation-only edits:
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---

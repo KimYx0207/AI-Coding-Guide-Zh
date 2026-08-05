@@ -24,6 +24,8 @@
 
 这份 FAQ 是老金按真实卡点整理的，不是为了凑问题数；能定位问题，比背答案更重要。
 
+> **2026-06-18 排障口径**：当前稳定基线为 v2026.6.8。升级优先用 `openclaw update`，再用 `openclaw doctor` 和 channel / gateway 日志定位问题；`repair` 可修复插件、payload、registry 和部分本地状态，但不会替你重新安装 core 或重启 Gateway。
+
 > 📌 **本节包含 15 个问题：**
 > [Q1: 命令找不到](#q1-openclaw-命令找不到command-not-found) | [Q2: Node.js 版本不兼容](#q2-nodejs-版本不兼容) | [Q3: npm 权限错误](#q3-npm-install-报权限错误eacces) | [Q4: 中国网络安装慢](#q4-中国网络环境安装慢或失败) | [Q5: node-gyp 编译错误](#q5-安装时报-node-gyp-编译错误) | [Q6: onboard 报错](#q6-openclaw-onboard-引导向导报错) | [Q7: 配置文件位置](#q7-配置文件在哪里怎么手动编辑) | [Q8: 多 API Key 配置](#q8-多个-api-key-怎么配置) | [Q9: 配置优先级](#q9-环境变量和配置文件哪个优先) | [Q10: 升级后配置丢失](#q10-升级-openclaw-后配置丢失了) | [Q11: 版本回滚](#q11-升级后功能异常怎么回滚) | [Q12: Windows Gateway 失败](#q12-windows-上安装后-gateway-启动失败) | [Q13: macOS 安全提示](#q13-macos-上安装提示无法验证开发者) | [Q14: 端口被占用](#q14-安装完成但-openclaw-gateway-start-提示端口被占用) | [Q15: 完全卸载](#q15-怎么完全卸载-openclaw)
 
@@ -652,7 +654,7 @@ export OPENAI_API_KEY="sk-proj-new-key-here"
 #     "defaults": {
 #       "model": {
 #         "primary": "openai/gpt-5.2",
-#         "fallbacks": ["anthropic/claude-sonnet-4-6", "openai/gpt-5.2-mini"]
+#         "fallbacks": ["anthropic/claude-sonnet-5", "openai/gpt-5.2-mini"]
 #       }
 #     }
 #   }
@@ -831,7 +833,7 @@ ollama pull qwen2.5:14b     # 中文能力更好
 # baseUrl: "https://api.deepseek.com/v1"
 # 具体 DeepSeek 模型名以当前 OpenClaw models / provider 目录为准
 
-# 最简单的方式：通过 OpenRouter 一站式接入所有国产模型
+# 最简单的方式：通过 OpenRouter 统一接入各类国产模型
 export OPENROUTER_API_KEY="sk-or-xxxxx"
 openclaw config set agents.defaults.model "openrouter/deepseek/deepseek-chat"
 ```
@@ -850,7 +852,7 @@ openclaw config set agents.defaults.model "openrouter/deepseek/deepseek-chat"
 #       "model": {
 #         "primary": "openai/gpt-5.2",
 #         "fallbacks": [
-#           "anthropic/claude-sonnet-4-6",
+#           "anthropic/claude-sonnet-5",
 #           "openai/gpt-5.2-mini"
 #         ]
 #       }
@@ -904,14 +906,14 @@ openclaw config set agents.defaults.model "ollama/llama3.1:8b"
 #       "model": "openai/gpt-5.2-mini"
 #     },
 #     "list": [
-#       { "id": "coding", "model": "anthropic/claude-sonnet-4-6" },
+#       { "id": "coding", "model": "anthropic/claude-sonnet-5" },
 #       { "id": "casual", "model": "openai/gpt-5.2-mini" }
 #     ]
 #   }
 # }
 
 # 方案二：使用模型别名快速切换
-openclaw models aliases add code-review "anthropic/claude-opus-4-6"
+openclaw models aliases add code-review "anthropic/claude-opus-4-8"
 openclaw models aliases add quick-chat "openai/gpt-5.2-mini"
 
 # 方案三：通过 bindings 将不同 Channel 路由到不同 Agent
@@ -1888,17 +1890,17 @@ Gateway 是基础设施层，Agent 是业务逻辑层。一个 Gateway 可以服
 
 ---
 
-## 十一、版本升级与迁移（v2026.3.28 → v2026.6.1）
+## 十一、版本升级与迁移（v2026.3.28 → v2026.6.8）
 
 
 > 📌 **本节包含 4 个问题：**
 > [Q80: 升级要点](#q1-从-v202632x-升级到-v202661-有哪些注意事项) | [Q81: 反向代理配置变更](#q81-升级后反向代理配置需要改吗) | [Q82: 插件白名单变更](#q82-升级后-allowlist-相关操作报权限错误) | [Q83: 性能提升](#q83-升级后启动变快了是正常的吗)
 
-### Q1: 从 v2026.3.2x 升级到 v2026.6.1 有哪些注意事项？
+### Q1: 从 v2026.3.2x 升级到 v2026.6.8 有哪些注意事项？
 
-> **v2026.6.1 新增关注点**：除了 v2026.4.x 和 v2026.5.x 的安全、通道、Transcript、模型目录、Docker 和 release integrity 改动之外，v2026.6.1 还重点改进 Agents / CLI runtime 恢复、消息通道稳定性、Skill Workshop、插件安装索引、Workboard、provider/model 覆盖、Control UI 和 release / diagnostics 证据链。升级后如果发现模型、通道、插件、技能或多 Agent 行为变化，先运行 `openclaw doctor`，再对照当前 release notes。
+> **v2026.6.8 新增关注点**：除了 v2026.4.x 和 v2026.5.x 的安全、通道、Transcript、模型目录、Docker 和 release integrity 改动之外，v2026.6.x 还重点改进 Agents / CLI runtime 恢复、消息通道稳定性、Skill Workshop、插件安装索引、Workboard、provider/model 覆盖、Control UI、fail-closed 边界、agent run recovery、SecretRef、`/usage` 和 release / diagnostics 证据链。升级后如果发现模型、通道、插件、技能或多 Agent 行为变化，先运行 `openclaw doctor`，再对照当前 release notes。
 
-**说明：** 从 v2026.4.x 到 v2026.6.1 的升级包含多项安全加固、性能优化、通道能力、插件/技能和多 Agent 更新。大部分配置向后兼容，但以下几点需要注意：
+**说明：** 从 v2026.4.x 到 v2026.6.8 的升级包含多项安全加固、性能优化、通道能力、插件/技能和多 Agent 更新。大部分配置向后兼容，但以下几点需要注意：
 
 1. **Owner-Enforced Commands（v2026.4.5+）**：`/allowlist add` 和 `/allowlist remove` 现在需要 Owner 身份验证。如果你之前在自动化脚本中使用了这些命令，需要确保调用者具有 Owner 权限
 2. **转发头安全检查（v2026.4.x+）**：如果你使用反向代理，Gateway 现在会检查转发头的一致性（详见 Q81）

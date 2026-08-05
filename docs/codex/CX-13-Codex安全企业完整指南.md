@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐⭐ 进阶级
-> - **更新日期**：2026年5月30日
+> - **更新日期**：2026年6月18日
 > - **信息来源**：OpenAI Codex Settings、Config、Rules、Hooks、MCP、Plugins、Automations 官方文档
 > - **前置要求**：已完成CX-01至CX-12，熟悉App所有基本功能
 
@@ -24,6 +24,8 @@
 ## 📚 本课学习目标
 
 完成本课学习后，你将能够：
+
+> **2026-06-18 安全口径**：App 26.609 增加 Windows Computer Use per-app controls，Automations 会遵循选定 approval mode；CLI 0.141 强化 PostToolUse blocking、加密凭证、Windows sandbox 和远程执行边界。企业落地时要把 App 权限、CLI profile、Hook 信任、Automation 审批和区域性 Memories / Chronicle 策略分开登记。
 
 1. **理解安全模型总览**：掌握六类风险（敏感文件、危险命令、大量改文件、外部数据、工具调用、后台任务）及各自的控制手段
 2. **设置审批与沙盒基线**：为不同场景（只读、日常、陌生仓库、CI、生产）配置合理的审批和沙盒策略
@@ -64,7 +66,7 @@
 
 ## 术语表（进阶必读）
 
-企业安全篇的重点不是“把权限关到最死”，而是把风险分类、控制手段、责任人和审计证据串起来。
+企业安全篇的重点不是"把权限关到最死"，而是把风险分类、控制手段、责任人和审计证据串起来。
 
 | 术语 | 一句话解释 | 在 Codex 里对应什么 |
 |---|---|---|
@@ -132,7 +134,7 @@ Codex 安全可以按六条链路看：
 
 ## 1. 安全模型总览
 
-Codex App 安全不是“完全不让它做事”，而是让每类动作有边界：
+Codex App 安全不是"完全不让它做事"，而是让每类动作有边界：
 
 | 风险 | 控制手段 |
 |---|---|
@@ -146,7 +148,7 @@ Codex App 安全不是“完全不让它做事”，而是让每类动作有边�
 ## 2. 审批与沙盒
 
 
-> **v0.133.0→v0.138.0 权限与审计更新**：permission profiles 已支持列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续版本又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出、配置错误展示和 `/app` 交接到 Desktop。企业文档里不要只写单一 approval mode，要把 profile、requirements、项目规则、`--profile` 迁移、插件结构化输出和 `codex doctor` 诊断证据一起看。
+> **v0.133.0→v0.141.0 权限与审计更新**：permission profiles 已支持列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续版本又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出、配置错误展示、`/app` 交接到 Desktop、加密凭证、PostToolUse blocking、远程执行权限路径保留和 Windows sandbox 修复。企业文档里不要只写单一 approval mode，要把 profile、requirements、项目规则、`--profile` 迁移、插件结构化输出和 `codex doctor` 诊断证据一起看。
 
 推荐基线：
 
@@ -981,7 +983,7 @@ Final human action:
 | 产品 | App 任务描述 | diff 用户影响 | Automation 摘要 |
 | 文档 | Skills | docs drift | Review |
 
-这能让企业培训不是“一场大课讲所有功能”，而是按实际工作内容分批吸收。
+这能让企业培训不是"一场大课讲所有功能"，而是按实际工作内容分批吸收。
 
 ## 25. 综合工坊：给一个 20 人团队制定 Codex 使用基线
 
@@ -1390,7 +1392,7 @@ What needs to be done:
 - [ ] 插件安装和授权分开看
 - [ ] 团队有插件/连接器/MCP/Automation登记表
 
-**如果以上全部勾选，恭喜你掌握Codex安全与企业基线！**
+**全部勾选后即掌握 Codex 安全与企业基线。**
 
 ---
 
@@ -1425,7 +1427,7 @@ AGENTS.md                    # 项目规则
 ---
 
 **课程制作**：老金
-**最后更新**：2026年5月30日
+**最后更新**：2026年6月18日
 **许可**：本课程采用 MIT License；转载、复制或二次分发时必须保留版权声明与许可声明
 
 ---
