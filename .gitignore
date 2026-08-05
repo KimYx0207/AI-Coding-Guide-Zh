@@ -9,6 +9,10 @@
 *findings*.md
 *交付报告*.md
 
+# 本地 AI 腔 / 错误审计报告（不推送）
+docs/_audit-*.md
+_audit-*.md
+
 # 系统文件
 .DS_Store
 Thumbs.db
@@ -23,10 +27,16 @@ Thumbs.db
 .claude/
 .agents/
 .codex/
+.cursor/
 .meta-kim/
 .mcp.json
 AGENTS.md
 CLAUDE.md
+
+# 本地私有状态和运行时投影
+.local-private/
+/openclaw/
+graphify-out/
 
 # 飞书同步脚本/配置（含文档 token，不提交）
 scripts/

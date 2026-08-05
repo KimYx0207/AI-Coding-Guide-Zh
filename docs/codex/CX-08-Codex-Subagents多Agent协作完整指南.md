@@ -2,6 +2,8 @@
 
 主要来源：OpenAI Codex Subagents、App Features、CLI Slash Commands 官方文档。
 
+> **2026-08-06 多 Agent 口径**：CLI 0.145.0 起 **多 Agent V2 已稳定**——可配置 subagent 模型、推理等级、并发上限，并恢复 V1 时期部分被限制的角色。委派模式分三档（禁用 / 仅显式请求 / 主动），可在线程 + 回合级别切换；父拥有的 subagent 线程**只读**，agent 线程工作区相互隔离，Guardian reviewer 工具权限被收窄。agent 任务存储从 CSV 迁到 SQLite。App-server 能列出后代线程并通过某一轮 fork 历史。演示时先讲"单 agent 边界"，再讲 V2 的可配置并发；不要第一天就开高并发。
+
 ---
 
 > **课程信息**

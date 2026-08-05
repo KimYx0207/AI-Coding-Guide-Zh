@@ -2,7 +2,9 @@
 
 本篇只解决一件事：把 **Codex App** 正确装好、登上号、打开本地项目，并跑通第一个安全任务。
 
-官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-06-18 可查官方文档、Codex App 26.609 与 Codex CLI 0.141.0 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。
+官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-08-06 可查官方文档、Codex App 26.727 与 Codex CLI 0.146.1 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。
+
+> **2026-08-06 安装口径**：自 **App 26.707（2026-07-09）** 起，**Codex 已并入 ChatGPT 桌面 App**——安装 ChatGPT 桌面后即可在其中使用 Codex，并可把 Codex 设为默认视图；原有项目、设置、线程保留。26.727 又补强了内置浏览器、Chrome 扩展（提及打开标签页 / 高亮文本）、多仓库 diff 审查和 Activity view。登录方面，设备码登录现在会显示防钓鱼提示，macOS 助手已签名+公证，企业版支持管理员通过 managed policies 控制 in-app 更新。社区有报告 App 更新后偶发线程/项目数据丢失，**更新前建议手动备份本地线程和项目目录**，以本机版本和官方公告为准。
 
 ---
 

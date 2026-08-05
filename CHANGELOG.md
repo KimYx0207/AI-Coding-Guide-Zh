@@ -4,6 +4,33 @@
 
 ---
 
+## [Unreleased] - 2026-08-06
+
+### 修复
+
+- 修复上一次"AI 腔清洗"过度编辑造成的 172 处病句：清洗把"X 不是 Y，而是 Z"句式中的"不是 Y"机械删除，留下缺谓语残句。本轮逐处精准补回对比连词，分布在 docs/claude-code/（7 篇 12 处）、docs/codex/（14 篇 113 处）、docs/openclaw/（10 篇 47 处）。不改动其他字，不恢复作者人设词，经 rg 反向扫描 + 抽样人审复核零残留。
+
+### 修改
+
+- 课程稳定基线刷新到 Claude Code v2.1.222（从 v2.1.181）、Codex App 26.727 + CLI 0.146.1（从 26.609 + 0.141.0）、OpenClaw v2026.7.1-2（从 v2026.6.8，预发布线推进到 v2026.7.2-beta.7）。README 徽章、版本表、差异速览、免责声明同步更新。
+- Claude Code 课程按 v2.1.222 补关键变化：Sonnet 5 成默认（1M 上下文）、Opus 5 成默认、"Default" 权限模式改名 "Manual"（v2.1.200）、ultraplan 移除（v2.1.222）、subagent 默认后台 + 嵌套深度 3、新 `/doctor` / `/commit-push-pr` / `/fork` / `/code-review` 命令、性能 79× transcript 缩小 / 7× 工具回合提速（v2.1.208）、Remote Control 不再允许仓库级开启、新 hooks（DirectoryAdded / EndConversation / Notification）、OTel `OTEL_LOG_USER_PROMPTS=1` 行为变化。
+- Codex 课程按 App 26.727 + CLI 0.146.1 补关键变化：Codex 并入 ChatGPT 桌面 App（26.707）、GPT-5.6 Sol/Terra/Luna 全系（272K 上下文）、PR Chat、多仓库 diff 审查、本地项目多文件夹、Activity view、Chrome 扩展、多 Agent V2 稳定、`/import` 从 Claude Code + Cursor 迁移、远程插件默认开、MCP 交互式认证默认、新 `writes` 审批模式、Agent Plugins manifest + 新市场（Amazon Bedrock + Claude Code）、系统代理 PAC/WPAD、企业 in-app 更新管控。
+- OpenClaw 课程按 v2026.7.1-2 补关键变化：State safety & recovery（quarantine store、SQLite 崩溃可恢复快照、schema 升级拒丢数据）、durable channel delivery（Telegram/Slack 跨崩溃保消息）、session rewind and branching、interactive MCP Apps、structured agent questions、meeting plugins（Teams/Zoom）、Wear OS companion；修复 Memory Core 启动冲突 fatal restart loop、Codex progress replies 中途停。
+
+---
+
+## [v4.4] - 2026-06-18
+
+### 修改
+
+- 本轮把课程稳定基线更新到 Claude Code v2.1.181、OpenClaw v2026.6.8、Codex App 26.609 与 Codex CLI 0.141.0，并在 README 统一维护版本表和差异速览，避免每章重复堆同一批 release notes。
+- Claude Code 课程补充 v2.1.169 -> v2.1.181 关键变化：`/config key=value`、`Tool(param:value)` 权限语法、嵌套 `.claude/skills` / agents / workflows 就近优先、subagent 多层委派、`enforceAvailableModels`、Remote Control presence file、Bun 1.4 与云盘写入修复。
+- Codex 课程继续保持 App-first：按 App 26.609 补充 Developer mode / CDP 浏览器调试、composer `/init`、Migrate to Codex、Windows Computer Use per-app controls、Automations 审批模式继承，并把 CLI 0.139 -> 0.141 的 `/usage`、`/import`、`/delete`、远程执行与 PostToolUse blocking 收进 CX-12。
+- OpenClaw 课程按 v2026.6.8 更新安装升级、模型/provider、搜索 opt-in、ClawHub pinned commit / policy checks、消息平台富文本、fail-closed 权限边界、SecretRef、agent run recovery、`/usage` 和 FAQ 排障口径。
+- 内容组织原则：README 放总览，CHANGELOG 放完整变更，产品章节只放“会改变实操判断”的短更新卡；不复制整段发布记录到多个章节。
+
+---
+
 ## [v4.3] - 2026-06-10
 
 ### 修改

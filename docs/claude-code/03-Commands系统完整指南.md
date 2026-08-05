@@ -502,8 +502,8 @@ You: /hello
 |                      | `/code-review`      | 代码审查与正确性问题报告，可指定 effort | 审 PR / 提交前检查 |      |
 |                      | `/batch`         | 大规模并行改造  | 多 worktree/多 agent |      |
 |                      | `/autofix-pr`    | 远程盯 PR 并修 CI/评论 | PR 修复循环 |      |
-|                      | `/ultrareview`   | 云端多 Agent 深度审查 | 高风险 PR |      |
-|                      | `/ultraplan`     | 云端深度计划    | 复杂方案设计   |      |
+|                      | `/ultrareview`   | 云端多 Agent 深度审查（v2.1.222 起 ultraplan 已移除，深度审查走 `/code-review`） | 高风险 PR |      |
+|                      | `/ultraplan`     | ~~云端深度计划~~（v2.1.222 已移除，改用 `/plan`）  | ~~复杂方案设计~~   |      |
 |                      | `/tasks`         | 后台任务管理    | 查看后台 Bash / agent 任务 |      |
 |                      | `/rewind`        | 回退检查点      | 撤销修改       |  ⭐  |
 | **诊断工具**   | `/doctor`        | 系统健康检查    | 排查问题       |      |
