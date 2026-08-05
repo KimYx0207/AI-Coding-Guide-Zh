@@ -1,4 +1,4 @@
-# Claude Code & OpenClaw & Codex 中文教程
+# Claude Code & OpenClaw & Codex & WorkBuddy 中文教程
 
 <div align="center">
 
@@ -9,19 +9,20 @@
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-2.1.222-green.svg">
   <img alt="OpenClaw" src="https://img.shields.io/badge/OpenClaw-v2026.7.1-blue.svg">
   <img alt="Codex App" src="https://img.shields.io/badge/Codex_App-26.727-orange.svg">
+  <img alt="WorkBuddy" src="https://img.shields.io/badge/WorkBuddy-2026.08-purple.svg">
 </p>
 
 **AI Coding / Agent 工作流中文实战教程**
 
 </div>
 
-> 🎯 **从个人上手到团队落地：Claude Code + OpenClaw + Codex**
+> 🎯 **从个人上手到团队落地：Claude Code + OpenClaw + Codex + WorkBuddy**
 >
-> 老金基于 **15+ 年游戏研发、项目管理、多部门协同、里程碑制定与数据分析经验** 整理本教程，面向 **中小企业 AI 赋能、高校培训、开发团队 AI Coding 落地**。
+> 老金基于 **15+ 年游戏研发、项目管理、多部门协同、里程碑制定与数据分析经验** 整理本教程，面向 **中小企业 AI 赋能、高校培训、开发团队 AI Coding 落地、国内办公场景**。
 
-> Codex 主线以 **Codex App** 为核心；CLI / Web / SDK / GitHub Action 等只作为 App 生态补充。
+> Codex 主线以 **Codex App** 为核心；CLI / Web / SDK / GitHub Action 等只作为 App 生态补充。WorkBuddy 主线面向**办公人和国内团队**，跟另外三条开发者主线互补不冲突。
 
-> 📚 39 篇完整教程 + 1 张速查卡 | 80万+ Markdown 内容量 | 1500+ 代码块 / 命令 / 配置示例 | 250+ 问答条目
+> 📚 50 篇完整教程 + 1 张速查卡 | 80万+ Markdown 内容量 | 1500+ 代码块 / 命令 / 配置示例 | 250+ 问答条目
 
 > ⭐ 新手能入门 | 开发者能提效 | 团队负责人能建规范 | 企业和高校能做培训
 
@@ -33,12 +34,12 @@
 
 这是一套**系统化、适合循序学习、也能进入团队落地**的 AI Coding 与 Agent 工作流中文教程，覆盖三类代表性工具：
 
-| | Claude Code | OpenClaw | Codex |
-|--|-------------|----------|-------|
-| **是什么** | Anthropic 官方 AI 编程 CLI 工具 | 开源 AI 私人助手框架 | OpenAI 编程 Agent 平台 |
-| **干什么** | 终端里写代码、调Bug、做架构 | 消息平台上管邮件、排日程、自动化一切 | App / CLI / Web / IDE / SDK 分层协作的编程 Agent |
-| **谁出的** | Anthropic 官方 | Peter Steinberger（原名 Clawdbot，因 Claude 商标被迫改名） | OpenAI 官方（CLI 开源 Apache-2.0） |
-| **教程数** | 13 篇 + 1 速查卡 | 12 篇完整教程 | 14 篇完整教程 |
+| | Claude Code | OpenClaw | Codex | WorkBuddy |
+|--|-------------|----------|-------|---------|
+| **是什么** | Anthropic 官方 AI 编程 CLI 工具 | 开源 AI 私人助手框架 | OpenAI 编程 Agent 平台 | 腾讯 AI 办公助手桌面 App |
+| **干什么** | 终端里写代码、调Bug、做架构 | 消息平台上管邮件、排日程、自动化一切 | App / CLI / Web / IDE / SDK 分层协作的编程 Agent | 专家/专家团/技能/自动化/腾讯生态，办公出活 |
+| **谁出的** | Anthropic 官方 | Peter Steinberger（原名 Clawdbot，因 Claude 商标被迫改名） | OpenAI 官方（CLI 开源 Apache-2.0） | 腾讯云（与 CodeBuddy 同根生） |
+| **教程数** | 13 篇 + 1 速查卡 | 12 篇完整教程 | 14 篇完整教程 | 11 篇完整教程 |
 
 ### 👤 作者定位
 
@@ -137,10 +138,27 @@ Codex 学习主线：**只有 Codex App 一条主线**。先看 CX-01 安装认�
 | CX-13 | [安全与企业基线](docs/codex/CX-13-Codex安全企业完整指南.md) | 2-3h | ⭐⭐⭐ | 审批、沙盒、Rules、Hooks、MCP/Plugins/Automations 权限 |
 | CX-14 | [Codex 与 Claude Code 对比](docs/codex/CX-14-Codex与Claude-Code对比指南.md) | 1-2h | ⭐⭐ | 从 App 主线出发做双工具选择和共存 |
 
+### 🐧 Part 4：WorkBuddy — 腾讯 AI 办公助手
+
+WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令行的人、用企业微信/腾讯文档的团队、想给非技术同事一个 AI 工具的人。跟另外三条开发者主线互补，不冲突。先看 WB-00 阅读指南找到学习路径，再按需学 WB-01~WB-10。
+
+| 序号 | 教程名称 | 学时 | 难度 | 说明 |
+|------|---------|------|------|------|
+| WB-00 | [阅读指南](docs/workbuddy/WB-00-阅读指南.md) | 5 分钟 | 🟢 | 五大核心概念、文档地图、阅读路线 |
+| WB-01 | [项目介绍](docs/workbuddy/WB-01-WorkBuddy项目介绍完整指南.md) | 30-60 分钟 | ⭐ | 30 分钟召唤第一个专家，搞清 WorkBuddy 是什么 |
+| WB-02 | [安装与登录](docs/workbuddy/WB-02-WorkBuddy安装与登录完整指南.md) | 20-40 分钟 | ⭐ | Win/Mac 双平台安装、微信扫码、跑通第一个任务 |
+| WB-03 | [专家与专家团](docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md) | 1-2h | ⭐⭐ | 召唤单专家、组专家团、自建专属专家团 |
+| WB-04 | [技能与技能市场](docs/workbuddy/WB-04-WorkBuddy技能与技能市场完整指南.md) | 1-2h | ⭐⭐ | 一键装技能、发邮件查股价读写文件 |
+| WB-05 | [连接器与腾讯生态](docs/workbuddy/WB-05-WorkBuddy连接器与腾讯生态完整指南.md) | 1-2h | ⭐⭐ | 接 QQ 邮箱/腾讯文档/腾讯会议/企业微信 |
+| WB-06 | [知识库](docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md) | 1-2h | ⭐⭐ | 把资料喂给 AI，回答有依据不瞎编 |
+| WB-07 | [自动化与计划任务](docs/workbuddy/WB-07-WorkBuddy自动化与计划任务完整指南.md) | 1-2h | ⭐⭐ | 定时跑、远程触发、跨应用流转、7×24h |
+| WB-08 | [多端协同](docs/workbuddy/WB-08-WorkBuddy多端协同完整指南.md) | 1h | ⭐⭐ | 桌面/微信/小程序/企业微信无缝接力 |
+| WB-09 | [Coding Mode 编程模式](docs/workbuddy/WB-09-WorkBuddy-Coding-Mode编程模式完整指南.md) | 1-2h | ⭐⭐ | 办公人偶尔写代码（开发者请用 Claude Code/Codex） |
+| WB-10 | [企业账号、安全与对比](docs/workbuddy/WB-10-WorkBuddy企业账号安全与对比完整指南.md) | 1-2h | ⭐⭐⭐ | 账号积分、私有云、安全边界、四工具横向对比 |
+
 ---
 
 ## 📋 环境要求
-
 ### Claude Code
 
 - **操作系统**：Windows 10+、macOS 10.15+、Linux
@@ -161,6 +179,13 @@ Codex 学习主线：**只有 Codex App 一条主线**。先看 CX-01 安装认�
 - **Codex App**：当前主线按 App 26.727（2026-07-30 官方 changelog）复核；Codex 已并入 ChatGPT 桌面 App（26.707 起），macOS 从官方入口安装，Windows 以 Microsoft Store / `winget -s msstore` 等官方安装入口为准
 - **CLI / Web / Cloud 辅助**：CLI 仅用于终端排查、CI、MCP / plugin 管理等辅助场景；Web / Cloud 用于远程仓库和长任务接力，版本以官方文档和当前账号能力为准
 - **认证方式**：ChatGPT 账户登录 或 OpenAI API Key
+
+### WorkBuddy
+
+- **WorkBuddy 桌面 App**：腾讯云出品，与 CodeBuddy 同账号同团队、积分共享；Windows 10/11、macOS（Apple Silicon / Intel）都支持
+- **多端**：桌面 App + 微信公众号/小程序 + 企业微信，同一微信账号打通
+- **认证方式**：微信扫码（推荐）、QQ 扫码、手机号验证码、腾讯云账号密码
+- **网络**：国内服务器直连，正常办公网络不用代理
 
 ---
 
@@ -200,6 +225,14 @@ Step 2（10分钟）：CX-02 App 桌面工作流 → 跑起第一个 App 线程
 完成 ✅ 能用Codex + 能让AI写代码
 ```
 
+### WorkBuddy 路线（30 分钟上手）
+
+```
+Step 1（10 分钟）：WB-02 安装登录 → 装好 WorkBuddy、微信扫码
+Step 2（20 分钟）：WB-01 项目介绍 → 召唤第一个专家、跑通周报任务
+完成 ✅ 能用 WorkBuddy + 能让 AI 帮你出办公产物
+```
+
 ### 完整掌握路径
 
 ```
@@ -213,6 +246,8 @@ Week 9  ：OpenClaw 多Agent + Docker部署 + 安全
 Week 10 ：Codex App 安装 + App 桌面工作流 + Commands
 Week 11 ：项目指令 + MCP + Skills + Plugins / Connectors + Subagents
 Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
+Week 13：WorkBuddy 安装 + 项目介绍 + 专家与专家团
+Week 14：WorkBuddy 技能 + 连接器 + 知识库 + 自动化 + 多端 + 企业安全
 ```
 
 ---
@@ -221,7 +256,7 @@ Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 
 | 指标 | 数值 |
 |------|------|
-| **教程总数** | 39 篇完整教程（Claude Code 13 / OpenClaw 12 / Codex 14）+ 1 速查卡 |
+| **教程总数** | 50 篇完整教程（Claude Code 13 / OpenClaw 12 / Codex 14 / WorkBuddy 11）+ 1 速查卡 |
 | **内容体量** | 80万+ Markdown 内容量（含正文、命令、代码、配置、提示词和 FAQ） |
 | **中文核心内容** | 20万+ 中文字 |
 | **代码 / 命令 / 配置示例** | 1500+ 个代码块与实操片段（核心示例按当前版本持续校验） |
@@ -231,6 +266,7 @@ Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 | **Claude Code版本** | v2.1.222（2026-08-06 对照 [GitHub Releases](https://github.com/anthropics/claude-code/releases) 与官方 changelog） |
 | **OpenClaw版本** | v2026.7.1-2（2026-08-06 对照 [Releases](https://github.com/openclaw/openclaw/releases)）；v2026.7.2-beta.7 为预发布线，不作为本教程默认稳定基线 |
 | **Codex版本** | Codex App 26.727（2026-07-30 官方 changelog）；Codex CLI 0.146.1（2026-08-05，辅助路径）；实际以 App 更新日志、系统应用信息和官方文档为准 |
+| **WorkBuddy版本** | 2026.08 基线（与 CodeBuddy 同账号同团队，积分共享）；App 无 semver，版本以本机"关于"页和官网当前显示为准 |
 
 ---
 
@@ -246,6 +282,7 @@ Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 | OpenClaw | v2026.7.1-2 | 2026-08-06 | [GitHub Releases](https://github.com/openclaw/openclaw/releases) |
 | Codex App | 26.727 | 2026-08-06 | [Codex changelog](https://developers.openai.com/codex/changelog) |
 | Codex CLI | 0.146.1 | 2026-08-06 | [Codex changelog](https://developers.openai.com/codex/changelog) / [GitHub Releases](https://github.com/openai/codex/releases) |
+| WorkBuddy | 2026.08 基线 | 2026-08-06 | App 内"关于"页 / workbuddy.ai / codebuddy.cn/work（无 semver，以本机和官网为准） |
 
 ### 本轮版本差异速览
 
@@ -280,6 +317,7 @@ Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 ## 🎯 适用人群
 
 - ✅ **刚入门的读者**：从未接触过 AI 编程工具，想系统学习
+- ✅ **办公人 / 业务用户 / 国内团队**：想用 AI 出周报、调研、PPT，被英文 CLI 劝退过，WorkBuddy 主线为你准备
 - ✅ **开发者**：想用 Claude Code 提升编程效率 + 用 OpenClaw 自动化日常工作
 - ✅ **团队负责人 / PM**：为团队制定 AI 工具使用规范、评审流程和里程碑验收方式
 - ✅ **企业用户**：企业级部署、安全边界、权限管理和最佳实践
@@ -379,7 +417,7 @@ Week 12 ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 
 ## ⚠️ 免责声明
 
-- Claude Code 教程已按 **v2.1.222** 重新校准版本口径；OpenClaw 教程以 **v2026.7.1-2** 为稳定复核基线，预发布线 v2026.7.2-beta.7 单独标注；Codex 教程按 **Codex App 26.727 与 Codex CLI 0.146.1** 修订，CLI 仅作为 CX-12 辅助路径，实际版本以本机和官方文档为准
+- Claude Code 教程已按 **v2.1.222** 重新校准版本口径；OpenClaw 教程以 **v2026.7.1-2** 为稳定复核基线，预发布线 v2026.7.2-beta.7 单独标注；Codex 教程按 **Codex App 26.727 与 Codex CLI 0.146.1** 修订，CLI 仅作为 CX-12 辅助路径；WorkBuddy 教程为全新主线（2026.08 基线），与 CodeBuddy 同账号同团队，菜单名/积分/价格以本机 App 关于页和官网当前显示为准
 - **预发布与 `latest` 以各项目 [Releases](https://github.com/openclaw/openclaw/releases) 与本机版本为准**（持续更新中）
 - 部分功能可能随版本更新而变化，请以官方文档为准
 - 本教程是学习和实践参考，重要项目请先在测试仓库 / 测试环境验证，再进入生产流程
