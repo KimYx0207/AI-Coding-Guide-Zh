@@ -6,11 +6,11 @@
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Stars"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh/forks"><img alt="Forks" src="https://img.shields.io/github/forks/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Forks"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;label=License"></a>
-  <img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.0-blueviolet.svg">
-  <img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-2.1.222-green.svg">
-  <img alt="OpenClaw" src="https://img.shields.io/badge/OpenClaw-v2026.7.1-blue.svg">
-  <img alt="Codex App" src="https://img.shields.io/badge/Codex_App-26.727-orange.svg">
-  <img alt="WorkBuddy" src="https://img.shields.io/badge/WorkBuddy-2026.08-purple.svg">
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.0-blueviolet.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-2.1.222-green.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="OpenClaw" src="https://img.shields.io/badge/OpenClaw-v2026.7.1-blue.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Codex App" src="https://img.shields.io/badge/Codex_App-26.727-orange.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="WorkBuddy" src="https://img.shields.io/badge/WorkBuddy-2026.08-purple.svg"></a>
 </p>
 
 **AI Coding / Agent 工作流中文实战教程**
