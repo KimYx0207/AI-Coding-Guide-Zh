@@ -159,6 +159,8 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 
 ---
 
+配套资源：[Awesome WorkBuddy](https://github.com/sandbaseai/awesome-workbuddy) —— 双语、经过安全审核的 WorkBuddy 文档、Skills、MCP、工作流与开源生态目录；第三方条目附许可证、来源、权限和数据流说明。
+
 ## 📋 环境要求
 ### Claude Code
 
