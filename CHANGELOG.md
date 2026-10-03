@@ -13,6 +13,13 @@
 - OpenClaw Docker 安装补匹配版本的官方初始化步骤，手动 Compose 补监听、认证和 origin 配置；修正配置查询与消息平台命令示例，说明沙箱默认关闭及数据库迁移对回滚的限制。
 - WorkBuddy 修正官网下载识别、网页登录、菜单与应用撤权入口；企业旧促销改为已结束的历史快照。
 
+### 工作流与可运行示例
+
+- Codex 云任务按当前 Work in / Cloud 的环境发布流程重写，区分新环境与 legacy 的代码审查集成；同步 Secrets 代理、Scheduled、MCP transport、导入及当前 CLI 参数。
+- Claude Code 修正 Skills 预批准权限、插件管理和 Hooks 通知转义；SDK 按 Python 实际类型处理消息，计算器改为有限 AST 运算，GitHub Action 修正输入、OIDC 权限与报告缺失时的失败行为。
+- OpenClaw 按 v2026.9.4 修正路由、模型、技能、记忆与定时命令；Agent 名单迁到 entries，共享工具策略放回顶层，压缩与媒体配置按现行 schema 修正。同步旧 QMD、SQLite 状态、认证目录与权限边界，Docker 示例保持明确参考版本；首次启动先生成缺失的 token 和进阶数据库密码，保留已有环境文件，再用 Compose 静默检查缺失或空值。
+- WorkBuddy 区分定时任务、远程助理与连接器授权，补 CSV 练习和设计创意入口，删除未经证实的固定耗时、收费倍率、同步及企业权限保证。价格未重新核实的段落保留日期快照。
+
 ### 检查
 
 - 新增离线教程检查与 Linux / Windows CI：核对公开 Markdown 的本地链接和章节锚点、围栏、编码，以及进度计算和订单练习。

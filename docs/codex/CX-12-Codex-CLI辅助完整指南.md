@@ -134,6 +134,28 @@ CLI 是 App 的辅助工具，适合：
 - 替代 App Review 面板。
 - 让新手先背所有参数。
 
+### 1.1 需要 CLI 时怎么安装
+
+按 [官方 CLI 安装页](https://learn.chatgpt.com/docs/codex/cli) 选择一种来源，并沿用同一种来源更新。Windows 的独立安装入口在新 PowerShell 窗口中执行：
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"
+```
+
+macOS / Linux 的独立安装入口：
+
+```bash
+curl -fsSL https://chatgpt.com/codex/install.sh | sh
+```
+
+已有 Node.js / npm 的环境也可用：
+
+```bash
+npm install -g @openai/codex
+```
+
+macOS Homebrew 用户可选 `brew install --cask codex`，后续用 `brew upgrade --cask codex` 更新。安装后先运行 `codex --version` 和 `codex --help`，再进入项目目录启动 `codex`，按界面完成可用的登录方式。本次核对安装文档与本机 npm 包入口，没有执行安装、更新或登录。
+
 ## 2. 常用命令
 
 ```bash
@@ -143,7 +165,7 @@ codex app
 codex exec "summarize this repo"
 codex review
 codex mcp list
-codex features
+codex features list
 codex plugin marketplace list
 ```
 
@@ -177,7 +199,7 @@ codex --help
 |---|---|---|
 | v0.129.0 | `/vim` composer、默认 Vim mode、`/keymap debug`、workspace plugin sharing、`/hooks` 浏览与开关 | 输入体验、插件共享和 hooks 排查都先用内置入口确认 |
 | v0.130.0 | `codex remote-control` 顶层入口、plugin share metadata / discoverability、live thread config refresh、thread pagination、Windows sandbox runtime cache | 远程控制、插件分享和 App server 排查时先看 readiness / config 是否刷新 |
-| v0.131.0 | TUI session controls、`@` mentions 搜索文件 / 目录 / plugins / skills、`codex doctor` | 交互模式先用 `/help` 和 `@` 试搜索，不要手写路径 |
+| v0.131.0 | TUI session controls、`@` mentions 搜索文件 / 目录 / plugins / skills、`codex doctor` | 交互模式先用 `/` 查看命令，再用 `@` 试搜索，不要手写路径 |
 | v0.132.0 | Python SDK 认证、`codex exec` 结构化输出、remote executor 标准认证、图片 fidelity、session picker | 自动化任务需要结构化输出时优先查 `codex exec --help` 和 `--output-schema` |
 | v0.133.0 | Goals 默认启用、permission profiles list / inheritance / managed `requirements.toml`、plugin discovery、extension lifecycle events | 把 `/goal`、权限 profiles、插件排查当成稳定教学入口 |
 | v0.134.0 | 本地会话历史搜索、`--profile` 主选择器、MCP per-server environment / streamable HTTP OAuth、read-only MCP 并发、extension / hook 上下文增强 | 迁移旧 profile 配置，排查 MCP 时先看 server environment 和 OAuth 选项 |
@@ -218,7 +240,7 @@ codex --ask-for-approval never --sandbox read-only
 codex --dangerously-bypass-approvals-and-sandbox
 ```
 
-不要把危险模式写成团队默认推荐。CLI v0.147.0 新增的 `--approve-for-me` 是让自动审查处理审批，不会替你选择任意读写范围；沙盒仍应单独核对。同版已移除 `codex exec --full-auto`，旧脚本按 [该版迁移说明](https://github.com/openai/codex/releases/tag/rust-v0.147.0) 改用 `--sandbox workspace-write`，并明确审批策略。
+不要把危险模式写成团队默认推荐。当前 `--approve-for-me` 会采用 workspace-write 沙盒并让自动审查处理审批；它与显式 `--sandbox` 冲突，不能把两者同时拼进命令。`codex exec --full-auto` 已在 v0.147.0 移除，本机 0.157.1 与 v0.160.0 的参数源码都未保留；Learn CLI Reference 仍有“deprecated compatibility flag”的旧描述。旧脚本按 [迁移记录](https://github.com/openai/codex/releases/tag/rust-v0.147.0) 改用 `--sandbox workspace-write`，不因文档残留再加回旧参数。
 
 如果你不知道该选什么，App 用户默认做法是：
 
@@ -285,9 +307,9 @@ codex review
 
 ## 6. CLI slash commands
 
-终端交互模式中可以输入 `/help` 查看当前 slash commands。不要把命令表写死；以当前 CLI 为准。
+在 CLI TUI 输入框输入 `/`，打开当前 slash commands 列表并查看说明。Shell 中运行 `codex --help` 查看子命令和参数；两种帮助入口要分清。
 
-App 用户重点掌握：
+CLI TUI 用户重点掌握以下入口；桌面 App 的命令列表按 CX-03 和当前 `/` 列表核对：
 
 - `/status`
 - `/permissions`
@@ -299,7 +321,7 @@ App 用户重点掌握：
 - `/compact`
 - `/resume`
 
-如果这些命令没有出现在你本机 `/help`，以本机输出为准，不要按教程硬敲。
+如果这些命令没有出现在本机 TUI 的 `/` 列表，以实际列表和当前功能状态为准，不要按教程硬敲。
 
 ### 6.0 `/vim` 和键盘排查
 
@@ -325,7 +347,7 @@ v0.131.0 起，`@` mentions 搜索范围更宽，能覆盖文件、目录、plug
 
 session picker 在 v0.132.0 后更适合恢复旧线程：重命名线程会显示 `name (thread-id)`，粘贴文本也能用于搜索。找不到旧任务时，先用 picker 搜标题关键词，再决定是否用 `codex exec resume`。
 
-后续几版增加了这些 **CLI TUI** 入口，使用前仍以本机 `/help` 为准，不照搬到 App 输入框：
+后续几版增加了这些 **CLI TUI** 入口，使用前仍以本机 TUI 的 `/` 列表为准，不照搬到 App 输入框：
 
 | 需求 | 入口与引入版本 | 操作前核对 |
 |---|---|---|
@@ -443,7 +465,7 @@ codex exec \
 | MCP 配置不生效 | `codex mcp list`、`codex mcp --help` | 配置层、server 启动、token |
 | `/plugins` 找不到 | 先进入 `codex` TUI | 它是交互命令，不是 shell 子命令 |
 | 结构化输出失败 | `codex exec --help` | 当前版本或 schema 不支持 |
-| 权限行为不对 | 查看 `--profile`、sandbox、approval | profile 继承或 managed requirements |
+| 权限行为不对 | 分别查看配置 profile、`default_permissions`、sandbox 和 approval | 配置叠加、权限 profile 继承或 managed requirements |
 | CI 日志泄露信息 | 查 prompt、命令、环境变量 | 禁止 echo secret，轮换凭据 |
 
 ## 11. CLI Runbook：四个常用排障场景

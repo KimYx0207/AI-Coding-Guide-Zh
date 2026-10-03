@@ -892,7 +892,7 @@ Workflow:
 $docs-drift
 每周一检查 docs/ 是否和代码、配置、README 不一致。
 默认只读。
-有发现时进入 Triage，没有发现时归档。
+有发现时在 Scheduled 查看运行报告；没有发现时不发无关通知。
 ```
 
 ### 18.3 Plugin + Skill

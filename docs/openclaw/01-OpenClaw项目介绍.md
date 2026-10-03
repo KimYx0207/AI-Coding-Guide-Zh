@@ -377,7 +377,7 @@ Channel 的安全默认值很重要。OpenClaw 连接的是真实的消息平台
 
 OpenClaw 的记忆系统设计哲学是：**简单到极致**。
 
-没有向量数据库，没有 RAG 管道，没有 Embedding 索引。AI 的记忆就是写在磁盘上的 Markdown 文件。
+记忆内容可以用 Markdown 文件保存和编辑。检索层可以为这些文件建立 SQLite 和 embedding 索引，并通过 `memory_search` 召回相关片段；Markdown 是可读的记忆来源，索引负责搜索。
 
 ```
 ~/.openclaw/workspace/
@@ -417,7 +417,7 @@ AI 有两个记忆工具：
 | Canvas | 可视化工作区 | Agent 驱动的 UI，支持 A2UI 推送 |
 | 节点操作 | 摄像头、屏幕录制、位置获取 | 通过 macOS/iOS/Android 节点 |
 | 文件操作 | 读写文件、目录管理 | 在工作空间内操作 |
-| Shell 执行 | 运行命令行命令 | 安全沙箱内执行 |
+| Shell 执行 | 运行命令行命令 | 执行位置取决于 exec 和 sandbox 配置；sandbox 默认关闭 |
 | 消息发送 | 通过任意 Channel 发消息 | 跨平台消息推送 |
 | 定时任务 | Cron 表达式调度 | 定时提醒、自动化任务 |
 | Webhook | 接收外部事件 | 与第三方服务集成 |
@@ -446,16 +446,7 @@ import { ... } from 'openclaw/plugin-sdk'
 
 ### MCP 支持
 
-OpenClaw 通过 `mcporter` 桥接支持 MCP（Model Context Protocol）：
-
-```
-OpenClaw Gateway ←→ mcporter ←→ MCP Servers
-```
-
-这种桥接模式的好处：
-- 添加或更换 MCP 服务器不需要重启 Gateway
-- 核心工具/上下文保持精简
-- MCP 生态的变动不影响核心稳定性
+OpenClaw 可以直接连接 MCP server。当前官方配置位于 `mcp.servers`，支持 stdio、SSE 和 Streamable HTTP；Control UI 的 Settings → MCP 也可以添加连接。先按所用版本的 [MCP 文档](https://docs.openclaw.ai/tools/mcp)配置和检查连接，再测试实际工具。`mcporter` 仍可用于需要它的独立工作流，但不是唯一接入路径。
 
 > ⏭️ **小白可跳过** — 这部分是技术深入分析，新手可以先跳过
 
@@ -663,7 +654,7 @@ OpenClaw 支持配置多个模型的优先级和故障转移策略。主模型�
 
 ```bash
 # 直接跟 AI 对话
-openclaw agent --message "帮我查一下明天的天气"
+openclaw agent --agent main --message "帮我查一下明天的天气"
 
 # 发送消息到指定平台
 openclaw message send --to +1234567890 --message "Hello"
@@ -1197,21 +1188,25 @@ OpenClaw 的配置不是孤立字段。每个字段背后都对应一个产品�
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "docs-helper",
+    "entries": {
+      "docs-helper": {
         "workspace": "~/.openclaw/workspace-docs-helper",
         "model": "openai/gpt-5.2-mini",
         "skills": ["summarize"]
       }
-    ]
+    }
   },
   "bindings": [
     {
-      "agent": "docs-helper",
-      "channel": "slack",
-      "channelId": "C0123456789"
+  "agentId": "docs-helper",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C0123456789"
     }
+  }
+}
   ]
 }
 ```

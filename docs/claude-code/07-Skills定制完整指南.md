@@ -625,7 +625,7 @@ Skills采用**约定优于配置**的目录结构，每个Skill都是 `.claude/s
 | `context` | string | 可选 | - | 设为`fork`时在独立子代理上下文中运行（Forked Context） |
 | `model` | string | 可选 | 继承 | 指定运行模型（如`opus`、`sonnet`、`haiku`） |
 | `agent` | string | 可选 | - | 指定代理类型（如`Explore`） |
-| `allowed-tools` | string | 可选 | 全部 | 限制可用工具列表（逗号分隔，如`Read, Grep, Glob`） |
+| `allowed-tools` | string 或 list | 可选 | 沿用基础权限 | 当前轮次预批准工具（如 `Read, Grep, Glob`），不会移除其他工具 |
 | `user-invocable` | boolean | 可选 | true | 是否允许用户通过`/`命令手动调用 |
 | `disable-model-invocation` | boolean | 可选 | false | 设为true时禁止Claude自动激活，只能手动`/`调用 |
 | `argument-hint` | string | 可选 | - | 参数提示（如`[filename] [format]`） |
@@ -634,7 +634,7 @@ Skills采用**约定优于配置**的目录结构，每个Skill都是 `.claude/s
 
 ```yaml
 ---
-# 最简单的SKILL.md（只有2个必填字段）
+# 推荐写明 name 和 description；这些 frontmatter 字段不是必填项
 name: code-commenter
 description: 当用户要求"添加注释"或"代码注释"时自动为代码添加清晰的中文注释
 ---
@@ -1899,7 +1899,7 @@ description: 当用户要求"添加注释"或"代码注释"时激活
 **A**：使用Git回退到旧版本的提交，或者在SKILL.md的版本历史中查看旧版本的内容。
 
 ### Q17：SKILL.md中可以使用变量吗？
-**A**：SKILL.md 支持一个特殊内置变量 `${CLAUDE_SKILL_DIR}`，其他自定义模板变量不支持。
+**A**：支持参数占位符和若干内置路径 / 会话变量，例如 `$ARGUMENTS`、`$ARGUMENTS[N]`、`$0`、`${CLAUDE_SESSION_ID}`、`${CLAUDE_PROJECT_DIR}` 和 `${CLAUDE_SKILL_DIR}`。还可以通过 frontmatter 的 `arguments` 声明命名参数。插件 Skill 另有 `${CLAUDE_PLUGIN_ROOT}`、`${CLAUDE_PLUGIN_DATA}`；任意环境变量不能直接当成通用模板变量使用。下面保留 `${CLAUDE_SKILL_DIR}` 的常用示例，完整清单以官方说明为准。
 
 **`${CLAUDE_SKILL_DIR}` 变量说明**：
 

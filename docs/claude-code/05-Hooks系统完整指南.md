@@ -1274,41 +1274,30 @@ import subprocess
 import platform
 
 def send_notification(title: str, message: str):
-    """发送系统桌面通知"""
+    """把通知作为数据传入，避免拼进 AppleScript 或 PowerShell 代码。"""
     system = platform.system()
-
     try:
-        if system == 'Darwin':  # macOS
-            subprocess.run([
-                'osascript', '-e',
-                f'display notification "{message}" with title "{title}"'
-            ])
+        if system == 'Darwin':
+            script = 'on run argv\ndisplay notification (item 2 of argv) with title (item 1 of argv)\nend run'
+            subprocess.run(['osascript', '-e', script, title, message], check=True)
         elif system == 'Linux':
-            subprocess.run(['notify-send', title, message])
+            subprocess.run(['notify-send', title, message], check=True)
         elif system == 'Windows':
-            # Windows Toast通知（推荐方式）
-            # 需要先安装：Install-Module -Name BurntToast -Scope CurrentUser
-            try:
-                # 优先使用BurntToast（更可靠）
-                ps_cmd = f'New-BurntToastNotification -Text "{title}", "{message}"'
-                result = subprocess.run(['powershell', '-Command', ps_cmd], capture_output=True)
-                if result.returncode != 0:
-                    raise Exception("BurntToast not available")
-            except:
-                # 回退方案：使用Windows原生Toast
-                ps_cmd = f'''
-                [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-                $template = [Windows.UI.Notifications.ToastTemplateType]::ToastText02
-                $xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
-                $text = $xml.GetElementsByTagName("text")
-                $text[0].AppendChild($xml.CreateTextNode("{title}")) | Out-Null
-                $text[1].AppendChild($xml.CreateTextNode("{message}")) | Out-Null
-                $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-                [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Claude Code").Show($toast)
-                '''
-                subprocess.run(['powershell', '-Command', ps_cmd], capture_output=True)
+            # 需先安装 BurntToast；JSON 使用 base64 传入，通知正文不参与脚本解析。
+            import base64
+            payload = base64.b64encode(
+                json.dumps({'title': title, 'message': message}, ensure_ascii=False).encode('utf-8')
+            ).decode('ascii')
+            script = (
+                "$ErrorActionPreference = 'Stop'; "
+                "$data = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"
+                + payload + "')) | ConvertFrom-Json; "
+                "Import-Module BurntToast -ErrorAction Stop; "
+                "New-BurntToastNotification -Text $data.title, $data.message"
+            )
+            subprocess.run(['powershell', '-NoProfile', '-Command', script], check=True)
     except Exception as e:
-        print(f"通知发送失败: {e}", file=sys.stderr)
+        print(f'通知发送失败: {e}', file=sys.stderr)
 
 def main():
     try:
@@ -1316,7 +1305,7 @@ def main():
     except json.JSONDecodeError:
         return
 
-    # 获取消息内容（注意：没有notification_type字段）
+    # Notification 输入包含 message、可选 title 和 notification_type
     message = input_data.get('message', '')
     session_id = input_data.get('session_id', '')
 
@@ -2844,11 +2833,11 @@ import platform
 system = platform.system()
 
 if system == 'Windows':
-    # Windows特定代码
+    pass  # 在此放 Windows 特定代码
 elif system == 'Darwin':  # macOS
-    # macOS特定代码
+    pass  # 在此放 macOS 特定代码
 else:  # Linux
-    # Linux特定代码
+    pass  # 在此放 Linux 特定代码
 ```
 
 ### 高级问题

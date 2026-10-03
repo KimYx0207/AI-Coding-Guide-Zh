@@ -213,7 +213,7 @@ CLI 配好后回到 App 仍要核对：
 | 类型 | 说明 |
 |---|---|
 | stdio | 本地命令启动，适合本机工具 |
-| HTTP / SSE | 远程服务，适合团队或云服务 |
+| Streamable HTTP | 远程服务，可配 bearer token 或 OAuth |
 | 插件携带 | Plugin 安装后提供 MCP server |
 
 App 用户重点不是背协议，而是知道工具从哪里来、权限是什么、结果能否验证。

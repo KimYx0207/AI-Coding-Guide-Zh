@@ -74,7 +74,7 @@
 | 术语 | 英文 | 解释 |
 |------|------|------|
 | **Plugin** | Plugin | Claude Code 的扩展包，可封装 agents、skills、hooks、MCP、LSP、bin、settings 等资源 |
-| **Marketplace** | Marketplace | Plugin商店，浏览和发现Plugin的网页平台 |
+| **Marketplace** | Marketplace | 列出插件与下载来源的目录，可通过 `/plugin` 或 `claude plugin marketplace` 注册和管理；网页是浏览入口之一 |
 | **.claude-plugin/plugin.json** | - | Plugin的元数据清单文件，位于 `.claude-plugin/` 子目录中 |
 | **--plugin-dir** | - | Claude Code 启动参数，主要用于本地开发 / 调试加载指定目录 |
 | **Skill** | Skill | Plugin中的核心能力模块（SKILL.md定义） |
@@ -258,7 +258,7 @@ rm -rf .claude/plugins/plugins-plus
 
 ### 3.1 浏览Marketplace
 
-> ⚠️ **注意**：Marketplace 是**网页平台**，不是CLI命令。
+Marketplace 是插件目录，Claude Code 通过已注册的目录发现插件。你可以在交互界面的 `/plugin` 中浏览，也可以用 `claude plugin marketplace` 在终端管理；网页浏览是补充入口。
 
 **访问方式**：
 
@@ -301,7 +301,9 @@ claude --plugin-dir .
 
 ### 3.3 管理已安装Plugins
 
-由于Plugin就是本地目录，管理操作都是标准文件/git操作：
+通过 marketplace 安装的插件，用 `/plugin` 或 CLI 管理，并注意安装作用域；不要直接修改其缓存目录。先在终端执行 `claude plugin list` 查看，再按需用 `claude plugin update <name>@<marketplace>` 或 `claude plugin uninstall <name>@<marketplace>` 操作。
+
+下面的文件 / git 操作只适用于你自己克隆并通过 `--plugin-dir` 加载的开发目录：
 
 ```bash
 # 查看已安装的Plugins
@@ -339,7 +341,7 @@ cat .claude/plugins/my-plugin/.claude-plugin/plugin.json
 ```
 my-plugin/
 ├── .claude-plugin/
-│   └── plugin.json      # 必需：Plugin元数据清单
+│   └── plugin.json      # 可选但推荐：Plugin元数据清单
 ├── .mcp.json            # 可选：MCP配置
 ├── README.md            # 推荐：使用文档
 ├── skills/              # 可选：Agent Skills
@@ -603,7 +605,8 @@ claude --plugin-dir /path/to/your/plugin --debug
 cat /path/to/plugin/skills/my-skill/SKILL.md
 
 # 确认frontmatter格式
-# 必须以 --- 开头和结尾，包含name和description
+# frontmatter 用 --- 包围；name 和 description 是推荐字段
+# name 缺省时使用目录名，description 缺省时回退到正文首段
 ```
 
 ### 6.4 多Plugin冲突
@@ -611,9 +614,10 @@ cat /path/to/plugin/skills/my-skill/SKILL.md
 如果多个Plugin定义了同名命令：
 
 ```bash
-# 后加载的Plugin会覆盖先加载的
-# 调整 --plugin-dir 的顺序来控制优先级
-claude --plugin-dir ./plugin-low-priority --plugin-dir ./plugin-high-priority
+# 不同插件的 skills / commands 通常用各自的插件命名空间区分
+claude --plugin-dir ./plugin-a --plugin-dir ./plugin-b
+# 分别用 /plugin-a:review、/plugin-b:review 调用，别靠加载顺序解决撞名
+# 若两个插件用了相同 manifest name，先改成不同名字并检查 /plugin 的 Errors
 ```
 
 ---
@@ -634,25 +638,27 @@ Claude Code 现在同时提供两类入口：
 
 ### Q3：Plugin会访问我的代码吗？
 
-Plugin中的Skills和Commands在Claude Code的沙箱中运行，遵循与内置工具相同的权限模型。Plugin不能绕过权限系统。
+Skill 和 command 会影响 Claude 的指令与工具选择；插件还可能包含 hooks、MCP 服务器或可执行文件，这些代码会以你的用户权限运行。Claude 的工具权限和 OS sandbox 是不同层面的控制，不能保证整个插件都被沙箱隔离。安装前检查来源和实际执行内容，再按需要配置权限、沙箱与组织策略。
 
 ### Q4：如何更新Plugin？
 
+市场安装的插件，优先用 `/plugin` 的更新入口，或在终端运行：
+
 ```bash
-cd .claude/plugins/my-plugin
-git pull origin main
+claude plugin update my-plugin@my-marketplace
 ```
 
-下次启动Claude Code时会自动加载最新版本。
+自行克隆并用 `--plugin-dir` 加载的开发目录才用 `git pull`。更新后检查当前会话是否需要 `/reload-plugins` 或重启。
 
 ### Q5：如何卸载Plugin？
 
-```bash
-# 删除Plugin目录
-rm -rf .claude/plugins/my-plugin
+市场安装的插件，用 `/plugin` 的卸载入口，或在终端运行：
 
-# 启动时不再指定该 --plugin-dir 即可
+```bash
+claude plugin uninstall my-plugin@my-marketplace
 ```
+
+如果你用了 project / local 作用域，先用 `claude plugin uninstall --help` 确认 `--scope`，避免只卸掉用户级副本。通过 `--plugin-dir` 临时加载的插件，下一次启动不再传这个目录即可；确认不需要开发文件后再自行删除。
 
 ### Q6：可以同时加载多少个Plugin？
 
@@ -664,7 +670,7 @@ rm -rf .claude/plugins/my-plugin
 
 ### Q8：Plugin可以离线使用吗？
 
-可以。Plugin是本地文件，加载后不需要网络。但如果Plugin包含MCP配置连接外部服务，那部分功能需要网络。
+已经下载的插件文件通常可以从本地加载，但 Claude Code 调用模型仍需要网络；插件里的远程 MCP、安装依赖和更新也可能联网。只能说本地资源加载与是否联网调用服务是两回事，不能把插件加载成功当成整套工作流可离线运行。
 
 ### Q9：如何让Plugin在所有项目中生效？
 
@@ -714,7 +720,7 @@ alias claude='claude --plugin-dir ~/.claude/global-plugins/my-plugin'
 ```
 my-plugin/
 ├── .claude-plugin/
-│   └── plugin.json      # 必需：元数据清单
+│   └── plugin.json      # 可选但推荐：元数据清单
 ├── .mcp.json            # 可选：MCP配置
 ├── README.md            # 推荐：文档
 ├── commands/*.md        # 可选：Slash命令

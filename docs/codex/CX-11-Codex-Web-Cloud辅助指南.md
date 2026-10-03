@@ -1,6 +1,6 @@
 # CX-11 Codex Web / Cloud 辅助指南：什么时候离开 App
 
-本篇是 App 主线的云端辅助篇。
+本篇是 App 主线的云端辅助篇，按 [当前 Codex Cloud](https://learn.chatgpt.com/docs/environments/cloud-environments) 的已发布环境工作流讲解。**Codex Cloud（Legacy）** 仍承接 Code Review、Linear 和 GitHub 集成，官方计划弃用；旧版 setup-only secrets 与阶段网络规则只适用于 [Legacy 环境](https://learn.chatgpt.com/docs/environments/cloud-environment)，不要套到新环境。
 
 主要来源：OpenAI Codex Web / Cloud、GitHub integration、Environments、Internet Access、Secrets 官方文档。
 
@@ -69,11 +69,11 @@ Cloud 这一章最重要的不是"云端更强"，而是知道它和本机 App �
 |---|---|---|
 | Codex Web / Cloud | 远程执行 Codex 任务的环境 | 不是本机 App 的复制品 |
 | Cloud environment | 远程任务的仓库、依赖、脚本、变量、网络配置 | 环境可复现比模型能力更重要 |
-| Setup script | agent 开始前安装依赖和准备环境的脚本 | 默认可联网，不要输出 secrets |
-| Agent phase | Codex 真正执行任务的阶段 | 默认不联网，除非显式开启 |
-| Environment variables | setup 和 agent 阶段都可用的变量 | 不适合存高度敏感值 |
-| Secrets | setup 阶段可用、agent 前移除的敏感值 | 适合拉私有依赖，不适合 agent 阶段长期使用 |
-| Internet access | agent 阶段是否允许联网 | 默认关闭，开启要限制域名和方法 |
+| Install script / Start skill | 环境记录已验证的安装命令和服务启动步骤 | 在准备对话中完善，验证后发布 |
+| Published environment | 新任务使用的已准备文件系统与访问设置 | 保存配置和发布环境是两步 |
+| Environment variables | 程序直接读取的配置值 | 敏感原值若直接传入进程，需要单独评估 |
+| Network secrets | 指定 HTTPS 服务使用的凭据 | 程序收到占位值，代理按允许域名替换真实凭据 |
+| Internet access | 环境允许访问的网络目的地 | 保存域名策略，发布后在新任务中验证 |
 | GitHub handoff | 从本地 App 交给远程仓库任务 | 本地未推送文件 Cloud 看不到 |
 | 回流 | Cloud 完成后回到 App / PR Review | 不能跳过本地 diff 和验证 |
 
@@ -86,21 +86,20 @@ Cloud 这一章最重要的不是"云端更强"，而是知道它和本机 App �
 一次 Cloud 任务通常经历：
 
 ```text
-选择仓库和分支
-  -> 创建或复用 Cloud environment
-  -> 运行 setup script 安装依赖
-  -> 移除 setup-only secrets
-  -> 进入 agent phase 执行任务
-  -> 产出分支、PR、评论或报告
+Work in → Cloud → 选择已发布环境
+  -> 新任务获得独立工作区和已准备的文件系统
+  -> 按已保存的网络、变量和凭据设置执行
+  -> 修改代码、运行验证并检查 diff
+  -> 人决定提交、开 PR 或继续修改
   -> 回到 App / GitHub Review
 ```
 
 这条链路解释了几个常见现象：
 
 - Cloud 不知道你本机未保存、未提交、未推送的文件。
-- setup script 能安装依赖，但 `export FOO=bar` 不等于 agent 阶段一定持久可用。
-- agent 阶段默认不联网，所以“查最新接口”需要显式开启网络或改成本地/文档证据。
-- secrets 适合 setup 阶段，不应该指望 agent 阶段一直能读到。
+- 新任务从已发布环境启动；修改环境后要重新发布，旧任务仍保留自己的工作状态。
+- 网络访问取决于环境保存的目的地策略和组织要求，不按旧版 setup / agent 的默认联网差异判断。
+- Network secrets 在准备和任务期间都可用于允许的 HTTPS 443 请求，原值由代理替换，不会直接交给本地进程。
 - Cloud 完成不等于可以合并，最终仍要 Review。
 
 ### 0.1 什么时候 Cloud 是优势
@@ -120,7 +119,7 @@ Cloud 这一章最重要的不是"云端更强"，而是知道它和本机 App �
 | 依赖本机数据库 | Cloud 环境拿不到你的本地服务 |
 | 依赖桌面 GUI | Cloud 不等于你的桌面 |
 | 需要未推送文件 | Cloud 只看远程仓库和配置 |
-| 需要生产 secret 在 agent 阶段持续可用 | secrets 默认只在 setup 阶段 |
+| 需要程序直接读取生产凭据原值 | Network secrets 提供的是代理占位值；直接环境变量可能暴露给进程，应重新评估权限和任务设计 |
 | 需要人工频繁判断 UI | 本机 App 更适合 |
 
 ## 1. Web / Cloud 是什么
@@ -159,14 +158,14 @@ Cloud environment 定义云端任务怎么跑：
 
 - 选择仓库。
 - 安装依赖。
-- 设置 setup script。
-- 配置 secrets。
-- 控制网络访问。
-- 设定运行验证方式。
+- 在准备对话中确认 Install script 和 Start skill。
+- 配置环境变量、Network secrets 与允许的网络目的地。
+- 验证准备结果，保存并发布环境。
+- 明确每个任务的验证命令。
 
 好的 environment 应该能让 Codex 在云端稳定复现项目。
 
-Cloud 任务启动后通常会创建容器、检出所选仓库分支、运行 setup script，再进入 agent 执行阶段。setup script 默认可以联网安装依赖；agent 阶段默认不联网，除非你在 environment 中显式开启并限制访问范围。
+创建当前 Cloud 环境时，在 Web 或桌面 App 选择 **Work in → Cloud → Select environment → Create environment**，挑选可访问的 GitHub 仓库，再选择 **Get started**。Codex 会检查仓库、安装依赖和工具并验证工作流；你补齐缺失的访问或配置，审查准备报告和文件，保存后选择 **Publish**。看到 **Environment published** 后，再用 **Start a new task** 发起任务。也可从 **Settings → Codex Cloud → Environments** 管理环境。
 
 ## 4. 创建 Cloud 任务前先准备什么
 
@@ -199,10 +198,9 @@ Cloud 不是“更强的本地 App”。它缺少你的本机文件、GUI 状态
 
 这份交接包能减少 Cloud 因上下文不足而扩大改动。
 
-## 5. Setup Script
+## 5. Install script 与环境准备
 
-
-Setup script 用来准备云端环境，例如：
+当前 Cloud 可以在准备对话里识别并安装项目需要的工具，把已验证的命令记录为 **Install script**，把服务启动和就绪检查记录为 **Start skill**。下文沿用 setup 这个通用称呼讲脚本设计；在当前界面里核对的是 Install script，不要求每次任务重新手写旧版 setup script。例如：
 
 ```bash
 npm ci
@@ -216,7 +214,7 @@ npm run build
 - 不输出密钥。
 - 失败时错误清晰。
 - 与项目 README / AGENTS.md 保持一致。
-- 不依赖 `export FOO=bar` 在 agent 阶段继续生效；需要持久环境变量时放到 environment 设置或写入合适的 shell 启动配置。
+- 需要程序直接读取的值放在 **Environment variables** 设置中；需要发给指定 HTTPS 服务的凭据优先用 **Network secrets**。不要只靠安装 shell 中的一次 `export` 传递任务配置。
 
 ### 5.1 好的 setup script 长什么样
 
@@ -263,16 +261,16 @@ Cloud 任务可能需要联网或 secret。规则：
 
 | 类型 | 作用时间 | 适合 |
 |---|---|---|
-| Environment variables | setup script 和 agent 阶段都可用 | 普通环境开关、非敏感配置 |
-| Secrets | 只在 setup script 阶段解密可用，agent 阶段前移除 | 安装私有依赖、拉取私有资源 |
+| Environment variables | 直接传入环境中的程序 | 程序需要直接读取的配置；原值可能被进程看到 |
+| Network secrets | 准备和任务期间的允许 HTTPS 443 请求，由代理替换占位值 | 私有依赖或外部 API 凭据；配置 Key、Value 和 Allowed domains |
 
-如果 agent 阶段需要访问外部网络，要在 environment 中开启 agent internet access，并尽量只允许必要域名和 HTTP 方法。
+需要联网时，在环境配置中打开 **Allow Codex to access internet**，选择 **Package managers** 或 **Custom domains only**，在 **Additional allowed domains** 补齐目的地主机。保存并在准备对话里验证，发布或重新发布后再用新任务确认。网络放行不等于提供了服务凭据或写权限。
 
 ### 6.1 网络访问决策表
 
 | 任务 | agent 阶段是否需要联网 | 建议 |
 |---|---|---|
-| 修本仓库代码并跑测试 | 通常不需要 | 保持默认关闭 |
+| 修本仓库代码并跑测试 | 通常不需要 | 不需要联网时保持最小网络范围 |
 | 安装依赖 | setup 阶段需要 | 放到 setup script |
 | 查官方文档 | 可能需要 | 优先使用已配置文档源，或限制域名 |
 | 调第三方 API 验证 | 高风险 | 使用测试环境，只允许必要域名 |
@@ -283,13 +281,14 @@ Cloud 任务可能需要联网或 secret。规则：
 不要把 secret 当成“云端环境里的永久变量”。更稳的理解是：
 
 ```text
-Secrets
-  -> setup 阶段用于安装私有依赖或拉取私有资源
-  -> agent 阶段前移除
+Network secrets
+   -> 配置 Key、Value 和 Allowed domains
+   -> 程序获得占位值
+   -> 准备与任务期间，代理在允许的 HTTPS 443 请求中替换真实凭据
 
 Environment variables
-  -> setup 和 agent 阶段都可用
-  -> 适合非敏感配置或经过风险评估的运行参数
+   -> 直接传入程序
+   -> 适合必须由程序读取的配置，敏感原值另做风险评估
 ```
 
 如果你发现一个任务必须在 agent 阶段持续使用敏感生产凭据，先停下来重新设计。很多时候应该改成只读报告、测试环境 token、外部 CI、或人工批准的短期动作。
@@ -388,7 +387,7 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
-在 environment 中确认：setup script 可以联网安装依赖；agent internet access 默认关闭。若必须联网查包或远程 API，只允许必要域名，并优先限制为 `GET` / `HEAD` / `OPTIONS`。
+在环境里选择所需的包管理器网络预设或自定义允许域名，确认私有仓库凭据使用 Network secrets，且 Allowed domains 与请求目的地一致。先在准备对话验证安装，再发布环境，用新任务核对安装结果和访问范围。不要把 Legacy 的 agent 默认离线和 HTTP 方法设置套到当前界面。
 
 ### 案例三：Cloud 结果回到 App 做最后检查
 
@@ -470,7 +469,7 @@ Issue：
 
 ### Q1：Cloud 能访问互联网吗？
 
-setup script 默认可以联网安装依赖；agent 阶段默认不联网。需要 agent 联网时，在 environment 中显式开启并审查风险。
+当前 Cloud 的准备和任务访问按环境配置与组织策略判断。先核对互联网开关和允许域名，验证服务连接后保存、发布。Legacy 的 setup 默认联网、agent 默认离线是另一套机制。
 
 ### Q2：Cloud 能用我的本机文件吗？
 
@@ -505,10 +504,10 @@ Cloud 的优势不是神秘的"云上更聪明"，而是它能在一个可配置
 | 维度 | App 本地 | Cloud |
 |------|----------|-------|
 | 项目状态 | 看得到本机工作区和未提交改动 | 通常从仓库分支或 commit checkout |
-| 环境 | 你的电脑、终端、权限、工具链 | 容器环境和 setup script |
+| 环境 | 你的电脑、终端、权限、工具链 | 已发布环境及每个任务的独立 VM 工作区 |
 | 适合任务 | 交互式修改、Review、本地 UI 检查 | 可复现任务、CI 修复、远端分支工作 |
-| 网络 | 受本地设置和权限影响 | setup 阶段有网络，agent 阶段默认无网络 |
-| 密钥 | 本机账号和配置 | secrets 只在 setup 阶段可用 |
+| 网络 | 受本地设置和权限影响 | 环境保存的允许域名、代理及组织策略 |
+| 密钥 | 本机账号和配置 | Network secrets 由代理替换；直接环境变量会进入进程 |
 | 回流 | 直接看 Review 面板 | 需要打开 diff、PR 或 apply 回本地 |
 
 课程里要强调：Cloud 不是把本地上下文“原样搬到云端”。你要给它可复现的分支、环境和任务说明。
@@ -518,15 +517,15 @@ Cloud 的优势不是神秘的"云上更聪明"，而是它能在一个可配置
 官方 Cloud environments 文档给出的执行顺序可以转成课堂图：
 
 ```text
-选择仓库、分支或 commit
+选择已发布环境和任务目标
   ↓
-创建容器并 checkout 代码
+创建使用该环境文件系统的独立 VM 工作区
   ↓
-运行 setup script
+使用保存的工具、配置和服务访问设置
   ↓
-应用网络设置
+按需要启动服务并确认就绪
   ↓
-agent 循环执行任务、编辑、检查
+agent 执行任务、编辑、检查
   ↓
 展示最终回答和 diff
   ↓
@@ -579,12 +578,12 @@ echo "Setup complete"
 
 ### 14.2 setup 与 agent 阶段的变量差异
 
-官方文档强调：环境变量在 setup 和 agent 阶段都可用；secrets 只在 setup 阶段可用；setup script 里的 `export` 不会自动进入 agent 阶段。
+当前环境里，Environment variables 直接传给程序；Network secrets 则由代理在允许的 HTTPS 443 请求中替换，准备和任务期间都可使用。安装 shell 的临时 `export` 不能代替环境配置。下面按当前机制比较：
 
 | 类型 | setup 阶段 | agent 阶段 | 用法 |
 |------|------------|------------|------|
 | Environment variable | 可用 | 可用 | 普通配置、非敏感开关 |
-| Secret | 可用 | 不可用 | 安装私有依赖、一次性认证 |
+| Network secret | 可通过代理使用 | 可通过代理使用 | 限定 HTTPS 服务，不把真实原值直接交给进程 |
 | `export` in setup | 当前 shell 可用 | 不持久 | 不要依赖它传给 agent |
 
 ### 14.3 错误示例
@@ -611,7 +610,7 @@ npm test
 
 ## 15. Internet Access：不要把网络当默认能力
 
-Cloud setup 阶段可以访问互联网安装依赖。Agent 阶段默认没有互联网，除非你配置 limited 或 unrestricted。这个边界很重要，因为它会影响测试、文档查询和外部 API 调用。
+当前 Cloud 在环境配置里统一核对互联网开关和允许的目的地。**Package managers** 预设只覆盖官方列出的依赖主机，自定义下载地址和 API 域名可能需要另外放行。保存后先验证准备流程，再发布或重新发布，并在新任务里确认访问。Legacy 的阶段网络默认值不能用于判断新环境。
 
 ### 15.1 网络决策表
 
@@ -778,19 +777,19 @@ Expected:
 
 这类 prompt 把 Cloud 的强项发挥出来：可复现、范围清楚、结果可 review。
 
-## 19. Cloud 环境维护：缓存、维护脚本和版本固定
+## 19. Cloud 环境维护：已发布状态与版本固定
 
-Cloud container 会缓存一段时间，以加速后续任务。缓存是好事，但也会带来“为什么这次和上次不一样”的疑问。
+新任务从已发布环境的准备结果启动，已有任务保留自己的文件、未提交改动和工具。仓库在后台刷新并保留依赖缓存，不会因此重新跑安装或启动命令。修改公共准备结果，从 **Settings → Codex Cloud → Environments → … → Edit** 进入，验证、保存并 **Republish**，再用新任务检查。
 
-### 19.1 什么时候重置缓存
+### 19.1 什么时候重新发布
 
 | 情况 | 动作 |
 |------|------|
-| setup script 改了 | 缓存会失效或需要刷新 |
-| 环境变量或 secrets 改了 | 重新跑环境 |
-| 依赖 lockfile 大改 | 可能要 reset cache |
-| 维护脚本失效 | 修 maintenance script |
-| 任务表现和本地差异很大 | 对比环境版本 |
+| Install script 或工具版本改变 | 重新准备和验证，保存后 Republish |
+| 网络、变量或 Network secrets 改变 | 保存并验证访问；发布后用新任务确认 |
+| 依赖 lockfile 大改 | 在代码任务中修好，再准备和重新发布环境 |
+| 旧任务仍使用原环境状态 | 新建任务使用新发布结果；旧任务单独处理 |
+| 任务表现和本地差异很大 | 对比实际环境版本和验证记录 |
 
 ### 19.2 版本固定思路
 
@@ -801,7 +800,7 @@ Package manager: 根据 lockfile 固定
 System tools: 在 setup script 明确安装
 ```
 
-### 19.3 维护脚本适用场景
+### 19.3 依赖刷新命令的适用场景
 
 ```bash
 set -euo pipefail
@@ -815,11 +814,11 @@ if [ -f pyproject.toml ]; then
 fi
 ```
 
-维护脚本适合缓存恢复时同步依赖，不适合做一次性 secret 输出或复杂业务初始化。
+这类命令可在准备对话中用于安装或同步依赖，验证后记录到 Install script。不要假设每次新任务都会运行它；当前环境复用已发布的准备结果。Legacy 的 maintenance script 属于旧环境缓存工作流。
 
 ## 20. Cloud 安全边界：secrets、日志和外部服务
 
-Cloud 的安全重点是：不要把凭据暴露给 agent 阶段，不要把 secret 打到日志里，不要让任务访问不该访问的外部系统。
+Cloud 的安全重点是区分程序可读的环境变量与代理替换的 Network secrets，不在提示或日志中输出凭据，限制目的地和服务账号权限。当前 Network secrets 在准备和任务期间都可用，关键边界是目的地与代理替换。
 
 ### 20.1 Secret 使用原则
 
@@ -828,7 +827,7 @@ Cloud 的安全重点是：不要把凭据暴露给 agent 阶段，不要把 sec
 不要在 agent prompt 里粘贴 secret。
 不要在 setup script 里 echo secret。
 不要让测试把 secret 打到失败日志。
-agent 阶段如果需要长期配置，用 environment variable，而不是 setup export。
+程序需要直接读取的普通配置用 Environment variables，不靠安装 shell 的临时 export。发给指定 HTTPS 服务的敏感凭据用 Network secrets，并核对允许域名。
 ```
 
 ### 20.2 外部 API 测试
@@ -859,7 +858,7 @@ agent 阶段如果需要长期配置，用 environment variable，而不是 setu
 |----------|------|----------|
 | setup 装不动依赖 | 第一步就失败 | 固定包管理器和版本 |
 | agent 需要联网 | 查文档或 API 失败 | 开有限网络或本地提供资料 |
-| secret 阶段误解 | agent 阶段找不到 secret | 改成环境变量或调整任务 |
+| 凭据配置误解 | 程序无法直接读取 Network secret 原值，或请求未被替换 | 核对值的类型、Key、HTTPS 443 和 Allowed domains；不要直接把敏感值降级为环境变量 |
 | 本地草稿没带上 | Cloud 改的是旧代码 | 先提交、推分支或写清 commit |
 | diff 太大 | Review 成本高 | 缩小任务 |
 | Cloud 结果和本地不一致 | 版本或环境差异 | 比对 setup、lockfile、工具版本 |
@@ -1281,8 +1280,10 @@ Commands:
 
 ## Environment Variables
 
-Used during setup:
-Not available during agent phase:
+Direct variables needed by programs:
+Network secret keys and allowed domains (no values):
+Last published / republished:
+Verified in a new task:
 
 ## Common Failures
 

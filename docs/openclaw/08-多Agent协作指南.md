@@ -142,7 +142,7 @@ OpenClaw 官方明确表示不会合并"Agent 层级框架（管理者的管理�
 3. 路由规则是确定性的 -- 不需要 AI 来判断消息该给谁，配置文件就能搞定
 4. 简单可靠 -- 越少的中间环节，越少的出错机会
 
-**每个 Agent 是完全独立的**
+**每个 Agent 有自己的工作空间和状态范围**
 
 Agent 之间默认没有任何共享：
 
@@ -150,9 +150,9 @@ Agent 之间默认没有任何共享：
 |------|----------|------|
 | 工作空间 | 否 | 每个 Agent 有独立的工作目录 |
 | 记忆文件 | 否 | 每个 Agent 有独立的 MEMORY.md 和日志 |
-| 记忆后端 | 可选 | 可配置 Builtin(SQLite)、QMD、Honcho 等后端 |
-| 会话历史 | 否 | 每个 Agent 的对话记录完全隔离 |
-| 认证凭证 | 否 | 每个 Agent 的 auth-profiles.json 独立 |
+| 记忆后端 | 可选 | 内置 SQLite；插件方案按所用版本与插件说明配置，v2026.9.4 已移除 QMD |
+| 会话历史 | 存储按 Agent 分开 | 跨 Agent 读取仍受会话工具可见性和 agentToAgent 策略控制 |
+| 认证凭证 | 按认证流程 | 每个 Agent 有自己的 SQLite auth store；同名 OAuth profile 可按规则读取 main 的新凭据 |
 | 技能配置 | 可选 | 可以配置 Agent 级别的技能白名单 |
 | AI 模型 | 可选 | 可以为每个 Agent 指定不同的模型 |
 
@@ -165,20 +165,16 @@ Agent 之间默认没有任何共享：
 ├── agents/                    # Agent 状态目录
 │   ├── main/                  # 默认 Agent
 │   │   ├── agent/
-│   │   │   └── auth-profiles.json    # main 的认证凭证
-│   │   └── sessions/                  # main 的会话历史
-│   │       ├── session-abc123.json
-│   │       └── session-def456.json
-│   │
+│   │   │   └── openclaw-agent.sqlite  # 模型认证与活跃会话状态
+│   │   └── sessions/          # 保留的转录产物；不是活跃会话数据库
 │   ├── coding/                # 编程 Agent
 │   │   ├── agent/
-│   │   │   └── auth-profiles.json    # coding 的认证凭证
-│   │   └── sessions/                  # coding 的会话历史
-│   │
+│   │   │   └── openclaw-agent.sqlite
+│   │   └── sessions/
 │   └── social/                # 社交 Agent
 │       ├── agent/
-│       │   └── auth-profiles.json    # social 的认证凭证
-│       └── sessions/                  # social 的会话历史
+│       │   └── openclaw-agent.sqlite
+│       └── sessions/
 │
 ├── workspace/                 # main Agent 的工作空间
 │   ├── SOUL.md               # main 的人格设定
@@ -217,7 +213,7 @@ openclaw agents add work
 # 每个 Agent 会自动创建：
 # - 独立的工作空间（SOUL.md, AGENTS.md, USER.md）
 # - 独立的 agentDir 和会话存储
-# - 独立的 auth-profiles.json
+# - 独立的 SQLite runtime store（模型认证与会话状态）
 ```
 
 ### 查看和管理 Agent
@@ -244,53 +240,64 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
         "mode": "non-main",
       },
     },
-    "list": [
-      {
-        "id": "main",
+    "entries": {
+      "main": {
+        "default": true,
         "workspace": "~/.openclaw/workspace",
         "model": "anthropic/claude-opus-4-8",
       },
-      {
-        "id": "coding",
+      "coding": {
         "workspace": "~/.openclaw/workspace-coding",
         "model": "anthropic/claude-opus-4-8",
         // Agent 级别的 skills 是简单的字符串数组
         "skills": ["coding-agent", "github", "gh-issues", "tmux"],
       },
-      {
-        "id": "social",
+      "social": {
         "workspace": "~/.openclaw/workspace-social",
         "model": "openai/gpt-5.2",
         "skills": ["summarize", "weather", "goplaces"],
       },
-      {
-        "id": "work",
+      "work": {
         "workspace": "~/.openclaw/workspace-work",
         "model": "anthropic/claude-sonnet-5",
         "skills": ["gog", "slack", "notion", "trello", "summarize"],
       },
-    ],
+    },
   },
 
   // bindings 是顶层配置，不嵌套在 agent 内部
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "123456789",
-      "channelId": "987654321",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "123456789",
+    "peer": {
+      "kind": "channel",
+      "id": "987654321"
+    }
+  }
+},
     {
-      "agent": "social",
-      "channel": "telegram",
-      "chatId": "-100123456789",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100123456789"
+    }
+  }
+},
     {
-      "agent": "work",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C01234567",
-    },
+  "agentId": "work",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C01234567"
+    }
+  }
+},
   ],
 }
 ```
@@ -416,23 +423,21 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "coding",
+    "entries": {
+      "coding": {
+        "default": true,
         "model": "anthropic/claude-opus-4-8",
         // 编程需要最强的推理能力，用最好的模型
       },
-      {
-        "id": "social",
+      "social": {
         "model": "openai/gpt-5.2-mini",
         // 闲聊不需要太强的模型，用便宜的就行
       },
-      {
-        "id": "work",
+      "work": {
         "model": "anthropic/claude-sonnet-5",
         // 办公任务中等复杂度，用性价比最高的
       },
-    ],
+    },
   },
 }
 ```
@@ -503,16 +508,15 @@ openclaw sessions cleanup
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "research",
+    "entries": {
+      "research": {
+        "default": true,
         "workspace": "~/.openclaw/workspace-research",
       },
-      {
-        "id": "writer",
+      "writer": {
         "workspace": "~/.openclaw/workspace-writer",
       },
-    ],
+    },
   },
 }
 ```
@@ -546,63 +550,39 @@ work Agent → 你：已创建 PROJ-101, PROJ-102, PROJ-103
 {
   "cron": {
     "enabled": true,
-    "store": "file",
-    "maxConcurrentRuns": 2,
   },
 }
 ```
 
-> **注意：** `cron` 是一个配置对象（包含 `enabled`、`store`、`maxConcurrentRuns` 等字段），不是任务数组。具体的定时任务通过 CLI 管理：
+> **注意：** `cron` 是一个配置对象（包含 `enabled`、`sessionRetention`、`failureAlert` 等字段），不是任务数组。具体的定时任务通过 CLI 管理：
 
 ```bash
 # 添加定时任务
-openclaw cron add --name "research-phase" --schedule "0 9 * * 1-5" \
-  --agent research --prompt "搜索今天的行业新闻，整理成摘要，保存到 ~/.openclaw/shared/daily-news.md"
+openclaw cron add --tz Asia/Shanghai --name "research-phase" --cron "0 9 * * 1-5" \
+  --agent research --message "搜索今天的行业新闻，整理成摘要，保存到 ~/.openclaw/shared/daily-news.md"
 
-openclaw cron add --name "writing-phase" --schedule "30 9 * * 1-5" \
-  --agent writer --prompt "读取 ~/.openclaw/shared/daily-news.md，基于今天的新闻写一篇简报，发送到 Slack #news 频道"
+openclaw cron add --tz Asia/Shanghai --name "writing-phase" --cron "30 9 * * 1-5" \
+  --agent writer --message "读取 ~/.openclaw/shared/daily-news.md，基于今天的新闻写一篇简报，发送到 Slack #news 频道"
 
 # 列出所有定时任务
 openclaw cron list
 
 # 删除定时任务
-openclaw cron rm research-phase
+openclaw cron list
+openclaw cron rm <job-id>  # 替换成列表中的实际 ID
 ```
 
-**方式四：通过 HTTP 请求触发**
+**方式四：通过支持的入口触发**
 
-一个 Agent 完成任务后，可以通过 Gateway 的 HTTP API 触发另一个 Agent。在 coding Agent 的技能中，完成审查后通过 HTTP 请求触发 writer Agent：
-
-```markdown
-## 审查完成后
-
-1. 把审查结果保存到 ~/.openclaw/shared/review-result.json
-2. 通过 HTTP 请求通知 Gateway: POST http://localhost:18789/api/message
-   发送消息给 writer Agent，提示它读取审查结果并生成报告
-```
+需要从外部系统触发指定 Agent 时，使用官方 inbound webhook 的 `/hooks/agent`，先配置 hooks token、允许的 agent ID 和对应访问策略；或者使用已经授权的 `sessions_send` 工作流。`POST /api/message` 不是这里可直接使用的 Gateway 接口。不要把 Gateway token 和 hooks token 混用，实际请求字段按 [官方 webhook 文档](https://docs.openclaw.ai/automation/webhook)准备。
 
 ## 消息路由和绑定配置
 
 ### 路由规则详解
 
-Gateway 收到消息后，按以下顺序匹配 Agent：
+Gateway 按绑定的匹配精度选择 Agent：具体 peer 规则比 guild/team、账号或整个通道的规则更具体；同等精度时按 bindings 顺序匹配。未匹配时回到配置的默认 Agent。私聊也可以通过 direct peer 绑定，不能认定所有私聊必定进入 main。Agent 名单顺序不是绑定优先级。
 
-```
-消息进来
-    │
-    ▼
-1. 检查 bindings 配置
-   ├── 匹配到 → 路由到对应 Agent
-   └── 未匹配 → 继续
-    │
-    ▼
-2. 检查是否是私聊
-   ├── 是 → 路由到 main Agent（默认）
-   └── 否 → 继续
-    │
-    ▼
-3. 回退到默认 Agent（main）
-```
+用 `openclaw agents list --bindings` 核对实际绑定，再从目标通道发一条测试消息。配置能解析不等于收到的 peer ID 正确。
 
 ### 绑定类型
 
@@ -613,11 +593,16 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "123456789",
-      "channelId": "987654321",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "123456789",
+    "peer": {
+      "kind": "channel",
+      "id": "987654321"
+    }
+  }
+},
   ],
 }
 ```
@@ -632,16 +617,21 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "social",
-      "channel": "telegram",
-      "chatId": "-100123456789",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100123456789"
+    }
+  }
+},
   ],
 }
 ```
 
 - `chatId` -- Telegram 群组 ID（负数开头）
-- 私聊默认走 main Agent，不需要绑定
+- 未匹配私聊走所配置默认 Agent；需要按联系人区分时增加 kind 为 direct 的 peer 绑定。
 
 **Slack 绑定：**
 
@@ -649,11 +639,15 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "work",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C01234567",
-    },
+  "agentId": "work",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C01234567"
+    }
+  }
+},
   ],
 }
 ```
@@ -664,10 +658,15 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "social",
-      "channel": "whatsapp",
-      "groupId": "120363xxx@g.us",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "whatsapp",
+    "peer": {
+      "kind": "group",
+      "id": "120363xxx@g.us"
+    }
+  }
+},
   ],
 }
 ```
@@ -681,28 +680,47 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "111111",
-      "channelId": "222222",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "111111",
+    "peer": {
+      "kind": "channel",
+      "id": "222222"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "111111",
-      "channelId": "333333",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "111111",
+    "peer": {
+      "kind": "channel",
+      "id": "333333"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "telegram",
-      "chatId": "-100999888777",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100999888777"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C09876543",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C09876543"
+    }
+  }
+},
   ],
 }
 ```
@@ -749,23 +767,21 @@ openclaw agents list
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "coding",
+    "entries": {
+      "coding": {
+        "default": true,
         "skills": ["coding-agent", "github", "gh-issues", "tmux"],
         "model": "anthropic/claude-opus-4-8",
       },
-      {
-        "id": "office",
+      "office": {
         "skills": ["gog", "slack", "notion", "trello", "summarize"],
         "model": "anthropic/claude-sonnet-5",
       },
-      {
-        "id": "social",
+      "social": {
         "skills": ["weather", "goplaces", "summarize"],
         "model": "openai/gpt-5.2-mini",
       },
-    ],
+    },
   },
 }
 ```
@@ -795,13 +811,13 @@ openclaw agents list
 ┌──────────────────────────────────────────────────┐
 │                按安全等级分工                       │
 │                                                  │
-│  trusted Agent   → 有完整权限，只接受你的私聊      │
+│  trusted Agent   → 可信入口，权限按 tools 策略      │
 │  limited Agent   → 有限权限，处理群聊消息          │
 │  readonly Agent  → 只读权限，处理公开频道          │
 └──────────────────────────────────────────────────┘
 ```
 
-配置示例：
+配置示例：群聊 Agent 只开放读取和搜索，公开频道 Agent 只开放 `read`。沙箱镜像先按沙箱章节准备；可信入口还要在渠道侧限制发送人，下面的 bindings 只负责路由。技能若需要未开放的工具将无法执行。
 
 ```json5
 {
@@ -812,35 +828,47 @@ openclaw agents list
         "mode": "non-main",
       },
     },
-    "list": [
-      {
-        "id": "trusted",
+    "entries": {
+      "trusted": {
+        "default": true,
         "skills": ["coding-agent", "github", "gog", "slack"],
-        // 完整权限，只处理私聊
+        // 可信入口；工具权限继承实际 tools 策略
       },
-      {
-        "id": "limited",
+      "limited": {
         "skills": ["summarize", "weather", "goplaces"],
-        // 有限权限，处理群聊
+        "tools": {
+          "allow": ["read", "web_search", "web_fetch"],
+          "sandbox": { "tools": { "allow": ["read", "web_search", "web_fetch"] } },
+        },
+        "sandbox": { "mode": "all", "workspaceAccess": "ro" },
+        // 只开放读取与搜索工具，处理群聊
       },
-      {
-        "id": "readonly",
+      "readonly": {
         "skills": ["summarize"],
-        // 只读权限，处理公开频道
+        "tools": { "allow": ["read"] },
+        "sandbox": { "mode": "all", "workspaceAccess": "ro" },
+        // 仅开放 read；技能名称不会额外授予命令执行权限
       },
-    ],
+    },
   },
   "bindings": [
     {
-      "agent": "limited",
-      "channel": "telegram",
-      "chatId": "-100111222333",
-    },
+  "agentId": "limited",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100111222333"
+    }
+  }
+},
     {
-      "agent": "readonly",
-      "channel": "discord",
-      "guildId": "444555666",
-    },
+  "agentId": "readonly",
+  "match": {
+    "channel": "discord",
+    "guildId": "444555666"
+  }
+},
   ],
 }
 ```
@@ -936,38 +964,46 @@ openclaw agents add tech-support
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "main",
+    "entries": {
+      "main": {
+        "default": true,
         "workspace": "~/.openclaw/workspace",
       },
-      {
-        "id": "community",
+      "community": {
         "workspace": "~/.openclaw/workspace-community",
         "model": "openai/gpt-5.2-mini",
         "skills": ["summarize"],
       },
-      {
-        "id": "tech-support",
+      "tech-support": {
         "workspace": "~/.openclaw/workspace-tech-support",
         "model": "anthropic/claude-sonnet-5",
         "skills": ["coding-agent", "github", "summarize"],
       },
-    ],
+    },
   },
   "bindings": [
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "444555666",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "444555666"
+    }
+  }
+},
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1048,13 +1084,13 @@ openclaw agents add writer
 通过 CLI 添加定时任务来串联两个 Agent：
 
 ```bash
-openclaw cron add --name "translate-new-content" --schedule "0 10 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "translate-new-content" --cron "0 10 * * *" \
   --agent translator \
-  --prompt "检查 ~/.openclaw/shared/drafts/ 目录，翻译所有新的中文稿件，保存到 ~/.openclaw/shared/translations/"
+  --message "检查 ~/.openclaw/shared/drafts/ 目录，翻译所有新的中文稿件，保存到 ~/.openclaw/shared/translations/"
 
-openclaw cron add --name "polish-translations" --schedule "0 11 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "polish-translations" --cron "0 11 * * *" \
   --agent writer \
-  --prompt "检查 ~/.openclaw/shared/translations/ 目录，润色所有新的翻译稿，保存到 ~/.openclaw/shared/published/"
+  --message "检查 ~/.openclaw/shared/translations/ 目录，润色所有新的翻译稿，保存到 ~/.openclaw/shared/published/"
 ```
 
 **手动触发的工作流：**
@@ -1186,17 +1222,17 @@ openclaw agents add reviewer
 通过 CLI 添加定时任务来串联三个 Agent：
 
 ```bash
-openclaw cron add --name "weekly-research" --schedule "0 9 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-research" --cron "0 9 * * 1" \
   --agent researcher \
-  --prompt "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
+  --message "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
 
-openclaw cron add --name "weekly-report" --schedule "0 14 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-report" --cron "0 14 * * 1" \
   --agent report-writer \
-  --prompt "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
+  --message "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
 
-openclaw cron add --name "weekly-review" --schedule "0 16 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-review" --cron "0 16 * * 1" \
   --agent reviewer \
-  --prompt "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
+  --message "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
 ```
 
 每周一的流程：
@@ -1242,17 +1278,27 @@ Agent: tech-support
 {
   "bindings": [
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "444555666",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "444555666"
+    }
+  }
+},
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1360,7 +1406,7 @@ tech-support Agent：
 ```text
 SOUL.md
 USER.md
-auth-profiles.json
+openclaw-agent.sqlite 与旧版 auth-profiles.json
 未脱敏的用户私聊
 API Key 或 Bot Token
 ```
@@ -1420,11 +1466,16 @@ openclaw agents list
 {
   "bindings": [
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1435,16 +1486,23 @@ openclaw agents list
 {
   "bindings": [
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333"
+  }
+},
   ],
 }
 ```
@@ -1490,45 +1548,33 @@ openclaw gateway --verbose 2>&1 | grep "Loading workspace"
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "coding",
+    "entries": {
+      "coding": {
+        "default": true,
         // Agent 级别的 skills 是简单的字符串数组
         "skills": ["coding-agent", "github", "gh-issues", "tmux"],
       },
-      {
-        "id": "office",
+      "office": {
         "skills": ["gog", "slack", "notion", "trello", "summarize"],
       },
-      {
-        "id": "social",
+      "social": {
         "skills": ["weather", "goplaces", "summarize"],
+        "tools": { "deny": ["exec", "process"] },
       },
-    ],
+    },
   },
 
-  // 技能的详细配置放在顶层 skills.entries 中
+  // 是否启用技能在顶层 skills.entries 中配置
   "skills": {
     "entries": {
-      "coding-agent": {
-        "config": {
-          "workDir": "~/projects",
-          "allowedCommands": ["npm", "node", "git", "tsc", "pnpm"],
-          "autoApprove": false,
-        },
-      },
-      "gog": {
-        "config": {
-          "timezone": "Asia/Shanghai",
-          "language": "zh-CN",
-        },
-      },
+      "coding-agent": { "enabled": true },
+      "gog": { "enabled": true },
     },
   },
 }
 ```
 
-> ⏭️ **小白可跳过** — 默认的沙箱配置已经足够安全
+> 公开频道或其他不可信消息入口不要跳过这一节。沙箱默认关闭；下面的 skills 配置只筛选可见技能，`config.allowedCommands`、`autoApprove` 等自定义属性不是通用执行权限。命令、文件与网络边界仍需 tools 策略、sandbox 和所用外部 CLI 实际配置落实。
 
 ### 沙箱隔离
 
@@ -1549,41 +1595,30 @@ openclaw gateway --verbose 2>&1 | grep "Loading workspace"
 
 **工具 allowlist 和 denylist：**
 
-沙箱环境中，Agent 可用的工具受到严格限制：
+v2026.9.4 的默认沙箱工具策略如下，实际可用工具还受顶层与 Agent 的工具策略限制：
 
 | 类型 | 工具列表 |
 |------|----------|
-| allowlist（允许使用） | `bash`, `process`, `read`, `write`, `edit`, `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn` |
-| denylist（禁止使用） | `browser`, `canvas`, `nodes`, `cron`, `discord`, `gateway` |
+| 默认 allowlist | `exec`, `process`, `read`, `ls`, `write`, `edit`, `apply_patch`, `view_image`, `sessions_list`, `sessions_history`, `sessions_search`, `sessions_send`, `sessions_spawn`, `sessions_yield`, `subagents`, `session_status` |
+| 默认 denylist | `browser`, `canvas`, `computer`, `mobile_ui`, `nodes`, `automations`, `gateway`，以及渠道工具 |
 
-allowlist 中的工具是 Agent 在沙箱中可以调用的全部工具。denylist 中的工具即使在 allowlist 中也会被阻止，确保沙箱内的 Agent 无法访问浏览器、管理 Gateway 或操作 Discord 等外部服务。
+共享沙箱策略配置在 `tools.sandbox.tools`，Agent 覆盖配置在 `agents.entries.<id>.tools.sandbox.tools`。`deny` 优先于 `allow`。这些默认列表可以修改，不能据此保证浏览器永远不可用；要开放沙箱浏览器，需要同时配置 browser 沙箱和工具策略。要禁止某个工具在沙箱内外执行，使用顶层或 Agent 的 `tools.deny`。
 
 ### 认证隔离
 
-每个 Agent 的认证凭证是独立的：
+v2026.9.4 的模型认证资料存放在各 Agent 的 `<agentDir>/openclaw-agent.sqlite`。旧 `auth-profiles.json` 是迁移来源，不能当作当前凭据共享接口直接复制。
 
-```
-~/.openclaw/agents/<agentId>/agent/auth-profiles.json
-```
-
-main Agent 的 Google 凭证不会自动共享给 coding Agent。如果 coding Agent 也需要访问 Google，需要单独认证：
+非主 Agent 的同名 OAuth profile 在自身凭据过期或刷新失败时，可以读取 main 的更新凭据；因此“每个 Agent 的 OAuth 完全独立”并不准确。需要独立账号时，从目标 Agent 的认证流程登录。模型 provider 认证、gog 的 Google Workspace 授权和 gh 的 GitHub 授权是不同流程，不能互相替代。
 
 ```bash
-# 为 coding Agent 认证 Google
-openclaw models auth login --provider google --agent coding
+# 查看目标 Agent 的认证状态；不要输出或复制凭据内容
+openclaw models status --agent coding
 
-# 为 coding Agent 认证 GitHub
-openclaw models auth login --provider github --agent coding
+# GitHub 技能由 gh 管理认证，使用目标运行环境的 gh
+gh auth status
 ```
 
-如果你确实需要共享凭证，可以手动复制：
-
-```bash
-cp ~/.openclaw/agents/main/agent/auth-profiles.json \
-   ~/.openclaw/agents/coding/agent/auth-profiles.json
-```
-
-但不推荐这样做 -- 独立认证更安全，而且可以为不同 Agent 使用不同的账号。
+不要复用多个 Agent 的 agentDir，也不要复制 OAuth refresh token 或正在使用的 SQLite 文件。静态 key 的共享也应按实际 SecretRef 或认证管理流程处理。
 
 ## Agent 性能监控
 
@@ -1602,7 +1637,9 @@ openclaw sessions cleanup
 
 ### 监控关键指标
 
-| 指标 | 说明 | 健康范围 | 异常处理 |
+下面的数字只是示例观察阈值，便于开始记录，不是 OpenClaw 官方性能标准。先用自己的模型、任务和网络跑几次，再决定哪些目标适合你的工作。
+
+| 指标 | 说明 | 示例观察阈值 | 异常处理 |
 |------|------|----------|----------|
 | 响应时间 | 从收到消息到发出回复 | < 10s | 检查模型选择和网络 |
 | Token 消耗 | 每条消息的平均 token 数 | < 5000 | 检查技能加载是否过多 |
@@ -1616,13 +1653,12 @@ openclaw sessions cleanup
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "social",
+    "entries": {
+      "social": {
         "model": "openai/gpt-5.2-mini",
         // 闲聊用便宜模型
       },
-    ],
+    },
   },
 }
 ```
@@ -1631,15 +1667,15 @@ openclaw sessions cleanup
 
 每个加载的技能都会增加系统提示词的长度，消耗更多 input token。只启用真正需要的技能。
 
-**3. 调整会话压缩阈值**
+**3. 调整压缩后的近期对话预算**
 
 ```json5
 {
   "agents": {
     "defaults": {
       "compaction": {
-        "reserveTokensFloor": 15000,
-        // 更早压缩会话，减少 token 消耗
+        "keepRecentTokens": 15000,
+        // 压缩时保留近期对话的 token 预算；不是压缩触发阈值
       },
     },
   },
@@ -1653,9 +1689,8 @@ Agent 的 `model` 字段支持故障转移配置：
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "work",
+    "entries": {
+      "work": {
         // model 可以是对象形式，指定主模型和备用模型
         "model": {
           "primary": "anthropic/claude-sonnet-5",
@@ -1665,7 +1700,7 @@ Agent 的 `model` 字段支持故障转移配置：
           ],
         },
       },
-    ],
+    },
   },
 }
 ```
@@ -1737,7 +1772,7 @@ openclaw agents add devops
 mkdir -p ~/.openclaw/workspace-devops/skills/server-monitor
 ```
 
-`~/.openclaw/workspace-devops/skills/server-monitor/skill.md`：
+`~/.openclaw/workspace-devops/skills/server-monitor/SKILL.md`：
 
 ````markdown
 ---
@@ -1796,22 +1831,25 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "devops",
+    "entries": {
+      "devops": {
         "workspace": "~/.openclaw/workspace-devops",
         "model": "anthropic/claude-sonnet-5",
         "skills": ["server-monitor", "summarize"],
       },
-    ],
+    },
   },
   "bindings": [
     {
-      "agent": "devops",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C-ops-channel",
-    },
+  "agentId": "devops",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C-ops-channel"
+    }
+  }
+},
   ],
   "cron": {
     "enabled": true,
@@ -1822,13 +1860,13 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
 通过 CLI 添加定时任务：
 
 ```bash
-openclaw cron add --name "health-check" --schedule "*/30 * * * *" \
+openclaw cron add --tz Asia/Shanghai --name "health-check" --cron "*/30 * * * *" \
   --agent devops \
-  --prompt "执行服务器健康检查，如果发现异常，通过 Slack 通知 #ops 频道"
+  --message "执行服务器健康检查，如果发现异常，通过 Slack 通知 #ops 频道"
 
-openclaw cron add --name "daily-report" --schedule "0 18 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "daily-report" --cron "0 18 * * *" \
   --agent devops \
-  --prompt "生成今日运维日报，发送到 Slack #ops 频道"
+  --message "生成今日运维日报，发送到 Slack #ops 频道"
 ```
 
 ### Agent 开发最佳实践
@@ -1882,7 +1920,7 @@ openclaw cron add --name "daily-report" --schedule "0 18 * * *" \
 
 ```bash
 # 启动 Gateway 时开启 Agent 调试
-openclaw gateway --verbose --agent-debug
+openclaw gateway --verbose --verbose
 
 # 或者在配置中开启
 ```
@@ -1995,8 +2033,8 @@ openclaw gateway --port 18789
 
 默认不能。每个 Agent 有独立的 MEMORY.md 和每日日志。如果你需要共享某些信息，可以：
 
-1. 把共享信息写入公共目录（如 `~/.openclaw/shared/`）
-2. 在每个 Agent 的 SOUL.md 中指示它读取公共目录
+1. 把可共享的信息放进经审查的公共目录（如 `~/.openclaw/shared/`），指定谁负责写入
+2. 为需要读取的 Agent 配置实际文件访问权限；启用 sandbox 时还需核对只读挂载和可见路径，再在 SOUL.md 中说明用途
 3. 手动复制记忆文件（不推荐，容易冲突）
 4. 使用 Memory Wiki 插件（`memory-wiki`，v2026.4.7 起随包内置）-- 提供结构化的知识页面层，支持确定性的页面组织和跨 Agent 共享查询。详见官方文档 [memory-wiki](https://docs.openclaw.ai/concepts/memory)
 5. 使用 Honcho 后端 -- 支持跨会话、多 Agent 感知的记忆系统
@@ -2005,7 +2043,7 @@ openclaw gateway --port 18789
 
 可以。OpenClaw 提供了 Sessions 工具来实现 Agent 间的直接通信：
 
-- `sessions_list` -- 发现活跃会话
+- `sessions_list` -- 列出当前权限可见的会话；最近更新不证明会话正在执行
 - `sessions_send` -- 向另一个会话发消息（支持 reply-back ping-pong 和 announce step 模式）
 - `sessions_spawn` -- 生成新的 Agent 会话
 
@@ -2013,15 +2051,15 @@ openclaw gateway --port 18789
 
 ### Q4：删除 Agent 会丢失数据吗？
 
-删除 Agent 会移除 Agent 的状态目录（`~/.openclaw/agents/<agentId>/`），但不会删除工作空间目录。你的 SOUL.md、记忆文件、技能文件都还在。如果要彻底清理，需要手动删除工作空间目录。
+`openclaw agents delete <id>` 会从配置中删除 Agent，并处理对应 workspace、Agent 状态和会话目录，通常移到 Trash。执行前核对实际路径和备份，不能假定工作区会原地保留；路径清理失败时按命令报告处理。
 
 ### Q5：多个 Agent 绑定同一个频道会怎样？
 
-只有第一个匹配的 Agent 会处理消息。如果你不小心把两个 Agent 绑定到了同一个频道，检查 `openclaw.json` 中 `agents.list` 的顺序 -- 排在前面的 Agent 优先匹配。
+同一条入站消息通常只路由到一个 Agent。先比较 bindings 的匹配范围：具体会话或群组范围优先于账号、通道的兜底规则；同一优先级内才由 bindings 数组中靠前的规则决定。Agent 配置对象的排列顺序不决定路由。重叠绑定时核对 accountId、peer、guildId 或 teamId，并显式设置默认 Agent。
 
 ### Q6：Agent 的会话是独立的吗？
 
-是的，完全独立。coding Agent 的对话历史不会出现在 social Agent 的上下文中。这是设计如此 -- 保证每个 Agent 的上下文干净、专注。
+会话状态按 Agent 分开存储，但这不等于其他 Agent 永远不能读到历史。v2026.9.4 的普通跨 Agent 会话访问默认开启，由 tools.sessions.visibility 和 tools.agentToAgent 控制；需要限制时明确收窄可见性或关闭普通跨 Agent 访问。要求严格隔离时使用独立 Gateway 或 OS/主机边界。
 
 ### Q7：如何迁移 Agent 到另一台机器？
 
