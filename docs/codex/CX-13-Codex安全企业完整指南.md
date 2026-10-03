@@ -809,7 +809,7 @@ Review path:
 ### 19.2 Secret 边界
 
 ```text
-- Secrets 只在 setup 阶段可用。
+- 当前 Cloud 的 Network secrets 在准备和任务期间都通过代理替换；Legacy 的 setup-only secrets 单独核对。
 - Agent 阶段需要的普通配置用 environment variables。
 - 不在 setup 日志打印 secret。
 - 不把 secret 放进 prompt。
@@ -1420,7 +1420,7 @@ AGENTS.md                    # 项目规则
 
 ### C. 推荐学习资源
 
-- **Codex Security 官方文档**：https://developers.openai.com/codex/security
+- **Agent approvals & security 官方文档**：https://learn.chatgpt.com/docs/agent-approvals-security
 - **本系列上一篇**：[CX-12 CLI 辅助](./CX-12-Codex-CLI辅助完整指南.md)
 - **本系列下一篇**：[CX-14 Codex vs Claude Code](./CX-14-Codex与Claude-Code对比指南.md)
 

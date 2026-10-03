@@ -415,7 +415,7 @@ App 用户优先通过这几处理解权限：
 
 实操时按这个顺序确认：
 
-1. 在 App Settings 里选默认 profile 和 sandbox。
+1. 在 App Settings 里核对当前权限方案。使用新权限 profile 时，通过 `default_permissions` 选择，并移除同一配置栈中的旧 `sandbox_mode` / `sandbox_workspace_write`；使用旧沙盒设置时按 `--sandbox` 核对，不把两套机制叠加理解。
 2. 用当前 App 的 `/` 列表、线程权限提示或 Settings 查看实际生效的审批策略；`/permissions` 属于 CLI 常见入口，App 是否显示以当前版本为准。
 3. 如果团队下发 managed `requirements.toml`，先读它规定的工具、网络和目录边界。
 4. 修改 profile 后开一个新任务验证；如果当前版本支持 runtime refresh，再确认旧线程是否已刷新。
@@ -460,7 +460,7 @@ App 主线中，普通读者不需要先手写它。推荐顺序：
 3. 只复制官方当前支持的字段。
 4. 改完后重启或刷新 App，再用 `/status`、Settings、MCP 列表等入口核对。
 
-如果教程需要展示配置，优先展示“要查官方 schema”而不是写死字段。比如 `/goal` 不显示时，官方 App Commands 文档说明可以使用 `[features] goals = true` 或 `codex features enable goals`；其他字段也要以当前官方 Config Reference 为准。
+展示配置前先核对官方 schema 和当前界面。比如 `/goal` 不显示，先在 App 的 `/` 列表核对可用功能和版本；当前命令页没有要求启用 `features.goals`，CLI v0.160.0 的配置 schema 也未列出这个旧字段。无法使用时可以按明确阶段继续，不把旧实验开关当成所有版本的前提。
 
 ```toml
 # 只作为结构提示，实际字段以官方 Config Reference 和当前 App 为准。

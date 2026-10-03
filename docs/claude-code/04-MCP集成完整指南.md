@@ -1978,7 +1978,7 @@ tail -f ~/.local/share/claude/logs/mcp*.log
 
 ```bash
 # 开启MCP调试日志
-claude --mcp-debug
+claude --debug mcp
 ```
 
 ### 6.4 重置MCP配置
@@ -2291,7 +2291,7 @@ npm publish --access public
 | `claude mcp add` | 添加MCP服务器 | `claude mcp add fs npx -y @.../server-filesystem ./` | ⭐ |
 | `claude mcp get` | 查看服务器详情 | `claude mcp get github` |  |
 | `claude mcp remove` | 删除服务器 | `claude mcp remove github` |  |
-| `claude --mcp-debug` | 调试模式启动 | `claude --mcp-debug` | ⭐ |
+| `claude --debug mcp` | 调试模式启动 | `claude --debug mcp` | ⭐ |
 
 > ⚠️ **重要澄清**：`claude mcp test` 和 `claude mcp restart` 命令**不存在**。如需测试服务器，使用 `claude mcp get <name>` 查看状态；如需重启，退出并重新启动Claude Code。
 

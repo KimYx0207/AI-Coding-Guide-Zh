@@ -109,7 +109,7 @@ nvm use 26
 # 方案一：修改 npm 全局目录（推荐）
 mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
-echo 'export PATH="~/.npm-global/bin:$PATH"' >> ~/.bashrc
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 npm install -g openclaw
 
@@ -400,10 +400,10 @@ docker rmi openclaw/openclaw:latest
 
 ```bash
 # 第一步：把 Gateway 安装为系统服务，保持持续运行
-openclaw daemon
+openclaw onboard --install-daemon
 
 # 第二步：检查连接状态
-openclaw channels status whatsapp
+openclaw channels status
 
 # 第三步：如果断开了，重新连接
 openclaw channels logout --channel whatsapp
@@ -630,7 +630,7 @@ openclaw channels list
 ```bash
 # 第一步：检查 Key 是否配置正确
 # 推荐通过环境变量设置：
-echo $OPENAI_API_KEY
+[ -n "${OPENAI_API_KEY:-}" ] && echo "OPENAI_API_KEY 已设置" || echo "OPENAI_API_KEY 未设置"
 # 确认 Key 没有多余的空格或换行
 
 # 第二步：测试 Key 是否有效
@@ -956,7 +956,7 @@ openclaw skills info <skill-name>
 # 看 triggers 字段，确认你的消息包含触发词
 
 # 第三步：手动触发技能测试
-openclaw skills check <skill-name> --input "测试消息"
+openclaw skills check
 
 # 第四步：重新加载技能
 openclaw skills list
@@ -972,7 +972,7 @@ openclaw skills list
 
 ```bash
 # 第一步：检查技能文件格式
-openclaw skills check ~/.openclaw/workspace/skills/my-skill.md
+openclaw skills check
 
 # 第二步：确认引用的工具都存在
 openclaw skills list
@@ -1020,7 +1020,7 @@ openclaw doctor
 # 诊断安全和配置问题
 
 # 第二步：测试单个工具
-openclaw skills check <skill-name>
+openclaw skills check
 
 # 第三步：检查工具依赖
 openclaw skills info <skill-name>
@@ -1093,7 +1093,7 @@ openclaw gateway --port 18789 --verbose
 # 直接发消息 "继续" 或 "请继续执行"
 
 # 第四步：如果是工具执行失败导致的中断
-openclaw skills check <failed-tool-name>
+openclaw skills check
 # 修复工具问题后重试
 ```
 
@@ -1220,22 +1220,9 @@ docker exec openclaw openclaw sessions cleanup
 
 ### Q48: Docker 数据卷怎么备份？
 
-**解决方案：**
+先识别当前 Compose 实际挂载的数据、workspace 和凭据密钥位置。SQLite 数据库不能靠运行中的 tar 保证一致；应使用支持的 `openclaw backup create --verify`，或停止 Gateway 和全部写入者后做完整卷快照。不要只备份示例中的 `./data` 或猜测名为 `openclaw_data` 的卷。
 
-```bash
-# 方案一：直接备份挂载目录
-tar -czf openclaw-backup-$(date +%Y%m%d).tar.gz ./data/
-
-# 方案二：备份 Docker volume
-docker run --rm \
-  -v openclaw_data:/source \
-  -v $(pwd):/backup \
-  alpine tar -czf /backup/openclaw-data.tar.gz -C /source .
-
-# 方案三：自动化备份脚本
-# 建议配合 crontab 每天自动备份
-# 0 3 * * * /path/to/backup-script.sh
-```
+完整脚本和恢复约束见 [09 章备份与恢复](09-Docker部署指南.md)。备份要连同匹配镜像版本保存，并在隔离环境实际恢复验证；校验归档可读不等于恢复成功。
 
 ### Q49: Gateway 进程崩溃后怎么自动重启？
 
@@ -1243,7 +1230,7 @@ docker run --rm \
 
 ```bash
 # 方案一：安装为 systemd 服务（Linux 推荐）
-openclaw daemon
+openclaw onboard --install-daemon
 # 这会创建 systemd service，崩溃后自动重启
 
 # 查看服务状态
@@ -1334,23 +1321,9 @@ du -sh ~/.openclaw/
 
 ### Q53: 怎么在多台服务器上部署？
 
-**说明：** OpenClaw 目前是单实例架构，不支持原生集群部署。但你可以通过以下方式实现多节点：
+多台服务器可以各自运行独立 Gateway，使用各自的状态目录和通道账号，也可以让节点连接一个 Gateway。不要让两个 Gateway 同时写同一个 `~/.openclaw`、SQLite 数据库或同一通道账户，再靠普通负载均衡冒充集群。故障接管需要明确单写入者、凭据接管和一致性备份流程。
 
-```bash
-# 方案一：每台服务器独立部署，连接不同的平台
-# 服务器 A：负责 WhatsApp
-# 服务器 B：负责 Telegram + Discord
-
-# 方案二：用反向代理做负载均衡（实验性）
-# Nginx 配置示例：
-# upstream openclaw {
-#     server 192.168.1.10:18789;
-#     server 192.168.1.11:18789 backup;
-# }
-
-# 方案三：共享配置和记忆（通过 NFS 或对象存储）
-# 把 ~/.openclaw/ 挂载到共享存储
-```
+参见 [官方多 Gateway 指南](https://docs.openclaw.ai/gateway/multiple-gateways)。
 
 ### Q54: 怎么设置 HTTPS？
 
@@ -1375,8 +1348,8 @@ sudo certbot --nginx -d openclaw.yourdomain.com
 # }
 
 # 方案二：OpenClaw 内置 TLS
-# GatewayTlsConfig 只有 certPath 和 keyPath 两个字段，没有 enabled 开关
-# 配置了证书路径即视为启用 TLS
+# 显式启用 Gateway TLS，并设置证书和私钥路径
+openclaw config set gateway.tls.enabled true
 openclaw config set gateway.tls.certPath "/path/to/cert.pem"
 openclaw config set gateway.tls.keyPath "/path/to/key.pem"
 # 重启 Gateway 使配置生效
@@ -1469,7 +1442,7 @@ wc -l ~/.openclaw/workspace/MEMORY.md
 
 ### Q58: 怎么在多个 Agent 之间共享记忆？
 
-**说明：** 默认情况下，所有 Agent 共享同一个 workspace 和记忆目录。如果你想隔离，在配置文件中为不同 Agent 指定独立的 workspace：
+**说明：** 用 `openclaw agents add` 创建 Agent 时，应核对各自的 workspace；多 Agent 可以分别拥有记忆，也可以被你显式配置为同一目录。共享 workspace 会共享该目录下的记忆，独立 workspace 则分开保存。下面演示明确指定独立目录：
 
 ```jsonc
 // ~/.openclaw/openclaw.json
@@ -1485,7 +1458,7 @@ wc -l ~/.openclaw/workspace/MEMORY.md
 }
 ```
 
-每个 Agent 的 workspace 下有独立的 `MEMORY.md` 和 `memory/` 目录，实现完全隔离。如果需要共享部分记忆，可以用符号链接指向同一个 `MEMORY.md` 文件。
+每个 workspace 可以保存自己的 `MEMORY.md` 和 `memory/`。这是内容分离，不是操作系统权限隔离。共享内容宜用受控只读目录并配置检索路径；若有多个写入者，要另行安排同步和冲突处理。
 
 ---
 
@@ -1559,7 +1532,7 @@ openclaw pairing approve user1 # 批准
 # }
 
 # 方案三：查看和管理配对状态
-openclaw pairing list --approved
+openclaw pairing list --channel whatsapp  # 仅列待审批请求；已授权身份查看该通道的 allowFrom 配置
 ```
 
 ### Q63: 怎么防止 AI 执行危险操作？
@@ -1769,7 +1742,7 @@ nano ~/.openclaw/workspace/skills/my-awesome-skill.md
 
 # 2. 测试技能
 openclaw skills list
-openclaw skills check my-awesome-skill --input "测试"
+openclaw skills check
 
 # 3. 分享到社区
 # 在 GitHub 上创建一个仓库，或者提交到 OpenClaw 的技能市场
@@ -1831,21 +1804,18 @@ openclaw skills check my-awesome-skill --input "测试"
 
 ### Q75: 一台机器能跑多个 OpenClaw 实例吗？
 
-**解决方案：**
+可以，但每个实例需要独立状态、workspace 和端口。推荐用 profile 创建并分别初始化：
 
 ```bash
-# 可以，但需要用不同的端口和数据目录
+openclaw --profile personal onboard
+openclaw --profile personal gateway --port 18789
 
-# 实例 1
-OPENCLAW_HOME=~/.openclaw-1 openclaw config set gateway.port 18789
-OPENCLAW_HOME=~/.openclaw-1 openclaw gateway --port 18789
-
-# 实例 2
-OPENCLAW_HOME=~/.openclaw-2 openclaw config set gateway.port 19789
-OPENCLAW_HOME=~/.openclaw-2 openclaw gateway --port 19789
-
-# Docker 方式更简单：跑多个容器，映射不同端口
+# 在另一终端或另一服务中启动，勿复用同一通道账号
+openclaw --profile work onboard
+openclaw --profile work gateway --port 19789
 ```
+
+`OPENCLAW_HOME` 是 home 根目录，不能直接等同于状态目录。自定义状态路径使用 `OPENCLAW_STATE_DIR`。不要仅映射不同宿主端口却让容器共享写入同一组卷。
 
 ### Q76: OpenClaw 会收费吗？
 

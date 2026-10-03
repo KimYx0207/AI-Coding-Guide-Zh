@@ -421,11 +421,13 @@ Team Lead 会自动将任务分配给不同的 Teammate，各成员独立工作�
 ```json
 // .claude/settings.json
 {
-  "worktree.baseRef": "head"
+  "worktree": {
+    "baseRef": "head"
+  }
 }
 ```
 
-**注意**：默认值从旧行为（head）变更为 `fresh`。如果你发现新 worktree 丢失了本地未推送的更改，将 `baseRef` 设为 `head`。
+**注意**：`fresh` 基于远程默认分支；`head` 基于本地当前提交，可以带上尚未推送的提交，但不会自动带上未提交的工作区改动。需要那些改动时，先明确是否提交或另外迁移，别把 `head` 当成工作区快照。
 
 ### `CLAUDE_CODE_FORK_SUBAGENT`（v2.1.132+）
 

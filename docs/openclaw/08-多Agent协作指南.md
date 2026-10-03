@@ -275,22 +275,36 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
   // bindings 是顶层配置，不嵌套在 agent 内部
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "123456789",
-      "channelId": "987654321",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "123456789",
+    "peer": {
+      "kind": "channel",
+      "id": "987654321"
+    }
+  }
+},
     {
-      "agent": "social",
-      "channel": "telegram",
-      "chatId": "-100123456789",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100123456789"
+    }
+  }
+},
     {
-      "agent": "work",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C01234567",
-    },
+  "agentId": "work",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C01234567"
+    }
+  }
+},
   ],
 }
 ```
@@ -556,11 +570,11 @@ work Agent → 你：已创建 PROJ-101, PROJ-102, PROJ-103
 
 ```bash
 # 添加定时任务
-openclaw cron add --name "research-phase" --schedule "0 9 * * 1-5" \
-  --agent research --prompt "搜索今天的行业新闻，整理成摘要，保存到 ~/.openclaw/shared/daily-news.md"
+openclaw cron add --name "research-phase" --cron "0 9 * * 1-5" \
+  --agent research --message "搜索今天的行业新闻，整理成摘要，保存到 ~/.openclaw/shared/daily-news.md"
 
-openclaw cron add --name "writing-phase" --schedule "30 9 * * 1-5" \
-  --agent writer --prompt "读取 ~/.openclaw/shared/daily-news.md，基于今天的新闻写一篇简报，发送到 Slack #news 频道"
+openclaw cron add --name "writing-phase" --cron "30 9 * * 1-5" \
+  --agent writer --message "读取 ~/.openclaw/shared/daily-news.md，基于今天的新闻写一篇简报，发送到 Slack #news 频道"
 
 # 列出所有定时任务
 openclaw cron list
@@ -613,11 +627,16 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "123456789",
-      "channelId": "987654321",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "123456789",
+    "peer": {
+      "kind": "channel",
+      "id": "987654321"
+    }
+  }
+},
   ],
 }
 ```
@@ -632,10 +651,15 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "social",
-      "channel": "telegram",
-      "chatId": "-100123456789",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100123456789"
+    }
+  }
+},
   ],
 }
 ```
@@ -649,11 +673,15 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "work",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C01234567",
-    },
+  "agentId": "work",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C01234567"
+    }
+  }
+},
   ],
 }
 ```
@@ -664,10 +692,15 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "social",
-      "channel": "whatsapp",
-      "groupId": "120363xxx@g.us",
-    },
+  "agentId": "social",
+  "match": {
+    "channel": "whatsapp",
+    "peer": {
+      "kind": "group",
+      "id": "120363xxx@g.us"
+    }
+  }
+},
   ],
 }
 ```
@@ -681,28 +714,47 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 {
   "bindings": [
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "111111",
-      "channelId": "222222",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "111111",
+    "peer": {
+      "kind": "channel",
+      "id": "222222"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "discord",
-      "guildId": "111111",
-      "channelId": "333333",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "discord",
+    "guildId": "111111",
+    "peer": {
+      "kind": "channel",
+      "id": "333333"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "telegram",
-      "chatId": "-100999888777",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100999888777"
+    }
+  }
+},
     {
-      "agent": "coding",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C09876543",
-    },
+  "agentId": "coding",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C09876543"
+    }
+  }
+},
   ],
 }
 ```
@@ -832,15 +884,22 @@ openclaw agents list
   },
   "bindings": [
     {
-      "agent": "limited",
-      "channel": "telegram",
-      "chatId": "-100111222333",
-    },
+  "agentId": "limited",
+  "match": {
+    "channel": "telegram",
+    "peer": {
+      "kind": "group",
+      "id": "-100111222333"
+    }
+  }
+},
     {
-      "agent": "readonly",
-      "channel": "discord",
-      "guildId": "444555666",
-    },
+  "agentId": "readonly",
+  "match": {
+    "channel": "discord",
+    "guildId": "444555666"
+  }
+},
   ],
 }
 ```
@@ -957,17 +1016,27 @@ openclaw agents add tech-support
   },
   "bindings": [
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "444555666",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "444555666"
+    }
+  }
+},
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1048,13 +1117,13 @@ openclaw agents add writer
 通过 CLI 添加定时任务来串联两个 Agent：
 
 ```bash
-openclaw cron add --name "translate-new-content" --schedule "0 10 * * *" \
+openclaw cron add --name "translate-new-content" --cron "0 10 * * *" \
   --agent translator \
-  --prompt "检查 ~/.openclaw/shared/drafts/ 目录，翻译所有新的中文稿件，保存到 ~/.openclaw/shared/translations/"
+  --message "检查 ~/.openclaw/shared/drafts/ 目录，翻译所有新的中文稿件，保存到 ~/.openclaw/shared/translations/"
 
-openclaw cron add --name "polish-translations" --schedule "0 11 * * *" \
+openclaw cron add --name "polish-translations" --cron "0 11 * * *" \
   --agent writer \
-  --prompt "检查 ~/.openclaw/shared/translations/ 目录，润色所有新的翻译稿，保存到 ~/.openclaw/shared/published/"
+  --message "检查 ~/.openclaw/shared/translations/ 目录，润色所有新的翻译稿，保存到 ~/.openclaw/shared/published/"
 ```
 
 **手动触发的工作流：**
@@ -1186,17 +1255,17 @@ openclaw agents add reviewer
 通过 CLI 添加定时任务来串联三个 Agent：
 
 ```bash
-openclaw cron add --name "weekly-research" --schedule "0 9 * * 1" \
+openclaw cron add --name "weekly-research" --cron "0 9 * * 1" \
   --agent researcher \
-  --prompt "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
+  --message "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
 
-openclaw cron add --name "weekly-report" --schedule "0 14 * * 1" \
+openclaw cron add --name "weekly-report" --cron "0 14 * * 1" \
   --agent report-writer \
-  --prompt "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
+  --message "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
 
-openclaw cron add --name "weekly-review" --schedule "0 16 * * 1" \
+openclaw cron add --name "weekly-review" --cron "0 16 * * 1" \
   --agent reviewer \
-  --prompt "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
+  --message "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
 ```
 
 每周一的流程：
@@ -1242,17 +1311,27 @@ Agent: tech-support
 {
   "bindings": [
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "444555666",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "444555666"
+    }
+  }
+},
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1420,11 +1499,16 @@ openclaw agents list
 {
   "bindings": [
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
   ],
 }
 ```
@@ -1435,16 +1519,23 @@ openclaw agents list
 {
   "bindings": [
     {
-      "agent": "tech-support",
-      "channel": "discord",
-      "guildId": "111222333",
-      "channelId": "777888999",
-    },
+  "agentId": "tech-support",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333",
+    "peer": {
+      "kind": "channel",
+      "id": "777888999"
+    }
+  }
+},
     {
-      "agent": "community",
-      "channel": "discord",
-      "guildId": "111222333",
-    },
+  "agentId": "community",
+  "match": {
+    "channel": "discord",
+    "guildId": "111222333"
+  }
+},
   ],
 }
 ```
@@ -1737,7 +1828,7 @@ openclaw agents add devops
 mkdir -p ~/.openclaw/workspace-devops/skills/server-monitor
 ```
 
-`~/.openclaw/workspace-devops/skills/server-monitor/skill.md`：
+`~/.openclaw/workspace-devops/skills/server-monitor/SKILL.md`：
 
 ````markdown
 ---
@@ -1807,11 +1898,15 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
   },
   "bindings": [
     {
-      "agent": "devops",
-      "channel": "slack",
-      "teamId": "T01234567",
-      "channelId": "C-ops-channel",
-    },
+  "agentId": "devops",
+  "match": {
+    "channel": "slack",
+    "peer": {
+      "kind": "channel",
+      "id": "C-ops-channel"
+    }
+  }
+},
   ],
   "cron": {
     "enabled": true,
@@ -1822,13 +1917,13 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
 通过 CLI 添加定时任务：
 
 ```bash
-openclaw cron add --name "health-check" --schedule "*/30 * * * *" \
+openclaw cron add --name "health-check" --cron "*/30 * * * *" \
   --agent devops \
-  --prompt "执行服务器健康检查，如果发现异常，通过 Slack 通知 #ops 频道"
+  --message "执行服务器健康检查，如果发现异常，通过 Slack 通知 #ops 频道"
 
-openclaw cron add --name "daily-report" --schedule "0 18 * * *" \
+openclaw cron add --name "daily-report" --cron "0 18 * * *" \
   --agent devops \
-  --prompt "生成今日运维日报，发送到 Slack #ops 频道"
+  --message "生成今日运维日报，发送到 Slack #ops 频道"
 ```
 
 ### Agent 开发最佳实践
@@ -1882,7 +1977,7 @@ openclaw cron add --name "daily-report" --schedule "0 18 * * *" \
 
 ```bash
 # 启动 Gateway 时开启 Agent 调试
-openclaw gateway --verbose --agent-debug
+openclaw gateway --verbose --verbose
 
 # 或者在配置中开启
 ```
