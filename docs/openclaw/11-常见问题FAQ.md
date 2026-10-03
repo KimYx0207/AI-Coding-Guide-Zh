@@ -442,9 +442,9 @@ openclaw config get channels.telegram.botToken
 # 第四步：检查日志
 openclaw logs --limit 50 | grep telegram
 
-# 第五步：重新连接
-openclaw channels logout --channel telegram
-openclaw channels login --channel telegram
+# 第五步：探测已配置的 Telegram Bot 认证与连接
+openclaw channels status --channel telegram --probe
+# Token 有误时，按 Telegram 接入章重新配置 Bot Token；不是扫码登录
 ```
 
 ### Q18: Telegram Bot 在群组中不回复
@@ -481,8 +481,8 @@ openclaw channels login --channel telegram
 ```bash
 # 配置 Discord Bot Token（注意：Discord 用的字段是 token，不是 botToken）
 openclaw config set channels.discord.token "your-discord-bot-token"
-openclaw channels logout --channel discord
-openclaw channels login --channel discord
+openclaw channels status --channel discord --probe
+# Discord 使用 Bot Token；按 Discord 接入章核对 token 与应用权限
 ```
 
 ### Q20: 消息延迟严重（发了好久才回复）
@@ -538,7 +538,7 @@ openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
 
 ```bash
 # 第一步：确认 Gateway 的公网地址可达
-curl https://your-domain.com:18789/healthz
+curl https://your-domain.com:18789/health
 
 # 第二步：在飞书开放平台配置事件订阅
 # 事件订阅 URL：https://your-domain.com:18789/webhook/feishu
@@ -1292,7 +1292,7 @@ openclaw config set logging.level "info"
 
 ```bash
 # 内置健康检查
-curl http://localhost:18789/healthz
+curl http://localhost:18789/health
 
 # 查看详细状态
 openclaw status
@@ -1305,7 +1305,7 @@ openclaw status
 # CPU: 2%
 
 # 配置外部监控（推荐 UptimeRobot 或类似服务）
-# 监控 URL: http://your-server:18789/healthz
+# 监控 URL: http://your-server:18789/health
 # 检查间隔: 5 分钟
 ```
 
@@ -1856,7 +1856,7 @@ OPENCLAW_HOME=~/.openclaw-2 openclaw gateway --port 19789
 **解决方案：**
 
 ```bash
-# 查看所有配置
+# 查看默认模型配置（这里只返回这个配置项）
 openclaw config get agents.defaults.model
 
 # 查看特定配置项

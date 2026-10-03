@@ -10,7 +10,7 @@
 
 - Codex Windows 安装改走当前 ChatGPT 桌面入口与准确的 Store ID，补 Linux 预览版入口；区分配置 profile、权限 profile 与只读沙箱，修正 `exec` 参数及网络域名规则的生效条件。
 - Claude Code 修正最低系统要求、自动更新变量、交互与打印模式、文件访问边界；Remote Control 补单会话模式和转录存储说明，Channels 与本地定时任务修正认证及恢复条件。
-- OpenClaw Docker 安装补匹配版本的官方初始化步骤，手动 Compose 补监听、认证和 origin 配置；修正健康探针、配置查询与消息平台命令示例，说明沙箱默认关闭及数据库迁移对回滚的限制。
+- OpenClaw Docker 安装补匹配版本的官方初始化步骤，手动 Compose 补监听、认证和 origin 配置；修正配置查询与消息平台命令示例，说明沙箱默认关闭及数据库迁移对回滚的限制。
 - WorkBuddy 修正官网下载识别、网页登录、菜单与应用撤权入口；企业旧促销改为已结束的历史快照。
 
 ### 检查

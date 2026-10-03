@@ -11,7 +11,7 @@
 > - **难度等级**：⭐ 零基础入门
 > - **更新日期**：2026年9月14日
 > - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
-> - **重要更新**：当前同时支持原生安装与标准 npm 安装；原生更省心，npm 路径仍然受支持且需要 Node.js 18+
+> - **重要更新**：当前同时支持原生安装与标准 npm 安装；原生更省心，npm 路径仍然受支持且需要 Node.js 22+
 
 ---
 
@@ -107,7 +107,7 @@
 | ----------------------- | --------------------------------- | ------------------------------------------------------------------ |
 | **CLI**           | Command Line Interface            | 命令行界面，就是那个黑色/白色的文字输入窗口，通过打字来操作电脑    |
 | **原生安装器** ⭐   | Native Installer                  | Claude Code官方提供的独立安装程序，不需要其他依赖                   |
-| **Node.js** | - | JavaScript 运行环境；如果你走 `npm install -g @anthropic-ai/claude-code` 这条标准安装路径，仍需要 18+ |
+| **Node.js** | - | JavaScript 运行环境；如果你走 `npm install -g @anthropic-ai/claude-code` 这条标准安装路径，仍需要 22+ |
 | **npm** | Node Package Manager | Node.js 的包管理器；Claude Code 的标准安装路径之一仍然会用到它 |
 | **LTS**           | Long Term Support                 | 长期支持版本，稳定、bug少、官方持续维护，适合正式使用              |
 | **API**           | Application Programming Interface | 应用程序接口，软件之间"对话"的方式                                 |
@@ -304,10 +304,10 @@ curl -I https://api.anthropic.com
 
 **背景说明：**
 
-截至 2026-04-05，Claude Code 官方文档的真实口径是：
+本次按 2026-10-03 的官方安装文档核对：
 
 - 仍然保留 **标准安装**：`npm install -g @anthropic-ai/claude-code`
-- 同时提供 **原生二进制安装**（beta / 改进安装路径）
+- 推荐 **原生二进制安装**；npm 也安装同一原生二进制
 - 安装后建议运行 `claude doctor` 检查当前安装类型
 
 因此，这里更准确的理解不是"npm 被删除了"，而是：
@@ -318,19 +318,19 @@ curl -I https://api.anthropic.com
 
 | 对比项         | 原生安装 ⭐ | npm标准安装 |
 | -------------- | ----------- | ----------------- |
-| 需要Node.js    | ❌ 不需要    | ✅ 需要 18+      |
-| 安装时间       | ⏱️ 5分钟     | ⏱️ 40分钟        |
-| 自动更新       | ✅ 更接近官方默认体验  | ⚠️ 通常需你自己更新 |
-| PATH配置       | ✅ 自动完成  | ⚠️ 经常出错     |
-| 跨平台支持     | ✅ 完美      | ⚠️ 平台差异大   |
-| 稳定性         | ✅ 生产级    | ⚠️ 依赖环境     |
+| 需要Node.js    | ❌ 不需要    | ✅ 需要 22+      |
+| 安装准备       | 直接下载二进制 | 先有 Node.js 22+，再由 npm 下载二进制 |
+| 自动更新       | 默认开启，可配置 | 默认开启；全局目录不可写时需处理权限 |
+| PATH配置       | 按安装器提示核对用户目录 | 核对 npm 全局 bin 目录 |
+| 跨平台支持     | 按官方支持的系统和架构选择 | 使用同一原生二进制，亦需符合平台要求 |
+| 安装管理       | 原生安装器管理 | npm 管理，需允许 optional dependencies |
 
 **简单理解：**
 
 现在更像是：
 
 - **原生安装**：买成品，拿来即用
-- **npm 安装**：标准件组装，兼容性更广，但需要你自己有 Node 环境
+- **npm 安装**：由 npm 下载同一原生二进制，安装时需要 Node.js 22+ 和 optional dependencies
 
 ### 3.2 原生安装的工作原理
 
@@ -713,7 +713,7 @@ Token是AI处理文本的最小单位，用于计费：
 > - **Windows用户**：用PowerShell（最简单）
 > - **Mac用户**：用脚本安装或Homebrew（都很快）
 > - **Linux用户**：用脚本安装
-> - **原生安装失败？**：试试 NPM 方式（见方式4），虽然官方标记为废弃，但仍然可以正常使用
+> - **原生安装失败？**：可以试试官方支持的 npm 方式（见方式4），先准备 Node.js 22+ 并确认 optional dependencies 没有被禁用
 
 ---
 
@@ -751,7 +751,7 @@ Run 'claude --version' to verify.
 
 ```bash
 claude --version
-# 预期输出：Claude Code v2.1.x (native)
+# 输出当前安装版本；安装类型和启动路径用 claude doctor 核对
 ```
 
 #### Windows PowerShell 安装
@@ -825,12 +825,12 @@ winget install Anthropic.ClaudeCode
 
 ### 5.5 方式4：NPM安装（标准兼容路径）
 
-> ⚠️ **重要说明**：npm 安装已被官方标记为弃用，已有安装可以迁移，但新环境优先选择原生安装、Homebrew 或 WinGet。下列 npm 命令仅供维护旧环境时参考；是否仍可安装以官方包和当前客户端为准。
+> ⚠️ **重要说明**：当前官方仍支持 npm 安装，它下载的也是原生二进制。npm 安装需要 Node.js 22+，并允许安装 optional dependencies；装好后的 `claude` 不依赖 Node.js 运行。新手优先走原生安装，也可以按自己的环境选择 Homebrew、WinGet 或 npm。
 
-**前提条件**：需要先安装 [Node.js](https://nodejs.org/) 18 或更高版本。
+**前提条件**：需要先安装 [Node.js](https://nodejs.org/) 22 或更高版本。
 
 ```bash
-# 检查 Node.js 版本（需要 18+）
+# 检查 Node.js 版本（需要 22+）
 node --version
 
 # 通过 NPM 全局安装 Claude Code
@@ -847,7 +847,7 @@ npm install -g @anthropic-ai/claude-code
 
 # 验证
 claude --version
-# 预期输出：Claude Code v2.1.x (npm)  ← 注意这里显示 npm 而非 native
+# 这里只核对版本号；安装类型用 claude doctor 查看
 ```
 
 **macOS/Linux：**
@@ -870,13 +870,13 @@ npm install -g @anthropic-ai/claude-code
 
 | 对比项 | 原生安装 ⭐ | NPM 安装 ⚠️ |
 |--------|------------|-------------|
-| 需要 Node.js | ❌ 不需要 | ✅ 需要 18+ |
-| 自动更新 | ✅ 内置 | ❌ 需手动 `npm update -g` |
+| 需要 Node.js | ❌ 不需要 | ✅ 需要 22+ |
+| 自动更新 | 默认开启，可配置 | 默认开启；手动升级用 `npm install -g @anthropic-ai/claude-code@latest` |
 | 安装大小 | ~80MB | ~80MB + Node.js |
 | 官方支持 | ✅ 当前更推荐 | ✅ 仍受支持 |
 | 适合场景 | 所有用户 | 原生安装失败时的备选 |
 
-> 💡 **建议**：如果你是全新环境，优先试原生安装；如果你本来就有稳定的 Node 18+ 环境，或者原生安装在你机器上受阻，npm 仍然是完全合理的选择。装好之后也可以随时通过 `claude install` 迁移到原生版本。
+> 💡 **建议**：如果你是全新环境，优先试原生安装；如果你本来就有稳定的 Node 22+ 环境，或者原生安装在你机器上受阻，npm 仍然是完全合理的选择。装好之后也可以随时通过 `claude install` 迁移到原生版本。
 
 ---
 
@@ -902,7 +902,7 @@ npm install -g @anthropic-ai/claude-code
 ```powershell
 # 重启终端后执行
 claude --version
-# 如果显示版本号（如 Claude Code v2.1.x (native)），说明配置成功
+# 能显示当前版本号，说明此终端能找到 claude；安装类型用 claude doctor 核对
 ```
 
 #### 方法2：通过系统设置（图形界面）
@@ -939,7 +939,7 @@ source ~/.bashrc
 ```bash
 # 检查版本
 claude --version
-# 预期输出：Claude Code v2.1.x (native)
+# 输出当前安装版本；安装类型和启动路径用 claude doctor 核对
 
 # 检查帮助
 claude --help
@@ -951,7 +951,7 @@ which claude     # macOS/Linux
 ```
 
 **成功的标志：**
-- ✅ 显示版本号（带 `native` 标识）
+- ✅ 显示当前安装版本，`claude doctor` 能确认安装类型和启动路径
 - ✅ 命令可以直接运行（不提示找不到命令）
 - ✅ `--help` 能显示帮助信息
 
@@ -1549,7 +1549,7 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 ```bash
 # 测试1：版本检查
 claude --version
-# 预期输出：Claude Code v2.1.x (native)
+# 输出当前安装版本；安装类型和启动路径用 claude doctor 核对
 
 # 测试2：简单问答
 claude -p "What is 2 + 2?"
@@ -1625,7 +1625,7 @@ claude-hello-world/
 
 | 验证项 | 命令 | 预期结果 | 状态 |
 |--------|------|----------|------|
-| 版本信息 | `claude --version` | v2.1.x+ (native) | [ ] |
+| 版本信息 | `claude --version` | 显示当前安装版本 | [ ] |
 | 帮助文档 | `claude --help` | 显示命令列表 | [ ] |
 | API Key | `echo $ANTHROPIC_API_KEY` | 显示完整Key | [ ] |
 | 网络连通 | `ping api.anthropic.com` | 有响应 | [ ] |
@@ -2189,8 +2189,8 @@ curl -fsSL https://claude.ai/install.sh | bash
 **问题3：检测到旧的npm安装**
 
 ```bash
-claude --version
-# 显示 (npm) 而不是 (native)
+claude doctor
+# 查看安装类型与启动路径，确认是否仍从 npm 全局目录启动
 ```
 
 **解决方案：**
@@ -2199,11 +2199,8 @@ claude --version
 # 运行迁移命令
 claude install
 
-# 这会自动：
-# 1. 检测到npm版本
-# 2. 下载原生版本
-# 3. 卸载npm版本
-# 4. 配置PATH
+# 安装后用 claude doctor 检查实际启动路径
+# 如果还存在旧的 npm 安装，确认新版本可用后再按附录卸载旧副本
 ```
 
 ### 8.3 网络连接问题
@@ -2852,8 +2849,8 @@ claude install
 
 ```bash
 claude --version
-# 应显示：Claude Code v2.1.x (native)
-# 而不是：(npm)
+claude doctor
+# 核对版本、安装类型与实际启动路径
 ```
 
 **如果迁移失败，手动卸载npm版本：**
@@ -2869,11 +2866,11 @@ npm uninstall -g @anthropic-ai/claude-code
 
 | 对比项         | 原生安装 ⭐ | npm标准安装 |
 | -------------- | ----------- | ----------------- |
-| 需要Node.js    | ❌ 不需要    | ✅ 需要 18+      |
+| 需要Node.js    | ❌ 不需要    | ✅ 需要 22+      |
 | 安装时间       | ⏱️ 3-5分钟  | ⏱️ 30-40分钟    |
-| 自动更新       | ✅ 更接近官方默认体验  | ⚠️ 通常需你手动更新 |
-| PATH配置       | ✅ 自动完成  | ⚠️ 经常出错     |
-| 稳定性         | ✅ 生产级    | ⚠️ 依赖环境     |
+| 自动更新       | 默认开启，可配置 | 默认开启；全局目录不可写时需处理权限 |
+| PATH配置       | 按安装器提示核对用户目录 | 核对 npm 全局 bin 目录 |
+| 安装管理       | 原生安装器管理 | npm 管理，需允许 optional dependencies |
 
 #### Q22：原生安装可以离线使用吗？
 
@@ -2918,7 +2915,7 @@ claude --version
 export DISABLE_AUTOUPDATER=1
 
 # Windows PowerShell
-$env:CLAUDE_AUTO_UPDATE="false"
+$env:DISABLE_AUTOUPDATER="1"
 ```
 
 **手动更新：**
@@ -3349,7 +3346,7 @@ claude --model opusplan
 **Claude Code安装：**
 
 - [ ] Claude Code原生安装成功
-- [ ] `claude --version` 显示正确版本（带native标识）
+- [ ] `claude --version` 显示当前安装版本
 - [ ] `claude --help` 显示帮助信息
 
 **功能验证：**
@@ -3370,13 +3367,13 @@ claude --model opusplan
 
 ```bash
 # Claude Code版本和帮助
-claude --version           # 查看版本（应显示native标识）
+claude --version           # 查看当前安装版本
 claude --help              # 查看帮助
-claude /doctor             # 系统诊断
+claude doctor              # 系统诊断
 
 # Claude Code操作
 claude                     # 进入交互模式
-claude "你的问题"          # 单次提问
+claude "你的问题"          # 带初始问题进入交互会话
 claude -p "问题"           # 打印模式（脚本友好）
 
 # 更新Claude Code
@@ -3392,9 +3389,8 @@ ping api.anthropic.com     # 测试连通性
 curl -I https://api.anthropic.com  # 测试HTTPS访问
 
 # 配置管理
-claude config list         # 查看所有配置
-claude config get <key>    # 查看特定配置
-claude config set <key> <value>  # 设置配置
+claude                    # 启动交互会话
+# 进入后输入 /config 打开设置；项目配置放在 .claude/settings.json
 ```
 
 ### B. 从npm迁移到原生安装
@@ -3404,9 +3400,8 @@ claude config set <key> <value>  # 设置配置
 **步骤1：检查当前安装方式**
 
 ```bash
-claude --version
-# 如果显示 (npm) → 需要迁移
-# 如果显示 (native) → 已经是原生版本
+claude doctor
+# 核对安装类型和启动路径；npm 安装仍受支持，迁移是可选的
 ```
 
 **步骤2：运行迁移命令**
@@ -3419,7 +3414,8 @@ claude install
 
 ```bash
 claude --version
-# 应显示：Claude Code v2.1.x (native)
+claude doctor
+# 核对版本、安装类型与实际启动路径
 ```
 
 **步骤4：卸载npm版本（可选）**

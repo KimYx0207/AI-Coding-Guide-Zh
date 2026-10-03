@@ -354,6 +354,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 
 ## 8. macOS 安装：官方入口、系统权限和开发工具链
 
+本章提到的 App 26.908 是功能快照。官方 [2026-09-25 安全更新](https://learn.chatgpt.com/docs/changelog) 已说明 macOS 26.924.20706 修复 CVE-2026-100754；安装和更新请采用官方提供的受支持版本，不要为了复现本课界面停留在旧安全版本。这里只核对了公告，没有在 macOS 安装验证。
+
 > **2026-06-09 安装口径**：Codex App 主线按官方 App 入口、Microsoft Store / macOS 下载页与 App 内更新为准。CLI 安装只作为自动化、CI 和排查补充；官方 changelog 已确认 `install.sh` / `install.ps1` 支持 `CODEX_NON_INTERACTIVE=1` 非交互安装。App 登录适合桌面工作流，API key / CLI 路径适合自动化、CI 和排查。
 
 ### 8.1 从哪里下载
@@ -363,8 +365,8 @@ macOS 用户从官方 Codex App 页面进入下载：
 1. 打开官方 Codex App 页面：[https://developers.openai.com/codex/app/](https://developers.openai.com/codex/app/)
 2. 选择 macOS 下载入口。
 3. 按页面提示下载适合当前 Mac 的安装包。
-4. 打开安装包，把 Codex App 安装到 Applications / 应用程序。
-5. 从 Launchpad 或 Applications 打开 Codex。
+4. 按官方下载页提示，把 ChatGPT 桌面 App 安装到 Applications / 应用程序。
+5. 从 Launchpad 或 Applications 打开 ChatGPT，进入 Codex 工作视图。
 
 注意：
 
@@ -508,13 +510,13 @@ CLI 安装和深入使用放到 CX-12。安装篇只要求你知道它不是主�
 
 目标：确认 Windows 上的 App、登录、Git、Review 都能跑通。
 
-1. 用 Microsoft Store 安装 Codex，或在 PowerShell 里运行：
+1. 用 Microsoft Store 安装 ChatGPT 桌面 App，或在 PowerShell 里运行：
 
 ```powershell
 winget install --id 9PLM9XGG6VKS -s msstore
 ```
 
-2. 启动 Codex，登录 ChatGPT / OpenAI 账号。
+2. 启动 ChatGPT 桌面 App，登录 ChatGPT / OpenAI 账号，再进入 Codex 工作视图。
 3. 如果弹出 Windows 防火墙提示，只在你信任的专用网络里放行。
 4. 打开一个测试 Git 仓库，创建 Local thread。
 5. 发送只读提示：
