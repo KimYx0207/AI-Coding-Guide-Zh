@@ -1649,7 +1649,7 @@ git push origin feat/my-new-feature
 
 **说明：** 有的。
 
-- GitHub Discussions（中英文都可以）：[github.com/openclaw/openclaw/discussions](https://github.com/openclaw/openclaw/discussions)
+- GitHub Issues（中英文都可以）：[github.com/openclaw/openclaw/issues](https://github.com/openclaw/openclaw/issues)
 - Discord 社区（有中文频道）
 - 微信群：关注 OpenClaw 公众号获取入群二维码
 
@@ -1756,7 +1756,7 @@ Gateway 是基础设施层，Agent 是业务逻辑层。一个 Gateway 可以服
 1. 查看本 FAQ 文档
 2. 查看[官方文档](https://docs.openclaw.ai)
 3. 搜索 [GitHub Issues](https://github.com/openclaw/openclaw/issues)（可能别人遇到过同样的问题）
-4. 在 [GitHub Discussions](https://github.com/openclaw/openclaw/discussions) 提问
+4. 在 [GitHub Issues](https://github.com/openclaw/openclaw/issues) 提问
 5. 加入 Discord 社区实时交流
 
 提问时请附上：
