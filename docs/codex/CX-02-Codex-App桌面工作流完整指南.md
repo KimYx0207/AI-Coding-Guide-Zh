@@ -277,6 +277,10 @@ Codex App 的学习难点不在提示词，而在你是否把每个动作放到�
 
 注意：worktree 仍然是真实 Git 工作区。合并前要 Review。
 
+实际创建时，先确认项目在 Git 仓库中。在新聊天输入框下选择 **Worktree**，选择基础分支，再发送任务。默认创建的是 detached HEAD，不会自动生成一个新分支；要长期保留或提交这项工作，使用聊天顶部的 **Create branch here**。需要回到本地 checkout 时用 **Hand off**，不要把同一分支同时 checkout 到两个 worktree。
+
+托管 worktree 默认位于 `$CODEX_HOME/worktrees`，可在 **Settings → Worktrees → Worktree root** 调整。默认保留最近 15 个托管 worktree，永久 worktree 的生命周期另行管理；删除前会保存快照，并可从相关聊天恢复。若新目录缺少被 Git 忽略的本地配置，可在仓库根目录的 `.worktreeinclude` 明确列出需要复制的忽略路径；这只适用于本地 App 托管 worktree，不适用于自己用 Git 创建的目录或远程 worktree。复制前确认这些配置应当进入该任务。详见 [官方 Worktrees 指南](https://learn.chatgpt.com/docs/worktrees)。
+
 ### 2.3 Cloud / Web handoff
 
 适合云端仓库任务、长时间后台任务和 PR 工作流。App 是本地主控台，Cloud 是远程执行环境。不要把 Cloud 当成本地 App 的替代品。
@@ -573,6 +577,34 @@ GitHub / PR 详见 CX-10。
 5. **第 5 天：Worktree / Automations / Cloud**。再进入并行、后台和远程执行。
 
 这条路径符合新手心理：先建立控制感，再逐步放开能力。反过来，一上来讲插件、云端、自动化，容易让人觉得强大但危险，最后不敢真正用。
+
+### 13.4 用内置浏览器验证一个页面
+
+桌面 App 的内置 Browser 和你的常用浏览器使用不同的 profile，不会自动共享已登录会话。验证本地页面前，先从项目脚本确认并启动开发服务器，再在 App 的 **New tab** 中打开准确的 localhost 地址。你也可以在任务中提及 `@Browser`。
+
+例如：“用 @Browser 打开 http://localhost:3000/settings，先复现窄屏下按钮溢出，只修改对应布局。修改后再次打开同一页面，说明是否仍能复现。”检查渲染结果时可在页面元素上添加浏览器评论，然后让 Codex 处理这些评论，并回到 Review 对照代码 diff。
+
+需要检查网络请求、console、DOM 或性能时，到 **Settings → Browser → Developer mode** 启用 **Enable full CDP access**，再按任务授权。组织可以禁止该能力；普通页面预览不要求先开全量 CDP。CLI 和 IDE 没有这个内置 Browser，仍可使用已配置的浏览器 MCP；ChatGPT Work 网页端的托管 Browser 也不共享你本地的登录会话；它不同于 CX-11 的 Codex Cloud VM 环境，后者目前不支持 Browser / Computer Use。详见 [Browser](https://learn.chatgpt.com/docs/browser)。
+
+### 13.5 需要操作真实桌面应用时
+
+在支持的地区，macOS / Windows 桌面 App 的 Work 或 Codex 可通过 **Plugins → Computer Use** 安装并启用插件、server 和 skill，再到 **Settings → Computer use** 查看允许的应用。macOS 还要按系统提示授予 Screen Recording 和 Accessibility。用 `@Computer` 或 `@AppName` 指定目标，并写清要检查的窗口与流程。
+
+Windows Computer Use 在当前活动桌面前台运行，任务会控制鼠标和键盘；保持目标应用可见，不要同时操作同一会话。系统授权、App 内应用授权和项目的文件/命令权限是不同边界。仅验证本地 Web 页面时优先用上一节的内置浏览器；Linux App preview 不意味着同样支持整个桌面的 Computer Use。详见 [Computer Use](https://learn.chatgpt.com/docs/computer-use)。
+
+### 13.6 从手机继续主机上的任务
+
+**Remote** 控制的是连接的 Mac 或 Windows 主机，代码和命令仍在主机上运行。先在主机 App 的 **Settings → Connections → Control this Mac or PC** 选择 Set up / Add，完成验证，再用手机扫描 QR code，确认同一个 ChatGPT 账号和 workspace。iOS 当前从 **Codex** 进入；仍显示 Remote 的客户端就使用该入口。Android 和跨桌面设备控制按实际 rollout 与 workspace 设置核对。
+
+连接后可以从手机选项目、发任务、补充指令、查看 diff 和处理审批。主机必须保持开机、联网、App 运行；睡眠或关闭 App 会中断访问。任务使用主机的文件、工具、连接和权限，不会因为从手机发起就变成 Codex Cloud。Windows Computer Use 还需要主机会话解锁，并为任务保留前台桌面。
+
+项目已在 SSH 主机时，先确认普通 SSH 能连上、远程登录 shell 的 PATH 中有已安装并认证的 Codex，再从 App **Settings → Connections** 添加主机和项目。跨主机 **Hand off** 要求目标保存同一个 Git 仓库项目；该操作不能把聊天直接 Hand off 到 Codex Cloud 环境。详见 [Remote connections](https://learn.chatgpt.com/docs/remote-connections)。
+
+### 13.7 需要使用日常浏览器的登录状态时
+
+内置 Browser 使用独立 profile。若任务需要你日常浏览器里已经登录的网站，在桌面 App 的 **Settings → Computer Use** 选择浏览器，按提示安装插件和扩展，再确认显示 **Manage**。当前支持 Chrome、Edge、Brave、Opera、Vivaldi；Opera 没有 side chat，其任务从桌面 App 发起。
+
+使用安装扩展的那个浏览器 profile，在 Work 或 Codex 聊天里用 `@Chrome` / `@Edge` 等选中浏览器，也可提及已打开标签页。第一次使用新站点时按当前任务选择一次允许或站点允许；在浏览器旁的 **Manage** 查看允许/禁止域名。浏览器扩展安装权限和每次任务的网站许可不同，不要把安装扩展当作所有网站均已允许。详见 [Browser extension](https://learn.chatgpt.com/docs/chrome-extension)。
 
 ## 14. 从零到 PR 的完整 App 实战
 

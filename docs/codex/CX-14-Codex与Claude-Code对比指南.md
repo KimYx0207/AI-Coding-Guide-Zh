@@ -190,13 +190,13 @@ CLAUDE.md
 .claude/
 ```
 
-规则：
+采用两份指令文件时，先核对共同的项目事实：
 
-- `AGENTS.md` 服务 Codex。
-- `CLAUDE.md` 服务 Claude Code。
-- 两边都要写相同项目事实，但不要互相假设。
-- 敏感规则要同步。
+- `AGENTS.md` 写 Codex 要遵守的项目指令，`CLAUDE.md` 可以另写 Claude Code 专属说明。
+- 安装命令、测试命令和安全边界要保持一致，工具专属配置分别维护。
 - 不要让两个工具同时改同一批文件。
+
+也可以共享 `AGENTS.md`。当前 Claude Code 支持直接发现它：默认在当前目录及父目录没有 `CLAUDE.md`、`.claude/CLAUDE.md` 或 `CLAUDE.local.md` 时读取，也可在 `/config` 的 Project instructions 中选择加载方式。这个能力从 v2.1.277 开始提供，旧版、内置插件设置或某些早期认证路径会影响可用性；先核对安装版本和设置。若需要保留 Claude 专属指令，也可在 `CLAUDE.md` 中用 `@AGENTS.md` 导入共同内容。最后用 `/context` 核对 Claude Code 实际加载的文件，不要只凭文件存在就判定两边已同步。参见[官方共享说明](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools)。
 
 ## 6. MCP 共享
 
@@ -225,11 +225,11 @@ MCP server 可以在两个工具中复用，但配置方式不同。
 | 问题 | Codex App 倾向 | Claude Code 倾向 |
 |---|---|---|
 | 团队成员是否熟终端？ | 不熟，App 更易培训 | 熟，终端效率更高 |
-| 是否高度依赖可视化 Review？ | 是 | 一般 |
+| 是否高度依赖可视化 Review？ | 有 Review 面板和评论流程 | Desktop 也有 diff view、行内反馈与 Review code |
 | 是否已有大量 `.claude/` 资产？ | 需要迁移成本 | 可继续复用 |
-| 是否需要桌面多项目并行？ | 是 | 取决于终端和工作区管理 |
+| 是否需要桌面多项目并行？ | 可用多线程和 worktree | Desktop 可并行会话，并用 worktree 隔离 |
 | 是否需要深度 shell / SSH / tmux？ | 一般 | 是 |
-| 是否需要 App Automations / Scheduled？ | 是 | 需另建自动化方式 |
+| 是否需要桌面周期任务？ | 有 Automations / Scheduled 入口，按当前入口配置 | Desktop 有 Scheduled tasks，按该入口的运行条件配置 |
 | 是否要企业统一权限配置？ | 两边都要评估 | 两边都要评估 |
 
 ### 7.2 单人、创业团队、企业的默认建议
@@ -298,7 +298,7 @@ Claude Code 路线：
 
 ### 案例二：配置共存检查
 
-目标：让 `AGENTS.md` 和 `CLAUDE.md` 讲同一个项目事实，但不互相替代。
+目标：采用两份指令文件时，核对共同的项目事实，并保留各自的工具专属说明。
 
 ```text
 阅读 AGENTS.md 和 CLAUDE.md，只输出二者关于安装命令、测试命令、安全边界是否一致。不要修改文件。
@@ -439,7 +439,7 @@ Claude Code 路线：
 
 ### Q5：两个工具的配置文件要不要内容完全一样？
 
-项目事实、安全边界、测试命令应该一致；工具专属配置不要互相复制。`AGENTS.md` 服务 Codex，`CLAUDE.md` 服务 Claude Code。
+项目事实、安全边界、测试命令应该一致；工具专属配置不要互相复制。可以分别维护两份文件，也可以按第 5 节共享 `AGENTS.md`，再核对两个工具实际加载的指令。
 
 ### Q6：什么时候应该从 Claude Code 迁到 Codex？
 

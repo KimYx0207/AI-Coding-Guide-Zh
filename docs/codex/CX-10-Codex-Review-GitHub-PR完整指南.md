@@ -75,7 +75,7 @@ Review 篇的核心是：Codex 改完不等于你可以合并。你要能读懂 
 | Staged | 已准备提交的改动 | 不代表已提交 |
 | Unstaged | 还没加入提交区的改动 | 常见于继续修改中 |
 | Inline comment | Review 面板里对具体行的反馈 | 比泛泛说“这里不对”更准 |
-| PR context | GitHub PR 描述、评论、changed files | 需要 GitHub 访问和 `gh auth login` |
+| PR context | GitHub PR 描述、评论、changed files | Code Review 插件需连接有仓库权限的来源账号；本地 `gh` 流程另需 CLI 认证 |
 | Verification | 真实运行过或明确未运行的检查 | 不要编造“已测试” |
 
 ## 0. Review 的底层逻辑
@@ -197,7 +197,29 @@ GitHub Connector / integration 适合：
 - 是否能评论 PR。
 - 是否能创建分支或提交。
 
-如果要在 App 里看到 PR 上下文，通常还需要：当前项目在 PR 分支上、GitHub 访问已配置、机器上安装 GitHub CLI，并用 `gh auth login` 完成认证。否则 PR 详情、评论或 changed files 可能不会完整显示在侧边栏或 Review 面板里。
+在 **Code Review** 插件里查看 PR 时，先连接有仓库权限的来源账号，再选择 PR 或输入链接；这条流程没有把切到本地 PR 分支、安装 `gh` 列为前提。如果你在本地项目里通过 GitHub CLI 读取 PR 并修复代码，再核对 PR 分支、`gh` 安装和认证。两条流程的入口与排障条件要分清。
+
+### 5.1 用 Code Review 插件阅读远程 PR
+
+桌面 App 已包含 **Code Review**，可从已安装插件固定到侧边栏。在 App 或受支持的网页入口打开它，按提示连接有仓库权限的来源账号，再选择 PR 或输入链接。先读 **Summary** 中的说明、评论和 checks，再到 **Changes** 对照 diff；桌面端还可用 Assigned to me / my team / Authored by me 找需要处理的 PR，或把 PR 固定到 Pinned。
+
+桌面端点击 **Review with Codex** 开始审查；**Review instructions** 齿轮或 **Settings → Code Review** 可设置后续审查的通用标准。审查结果仍要逐项对照代码和测试。PR 聊天里生成的评论草稿不会自行发布，但你在 Summary 或 Changes 中发出的评论会立即发送到来源平台，不能等到 **Submit review** 才当作发布；Submit review 用于发送 Comment / Approve / Request changes 的审查决定。
+
+本地 `/review` 和 Review pane 继续用于 Git checkout 的改动，Code Review 插件用于远程 PR。GitHub PR 支持已一般可用，GitLab MR 在插件中属于 preview；这不代表 CX-11 的当前 Codex Cloud 环境已经支持 GitLab。依据：[官方 Code review 流程](https://learn.chatgpt.com/docs/code-review)。
+
+### 5.2 在 GitHub 请求自动审查或 Security Review
+
+GitHub 仓库连接完成后，在 [Codex code review settings](https://app.chatgpt.com/settings/code-review) 选择仓库并启用 **Automatic review**。配置仓库设置需要 GitHub push 或 admin 权限；个人偏好中的 Automatic review / Review trigger 决定何时审查你的 PR。也可以在 PR 评论中写 `@codex review` 手动请求；这会向 GitHub 发布评论并启动远程任务。GitHub 的常规 Codex review 聚焦 P0 / P1，不能据此认定没有其他级别问题。
+
+**Security Review** 是额外的安全审查，目前为 research preview，面向 ChatGPT Pro、Business、Enterprise、Edu，Plus 不可用；它消耗 Codex allowance 或 ChatGPT credits。本节只给操作说明，没有执行付费审查。
+
+1. 确认工作区有权限、GitHub 仓库已连接。到同一设置页的 **Review security vulnerabilities** 开启 **Auto security review**。
+2. 用 **Review** 选择审查范围；Team PRs 指 ChatGPT 工作区成员的 PR，不是 GitHub team。用 **Trigger** 选择 On PR open、On every push，或与 Code Review 同时运行。
+3. 按仓库风险提供 threat model 文件或已有扫描的模型。未指定来源时，Codex 会为每次安全审查重新生成 threat model。
+4. 手动请求时在 PR 评论写 `@codex security review`。打开对应 Codex task 的 **Security Report** 查看完整证据、攻击路径、验证和修复建议。
+5. 自动审查默认发布 High / Critical，手动审查默认发布 Medium / High / Critical；可分别调整阈值和路径覆盖。PR 中的 findings 对所有能看该 PR 的人可见，而完整报告留在 Codex；没有达到阈值的 findings 不会发到 PR，不代表没有运行。
+
+请求 `@codex fix ...` 属于另一个会修改代码的动作，当前官方说明它启动带 PR 上下文的 **Legacy cloud chat**，有权限时可推送到分支。查看报告、发送审查评论和授权修复是不同操作，先明确要执行哪一步。依据：[GitHub 审查集成](https://learn.chatgpt.com/docs/third-party/github)、[Security Review](https://learn.chatgpt.com/docs/security/security-review)。
 
 ## 6. 从 App 到 GitHub PR
 
@@ -265,7 +287,7 @@ App thread
 |---|---|---|
 | Review 面板不可用 | 项目不是 Git 仓库 | 先初始化或打开 Git 项目 |
 | 文件重复出现在 staged / unstaged | Git 同一文件有两种状态 | 分别检查 staged 和 unstaged diff |
-| PR 评论不显示 | 不在 PR 分支、GitHub 未授权、`gh` 未登录 | 切分支并 `gh auth login` |
+| PR 评论不显示 | Code Review 来源账号无仓库访问权限；或本地 `gh` 流程缺少认证/分支上下文 | 先确认使用哪条流程；插件检查连接账号，本地流程检查分支及 `gh auth status` |
 | Codex 修错评论 | 提示太泛，没引用具体 comment | 引用评论内容和文件行 |
 | Verification 写得过度 | Codex 把推测当事实 | 只保留真实命令和明确未运行项 |
 | 改动范围太大 | 任务范围没写清或 Codex 顺手重构 | 要求解释每个文件为什么必须改 |
@@ -285,9 +307,9 @@ App thread
 
 你应该看到：Review 面板只显示目标文件；线程或终端记录里能看到验证命令结果；提交信息只由 Codex 草拟，不自动执行。
 
-### 案例二：处理 PR 评论
+### 案例二：在本地项目处理 PR 评论
 
-目标：用 GitHub 上下文修特定 review comment。
+目标：通过 GitHub CLI 读取 PR 上下文，在本地分支修特定 review comment。只阅读远程 PR 时，也可使用第 5.1 节的 Code Review 插件。
 
 1. 切到 PR 分支。
 2. 确认 `gh auth login` 已完成。
@@ -609,7 +631,7 @@ Revert 是“丢弃这部分未提交改动”。这个动作要谨慎，因为�
 
 ## 18. GitHub PR 上下文：App 不是凭空知道 PR
 
-App 要显示 PR context，需要当前项目在 PR 分支上，并且有 GitHub 访问能力。通常还要安装 GitHub CLI 并通过 `gh auth login` 登录。
+本节演示在本地项目中用 GitHub CLI 读取 PR，并结合本地 diff 处理评论，因此要确认 PR 分支、仓库访问和 `gh` 认证。仅在 Code Review 插件中打开远程 PR 时，按第 5.1 节连接来源账号并选择 PR，不需要先把本地项目切到该分支。
 
 ### 18.1 PR 上下文准备
 
@@ -620,7 +642,7 @@ gh auth status
 gh pr status
 ```
 
-如果 `gh` 不可用，App 可能看不到 PR 评论、上下文或 changed files。这不是 Review 面板坏了，而是 GitHub 上下文没接上。
+如果 `gh` 不可用，上述本地 CLI 路径无法读取 PR。Code Review 插件则应检查来源连接与仓库权限；不要把本机缺少 `gh` 当成所有 PR 浏览入口的失败原因。
 
 ### 18.2 PR 评论处理 prompt
 
@@ -750,7 +772,7 @@ PR 描述要让 reviewer 快速知道三件事：为什么改、改了什么、�
 | 症状 | 可能原因 | 下一步 |
 |------|----------|--------|
 | Review 面板不可用 | 项目不是 Git 仓库 | 初始化或打开 Git 项目 |
-| 看不到 PR 评论 | `gh` 未安装或未登录 | `gh auth login` |
+| 看不到 PR 评论 | Code Review 来源连接无访问权限；或本地 CLI 路径的 `gh` 不可用 | 插件核对连接账号与仓库；本地路径核对 `gh auth status` |
 | diff 里有奇怪旧改动 | 工作区本来不干净 | 先看 `git status` |
 | Staged/Unstaged 像重复文件 | Git 暂存区状态不同 | 分别查看两边 |
 | Codex 没处理 inline comment | 评论后没发线程消息 | 发明确 follow-up |

@@ -311,6 +311,8 @@ bearer_token_env_var = "DOCS_MCP_TOKEN"
 | 工具要求过大权限 | server 默认工具太宽 | 用 enabled_tools / disabled_tools 收窄 |
 | 结果不可信 | 来源不明、时间过期、权限范围不清 | 要求 Codex 列出来源和查询条件 |
 
+CLI v0.158.0 起，预注册 OAuth client 需要 client secret 时，`codex mcp add` 支持 `--oauth-client-secret`；本机 0.157.1 的 help 尚无该参数。只在服务器确实要求且本机帮助支持时使用，并按组织凭据保存方式配置，不要把真实 secret 写入教程或仓库。普通 OAuth 不需要为了跟上新版强行增加 client secret。
+
 CLI v0.148.0 已支持 OAuth 重新认证后恢复 MCP，无需为此重启整个 Codex；v0.152.0 又修复了缓存刷新、远程插件变化和认证重试时的工具可用性。v0.154.0 会在刷新失败时提示登录，也不会自动重放已被拒绝的工具调用。登录完成后先核对状态，再决定是否重试原动作。版本依据见 [官方 changelog](https://developers.openai.com/codex/changelog)。
 
 排障时不要第一步就重装。先确认“配置在哪一层、当前线程是否加载、server 是否启动、工具是否可见、调用是否被审批拦住”。

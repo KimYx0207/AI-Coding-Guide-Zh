@@ -312,6 +312,12 @@ AGENTS.md
 4. 每次大改前记录当前线程状态、权限配置和 Review 证据；App 内入口以当前界面和 `/` 列表为准。
 5. PR Review 时确认没有临时切到危险模式。
 
+### 8.2 Computer History 的当前边界
+
+macOS 的 **Computer History** 已替代早期 Chronicle research preview，是重新实现的交互事件与文字摘要系统；它不是自动屏幕录像，也不录制音频。当前面向支持地区的 Pro、Business、Enterprise，包含 EEA、英国和瑞士；不适用于 API Key 或 Amazon Bedrock，且默认关闭。Business/Enterprise 先由管理员授予访问，再由成员个人选择开启；管理员授权不会自动替所有人开启。
+
+要使用时，在 macOS App 的 **Settings → Integrations → Computer history** 选择 Turn on，按提示开启所需 Memories，并限定允许的 App/网站。到 **History** 查看摘要，使用菜单栏暂停或恢复收集；改变许可只影响后续收集，已有内容要单独删除。该功能不需要 Screen Recording 权限，与前文 Computer Use 的系统权限不同。Memories 的聊天与全局控制见 CX-04 第 8.4 节。详见 [Computer History](https://learn.chatgpt.com/docs/customization/computer-history)。
+
 ## 9. 敏感文件
 
 在 `AGENTS.md` 中写：
@@ -646,15 +652,32 @@ extends = ":workspace"
 ### 15.4 Rules 示例：发布和推送
 
 ```python
-def prefix_rule(argv):
-    if len(argv) >= 2 and argv[0] == "npm" and argv[1] == "publish":
-        return "prompt"
-    if len(argv) >= 2 and argv[0] == "git" and argv[1] == "push":
-        return "prompt"
-    if len(argv) >= 3 and argv[0] == "git" and argv[1] == "push" and "--force" in argv:
-        return "deny"
-    return None
+prefix_rule(
+    pattern = ["npm", "publish"],
+    decision = "prompt",
+    justification = "发布前确认包、版本、目标 registry 和授权。",
+    match = ["npm publish", "npm publish --tag next"],
+    not_match = ["npm test"],
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "推送前确认仓库、分支、参数和影响范围。",
+    match = ["git push origin main", "git push origin main --force"],
+    not_match = ["git status"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "--force-with-lease", "-f"]],
+    decision = "forbidden",
+    justification = "禁止此处列出的强制推送前缀；先查看差异并与分支维护者确认。",
+    match = ["git push --force origin main", "git push -f origin main"],
+    not_match = ["git push origin main --force"],
+)
 ```
+
+上面的强制推送禁令只匹配选项紧接在 `git push` 后的前缀；`git push origin main --force` 仍会匹配推送审批规则。用 `codex execpolicy check` 核对团队实际命令。若要禁止所有推送，把 `git push` 规则改成 `forbidden`；若要检查任意位置的参数，使用经过审查的同步 Hook。
 
 ## 16. MCP 企业治理
 
@@ -783,6 +806,12 @@ Stop condition:
 如果需要外部写操作，请请求人工处理。
 没有发现时归档，避免制造噪音。
 ```
+
+### 18.4 共享团队任务使用谁的账号
+
+个人桌面 Automation 和云端 **Team Task** 的执行身份不同。Team Tasks 使用团队 service account 和配置的 App connections，不继承创建者的个人 memories、custom instructions 或聊天历史。成员能看到团队既有运行和生成文件，单个任务或运行不能另外设置访问限制，因此先确认团队成员与连接账号的数据范围。
+
+工作区允许创建团队和管理任务后，在网页 **Settings → Teams** 建立团队并配置连接。创建任务时打开 **Scheduled → + New Task**，选择 **Team** 和所属团队，核对 Trigger、时区、Instructions、Plugins 与 Model，然后创建。先用 **Run now**，在 **Previous runs** 审阅输出；失败时检查团队连接的授权，而不是假设创建者个人账号的权限会被继承。详见 [官方 Team Tasks 指南](https://learn.chatgpt.com/docs/enterprise/teams)。
 
 ## 19. Cloud 企业治理
 

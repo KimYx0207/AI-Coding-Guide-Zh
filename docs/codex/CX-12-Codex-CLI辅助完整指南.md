@@ -224,6 +224,39 @@ codex --help
 
 这些版本还补了很多“看起来小、实际影响学习体验”的 TUI 和启动修复：链接、表格、取消提示、目标续跑、配置错误展示、OAuth/MCP 刷新和 workspace instruction 加载都更稳。写教程和排障时，不需要让新手背每个变更，但要解释“为什么升级后终端界面、App handoff 和插件排查突然更稳了”。
 
+### 2.2 当前模型选择与旧配置迁移
+
+带日期的变更表记录的是当时新增了什么，不能代替现在的可用模型列表。桌面 App 在输入框下方选择模型和推理等级；CLI 交互会话用 `/model`，启动时也可用 `codex --model gpt-6.1-sol`。先确认该模型出现在你的账号与当前客户端中，再运行带模型参数的任务。
+
+截至 2026-10-03，官方建议复杂编程和持续代理任务优先考虑可用的 **GPT-6.1 Sol**（`gpt-6.1-sol`），明确、重复的轻任务可考虑 **GPT-6 Luna**。6.1 Sol 首批包括 Plus、Pro、Business、Enterprise 和 Edu 的桌面 Codex、CLI，以及网页/移动端 ChatGPT Work；Enterprise/Edu 需要管理员启用，Free/Go 不在首批。Standard/Fast 已开放，6.1 Sol 的 Ultrafast 尚待开放。账号权限、客户端与模型 provider 仍会影响实际列表；切换模型不会扩大文件、网络或工具权限。
+
+迁移旧设置时，按下面的顺序检查：
+
+1. 确认使用 ChatGPT 登录，还是 API Key / 自定义 provider。不要把一种登录方式的退役日期套到另一种。
+2. 检查自己的 `config.toml`、受管默认模型、自定义 agent 文件、定时任务和脚本中显式选择的模型。
+3. ChatGPT 登录范围内，`gpt-5.3-codex-spark` 已于 2026-09-14 退役；`gpt-5.4` / `gpt-5.4-mini` 已于 8 月 31 日退役；`gpt-5.2` / `gpt-5.3-codex` 也已废弃。改用账号实际可用的模型。
+4. `gpt-5.5` 将于 2026-10-14 从 ChatGPT、ChatGPT Work 与使用 ChatGPT 登录的 Codex 退役。官方迁移建议是 Plus/Pro/Business/Enterprise/Edu 在可用时选择 `gpt-6-sol`，Free/Go 在桌面 App 可用时选择 `gpt-6-luna`；若已有 6.1 Sol，也可按任务选择。此次 GPT-5.5 退役不适用于 OpenAI API；5.4 的这次 ChatGPT 登录退役也不影响用自有 API Key 的 Codex。API 和自定义 provider 的可用性要看相应模型目录。
+5. 在普通交互任务中确认模型可选、权限与输出正常，再更新无人值守任务。不要全局替换带日期的历史记录或 API 示例。
+
+依据：[Models 与迁移说明](https://learn.chatgpt.com/docs/models)、[0.159.1 默认模型更新](https://github.com/openai/codex/releases/tag/rust-v0.159.1)。
+
+### 2.3 v0.156.0 之后影响日常使用的变化
+
+前面的历史表保留原日期。使用本机 0.157.1 或更新版本时，还要知道下面几处实际入口，而不只是更新版本号：
+
+| 场景 | 当前入口与版本边界 |
+|---|---|
+| 终端界面与复制 | v0.156.0 加入 `/tui` 选择下次启动的界面，v0.157.0 默认启用 fullscreen transcript；v0.158.0 才增加可配置的选中即复制和右键粘贴。先按当前终端和 `/` 列表核对。 |
+| 查看用量和工具活动 | v0.156.0 的 `/usage` 已是分析 dashboard，可看账号用量、token 及 plugin/skill 活动；它不同于只看当前会话状态的 `/status`。 |
+| 语音和后台服务 | v0.156.0 默认启用语音，可用 F8 切换、`/voice settings` 选声音；同版加入 `/daemon` 管理本地后台服务，`--no-daemon` 可绕开该服务。v0.157.0 会为符合条件的交互会话自动启动后台服务。 |
+| CLI 工作树 | v0.154.0 的实验性说明是历史记录；v0.156.0 已默认启用，可从 agent command center 建立 worktree 会话。它仍需要 Git 仓库，检查实际目录后再写文件。 |
+| 任务中补充指令 | v0.159.0 的 `instant_interrupt` 是选择开启的功能，可在模型回答或长 code-mode 调用时用新输入调整任务；不能说所有旧版本默认即时中断。 |
+| 不在项目中启动与恢复 | v0.160.0 在策略允许时可使用 workspace defaults 启动无项目会话，并在恢复时保留已保存的权限。恢复后仍要核对实际目录、provider 和权限。 |
+
+v0.159.0 已删除自动后续 prompt suggestions 及 `tui.prompt_suggestions`，也移除了随 CLI 捆绑的 `plugin-creator` skill；不要把旧设置或该 bundled skill 写成当前必需步骤。创建和分发 Plugin 继续按 CX-07 的当前官方流程处理。
+
+依据：[v0.156.0](https://github.com/openai/codex/releases/tag/rust-v0.156.0)、[v0.157.0](https://github.com/openai/codex/releases/tag/rust-v0.157.0)、[v0.158.0](https://github.com/openai/codex/releases/tag/rust-v0.158.0)、[v0.159.0](https://github.com/openai/codex/releases/tag/rust-v0.159.0)、[v0.160.0](https://github.com/openai/codex/releases/tag/rust-v0.160.0)。上述界面行为核到官方发布记录，没有启动登录后的 TUI 或语音会话。
+
 ## 3. 审批与沙盒
 
 
@@ -281,9 +314,24 @@ codex exec "Read package.json and AGENTS.md. Report the install, test, lint, and
 需要让无头任务返回可校验 JSON 时，优先使用当前 `codex exec --help` 中显示的 `--output-schema` 能力：
 
 ```bash
-codex exec \
+mkdir -p schemas
+cat > schemas/audit-result.schema.json <<'JSON'
+{
+  "type": "object",
+  "properties": {
+    "scripts": {"type": "array", "items": {"type": "string"}},
+    "packageManager": {"type": ["string", "null"]},
+    "riskyLifecycleHooks": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["scripts", "packageManager", "riskyLifecycleHooks"],
+  "additionalProperties": false
+}
+JSON
+
+codex exec --sandbox read-only \
   --output-schema ./schemas/audit-result.schema.json \
-  "Read package.json and return only schema-valid JSON with scripts, packageManager, and risky lifecycle hooks."
+  -o ./audit-result.json \
+  "Read package.json. Return each script as name: command in scripts, packageManager or null when absent, and risky lifecycle hook names in riskyLifecycleHooks. Do not modify project files."
 ```
 
 `codex exec resume` 适合恢复旧的非交互任务上下文。是否能和 `--output-schema` 组合，以你本机 `codex exec resume --help` 为准；教程不要把组合参数写成所有版本都可用。
@@ -413,9 +461,25 @@ codex exec "Read package.json, README, and AGENTS.md. Report install, test, lint
 目标：让 `codex exec` 输出机器可读 JSON。
 
 ```bash
-codex exec \
+mkdir -p schemas
+cat > ./schemas/repo-commands.schema.json <<'JSON'
+{
+  "type": "object",
+  "properties": {
+    "install": {"type": ["string", "null"]},
+    "test": {"type": ["string", "null"]},
+    "lint": {"type": ["string", "null"]},
+    "build": {"type": ["string", "null"]}
+  },
+  "required": ["install", "test", "lint", "build"],
+  "additionalProperties": false
+}
+JSON
+
+codex exec --sandbox read-only \
   --output-schema ./schemas/repo-commands.schema.json \
-  "Return install, test, lint, build commands as schema-valid JSON. Do not modify files."
+  -o ./repo-commands.json \
+  "Read package.json, README, and AGENTS.md. Return the documented install, test, lint, and build commands. Use null when a command cannot be confirmed; do not invent one. Do not modify project files."
 ```
 
 如果当前 CLI 不支持 `--output-schema`，先用 `codex exec --help` 确认本机版本，不要硬套教程参数。
@@ -648,6 +712,8 @@ codex exec --json "summarize the repo structure" | jq
 JSONL 适合脚本消费，因为你能看到 thread、turn、command execution、file changes、MCP tool calls 等事件。
 
 ### 15.4 结构化输出
+
+先把你需要的 JSON Schema 保存为 `schema.json`；完整写法可参照第 4.1 节。`--output-schema` 读取的是本机已有文件，不能只把想要的字段写进 prompt。下面假设 `schema.json` 已准备好：
 
 ```bash
 codex exec "Extract project metadata" \
@@ -1144,14 +1210,14 @@ npm test -- auth-redirect 2>&1 |
 
 ```bash
 git diff --stat |
-  codex exec --sandbox read-only --json "
+  codex exec --sandbox read-only -o ./diff-classification.json "
   Classify this diff summary into one of:
   docs-only, tests-only, code-low-risk, code-needs-review.
   Return JSON with keys: category, reason, suggested_next_step.
   "
 ```
 
-脚本可以读取这个 JSON，但不要直接根据 category 自动 push 或 merge。更稳的做法是把结果作为提示：
+脚本从 `diff-classification.json` 读取最终消息，先解析 JSON 并核对字段；解析失败或字段缺失时停止消费，不能直接根据 `category` 自动 push 或 merge。`--json` 输出的是运行事件的 JSONL 流，适合记录事件；它不会把 stdout 变成一个分类对象。需要严格约束最终 JSON 时，按照第 4.1 节先准备 JSON Schema，再加入 `--output-schema`。更稳的做法是把分类结果作为提示：
 
 ```text
 如果 category 是 docs-only：
@@ -1335,7 +1401,7 @@ Symptom:
 CLI reads different config than App.
 
 Observed:
-Windows App opens project under C:\Users\Kim\Projects\repo.
+Windows App opens the project from a Windows filesystem path.
 CLI was launched inside WSL path.
 
 Likely:

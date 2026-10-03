@@ -45,7 +45,7 @@
 ✅ 术语表（5分钟） - 快速了解MCP核心概念
 ✅ 第一部分：MCP简介（10分钟） - 理解MCP是什么
 ✅ 第二部分：5分钟快速开始（15分钟） - 配置第一个MCP服务器
-✅ 第三部分3.1-3.3：配置GitHub和数据库MCP（30分钟）
+✅ 第三部分3.1-3.2：学习配置方式并连接GitHub MCP（30分钟）；3.3的数据库服务器已归档，仅作旧项目参考
 ```
 
 **60分钟后你能达到**：成功配置2-3个MCP服务器，Claude Code能调用外部工具
@@ -92,7 +92,7 @@
 | **自定义MCP开发** | 第五部分 | 1.5小时 |
 | **三作用域配置** | 第三部分3.4节 | 30分钟 |
 | **MCP工作原理** | 第四部分 | 45分钟 |
-| **安全最佳实践** | 第三部分3.5节 | 20分钟 |
+| **安全最佳实践** | 第三部分3.2节的密钥配置 + 第七部分安全问题 | 20分钟 |
 
 ---
 
@@ -201,7 +201,7 @@ Claude Code（通过Filesystem MCP）：
 你：帮我创建一个Issue，标题是"修复登录bug"
 
 Claude Code（通过GitHub MCP）：
-1. [调用] create_issue(owner, repo, title, body) - 创建Issue
+1. [调用] issue_write(method="create", owner=owner, repo=repo, title=title, body=body) - 创建Issue
 2. [返回] Issue创建成功！链接：https://github.com/xxx/xxx/issues/123
 ```
 
@@ -219,8 +219,8 @@ Claude Code（通过SQLite MCP）：
 你：帮我查一下Next.js 15的App Router怎么用
 
 Claude Code（通过Context7 MCP）：
-1. [调用] resolve_library_id("next.js")
-2. [调用] get_library_docs("/vercel/next.js", "app router")
+1. [调用] resolve-library-id(libraryName="next.js", query="Next.js 15 App Router怎么用")
+2. [调用] query-docs(libraryId="/vercel/next.js", query="Next.js 15 App Router怎么用")
 3. [返回] 这是Next.js 15 App Router的最新文档...
 ```
 
@@ -357,19 +357,9 @@ cat .mcp.json | jq .
 claude
 ```
 
-**启动时会看到**：
+**启动后检查连接**：
 
-```
-Claude Code v2.1.92
-Working directory: /你的项目路径
-
-MCP servers connected:
-  ✓ filesystem (3 tools available)
-
-You: █
-```
-
-> ✅ **关键确认**：看到 `✓ filesystem` 说明MCP服务器连接成功！
+项目级 `.mcp.json` 可能先请求你批准服务器。确认来源后，在会话中输入 `/mcp`，查看 `filesystem` 的状态和工具列表；不要用某个固定版本的欢迎屏幕或固定工具数量判断是否成功。也可以在终端运行 `claude mcp get filesystem` 查看状态。
 
 **如果看不到MCP服务器列表**：
 
@@ -416,10 +406,10 @@ Claude Code：
 **完整验证清单**：
 
 - [ ] `.mcp.json` 文件存在且格式正确
-- [ ] Claude Code启动时显示MCP服务器已连接
+- [ ] 已在 `/mcp` 核对服务器状态，并完成需要的项目批准或认证
 - [ ] 能成功执行 `list_directory` 工具
 - [ ] 能成功执行 `read_file` 工具
-- [ ] 能成功执行 `write_file` 工具（会请求确认）
+- [ ] 能成功执行 `write_file` 工具；是否询问确认取决于当前权限模式、规则和已有授权
 
 ### 2.3 第一个MCP工具调用
 
@@ -475,7 +465,7 @@ Claude Code：
 | 字段 | 必需 | 说明 | 示例 |
 |------|------|------|------|
 | `command` | ✅ | 启动命令 | `"npx"`, `"node"`, `"python"` |
-| `args` | ✅ | 命令参数数组 | `["-y", "@modelcontextprotocol/server-xxx"]` |
+| `args` | ❌ | stdio 启动参数数组；没有参数时可省略 | `["-y", "@modelcontextprotocol/server-xxx"]` |
 | `env` | ❌ | 环境变量对象 | `{"API_KEY": "xxx"}` |
 | `timeout` | ❌ | 超时时间(毫秒) | `60000` |
 
@@ -518,7 +508,7 @@ claude mcp add --scope user my-server npx -y xxx
 | **适合场景** | 团队项目、版本控制 | 快速测试、个人配置 |
 | **可读性** | 高（结构清晰） | 中 |
 | **批量配置** | 方便（一个文件） | 不便（逐个添加） |
-| **版本控制** | 支持 | 不支持 |
+| **版本控制** | project 配置可提交 Git | `--scope project` 同样写入可提交 Git 的 `.mcp.json` |
 | **推荐度** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
 
 ### 3.2 GitHub MCP服务器
@@ -549,9 +539,11 @@ claude mcp add --scope user my-server npx -y xxx
 # 永久设置环境变量
 [System.Environment]::SetEnvironmentVariable('GITHUB_PERSONAL_ACCESS_TOKEN', 'ghp_你的Token', 'User')
 
-# 验证
-$env:GITHUB_PERSONAL_ACCESS_TOKEN
-# 应显示你的Token
+# User 作用域不会刷新当前终端的环境，先同步到本次会话
+$env:GITHUB_PERSONAL_ACCESS_TOKEN = [System.Environment]::GetEnvironmentVariable('GITHUB_PERSONAL_ACCESS_TOKEN', 'User')
+
+# 只检查是否有值，避免把完整 token 打到终端
+[bool]$env:GITHUB_PERSONAL_ACCESS_TOKEN
 ```
 
 **macOS/Linux：**
@@ -572,10 +564,10 @@ echo $GITHUB_PERSONAL_ACCESS_TOKEN
 {
   "mcpServers": {
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     }
   }
@@ -602,7 +594,7 @@ claude
 | `create_repository` | 创建仓库 | name, description, private |
 | `get_file_contents` | 获取文件内容 | owner, repo, path |
 | `push_files` | 推送文件 | owner, repo, branch, files |
-| `create_issue` | 创建Issue | owner, repo, title, body |
+| `issue_write` | 创建或更新 Issue | 参数以 `/mcp` 中当前工具定义为准 |
 | `create_pull_request` | 创建PR | owner, repo, title, head, base |
 | `fork_repository` | Fork仓库 | owner, repo |
 | `create_branch` | 创建分支 | owner, repo, branch |
@@ -614,7 +606,7 @@ claude
 
 #### SQLite（本地数据库）
 
-> **功能**：本地SQLite数据库的完整访问，无需安装数据库软件
+> **历史参考示例**：下面的 SQLite MCP 服务器已移入 `modelcontextprotocol/servers-archived`，不再维护；包名和工具名可用来理解旧项目配置，但不应据此选作新项目的维护基线。需要安装 `uv`，并确认数据库目录存在。
 
 **配置方法**：
 
@@ -653,7 +645,7 @@ claude
 
 #### PostgreSQL（生产数据库）
 
-> **功能**：连接PostgreSQL数据库，支持查询和结构检查
+> **历史参考示例**：下面的 PostgreSQL 服务器已归档，不再维护。保留配置用于识别旧项目；新接入应先确认所选服务器的维护者、权限和数据库版本支持。
 
 **配置方法**：
 
@@ -732,43 +724,36 @@ Local作用域：GITHUB_PERSONAL_ACCESS_TOKEN = "local-override-token"
 
 #### 配置方法
 
-**Local作用域**（修改 `~/.claude.json`）：
+**Local作用域**（让 CLI 保存项目私有配置）：
 
-```json
-{
-  "mcpServers": {
-    "/Users/me/project1": {
-      "github": {
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github"],
-        "env": {
-          "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxxx_local_override"
-        }
-      }
-    }
-  }
-}
+在目标项目目录执行：
+
+```bash
+claude mcp add --scope local --transport http github https://api.githubcopilot.com/mcp/
 ```
+
+再在交互会话的 `/mcp` 中完成该服务支持的认证。CLI 会把配置保存到 `~/.claude.json` 的 `projects[项目绝对路径].mcpServers`；不要把项目路径直接放进根级 `mcpServers`，也不要在教程跟练时改写整个用户配置文件。
 
 **Project作用域**（项目根目录 `.mcp.json`）：沿用前面 GitHub MCP 的 `.mcp.json` 写法，把配置放到项目根目录，适合团队共享服务器声明；密钥仍然通过环境变量注入，不要把 token 写进仓库。
 
 **User作用域**（使用CLI）：
 
 ```bash
-claude mcp add --scope user github npx -y @modelcontextprotocol/server-github
+claude mcp add --scope user --transport http github https://api.githubcopilot.com/mcp/
+# 在 /mcp 中按当前服务的认证提示完成登录
 ```
 
 ### 3.5 更多常用服务器配置
 
 #### Brave Search（网页搜索）
 
-> **功能**：隐私优先的Web搜索，免费层每月2000次查询
+> **功能**：隐私优先的 Web 搜索；使用前在 Brave 账号面板确认当前套餐、免费额度和计费。
 
 **获取API Key**：
 1. 访问 https://brave.com/search/api/
 2. 注册账号
 3. 创建API Key
-4. 免费层：2000次/月
+4. 核对当前套餐和免费 credits，不要按旧的固定查询次数估算费用
 
 **配置方法**：
 
@@ -777,7 +762,7 @@ claude mcp add --scope user github npx -y @modelcontextprotocol/server-github
   "mcpServers": {
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
@@ -810,18 +795,18 @@ claude mcp add --scope user github npx -y @modelcontextprotocol/server-github
 你：查一下React 19的新特性
 
 Claude Code：
-1. [调用] resolve_library_id("react")
-2. [调用] get_library_docs("/facebook/react", "react 19", 5000)
+1. [调用] resolve-library-id(libraryName="react", query="React 19有哪些新特性")
+2. [调用] query-docs(libraryId="/facebook/react", query="React 19有哪些新特性")
 3. [返回] React 19新特性包括：...
 ```
 
-> **注意**：Context7 免费额度为每月 1,000 次请求（2026年1月从 6,000 次下调），每小时限 60 次。超出需配置 API Key。
+> **注意**：Context7 推荐使用免费 API Key，以取得更高的请求限额。具体额度和计费以当前账号面板为准；添加 Key 也不代表可以无限调用。工具名与参数可在 `/mcp` 中核对。
 
 #### MCP Apps（交互式界面）
 
 > **功能**：MCP 服务器可提供交互式用户界面，直接在聊天中渲染图表、表单、仪表盘
 
-这是 2026 年初新增的能力——MCP 服务器不再只是返回文本数据，还可以返回可交互的 UI 组件。这意味着你可以在 Claude Code 的对话中直接操作第三方工具的界面，无需切换到外部应用。
+MCP Apps 让服务器提供可交互的 UI 资源，但界面能否显示取决于宿主客户端。当前 Claude Code MCP 文档说明，`ui://` 或 `text/html;profile=mcp-app` 资源不会出现在 `@` 建议或资源列表工具的结果里；按 URI 读取仍可用。不要把协议支持 UI 理解成终端对话会直接渲染图表和表单。
 
 #### MCP 工具懒加载（当前标准行为）
 
@@ -848,8 +833,9 @@ Claude Code：
 {
   "mcpServers": {
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {"Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"},
       "alwaysLoad": true
     }
   }
@@ -857,7 +843,10 @@ Claude Code：
 ```
 
 - `alwaysLoad: true`：工具定义直接注入上下文，无需 ToolSearch 搜索
-- 不设或 `alwaysLoad: false`：走标准 ToolSearch 懒加载（默认）
+- 不设：沿用当前工具搜索策略
+- `alwaysLoad: false`：从 v2.1.287 起，让该服务器的全部工具通过工具搜索发现
+
+工具搜索默认开启，但模型、服务提供方、组织设置或环境变量可能关闭它；这时工具定义会提前加载。`alwaysLoad` 控制工具定义，不能用它推断服务器进程每次调用后是否关闭。
 
 **适用场景**：高频使用的核心 MCP（如 GitHub、数据库），设 `alwaysLoad` 可省去每次搜索的开销；低频 MCP 保持默认懒加载即可。
 
@@ -954,7 +943,7 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
 
 #### Puppeteer（浏览器自动化）
 
-> **功能**：无头浏览器自动化，网页截图、表单填写、数据采集
+> **历史参考**：这个 Puppeteer 参考服务器提供网页截图、表单填写等功能，但已经归档，不再维护。新项目先选择维护中的浏览器服务器，下面的包名只用于识别旧配置。
 
 **配置方法**：
 
@@ -972,7 +961,7 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
 
 ### 3.6 完整配置示例
 
-**一个功能完整的项目配置**（`.mcp.json`）：
+**组合配置示例**（`.mcp.json`）：先安装 `uv` / Node.js，创建实际要访问的目录，并设置对应环境变量。SQLite 是已归档的历史示例，可删除其条目；其他服务器也应按任务挑选。已有 `.mcp.json` 时合并条目，不要覆盖原配置。
 
 ```json
 {
@@ -983,10 +972,10 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
       "env": {}
     },
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     },
     "sqlite": {
@@ -1001,7 +990,7 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
     },
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
@@ -1414,7 +1403,7 @@ npm install -D typescript @types/node ts-node
 
 **步骤3：配置package.json**
 
-修改 `package.json`：
+修改 `package.json`：下面展示完整示例；安装依赖后，保留 npm 实际写入的依赖版本和 lockfile，主要合并 `type`、入口及 `scripts`。若整份替换，请再运行 `npm install` 同步依赖，不要只改版本声明后直接构建。
 
 ```json
 {
@@ -1429,7 +1418,7 @@ npm install -D typescript @types/node ts-node
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node --esm src/index.ts",
+    "dev": "npm run build && node dist/index.js",
     "start": "node dist/index.js",
     "watch": "tsc --watch"
   },
@@ -1643,7 +1632,7 @@ Hello, 老金! 这是来自my-first-mcp的问候！
 
 ### 5.4 使用MCP Inspector调试
 
-> **这是什么？** MCP Inspector是官方提供的调试工具，可以交互式测试MCP服务器。
+> **这是什么？** MCP Inspector 是官方提供的调试工具，可以交互式测试 MCP 服务器。当前 v2 需要 Node.js 22.19.0 或更高；前面 SDK 示例的 Node 18 最低要求不足以运行当前 Inspector，先检查 `node --version`。
 
 **使用方法**：
 
@@ -1688,7 +1677,7 @@ npx @modelcontextprotocol/inspector npx -y @modelcontextprotocol/server-filesyst
 },
 ```
 
-在 `CallToolRequestSchema` 处理器中添加：
+在原有 `CallToolRequestSchema` 处理器内、`throw new Error(未知工具)` 那个兜底分支之前添加以下代码。修改后重新运行 `npm run build`，再重启自定义服务器或会话，否则 `dist/index.js` 仍是上一次编译的内容：
 
 ```typescript
 if (name === "get_current_time") {
@@ -1706,6 +1695,8 @@ if (name === "get_current_time") {
 ```
 
 #### 添加Resources
+
+把两个 schema 导入合并到文件顶部；将现有 `Server` 的 capabilities 增加 `resources: {}`，不要再声明第二个同名 `server`。再把两个资源处理器放到 `main()` 调用之前，重新编译并重启服务器。下面的 `const server` 展示的是原有初始化代码的替换位置：
 
 ```typescript
 import {
@@ -1761,7 +1752,9 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 
 #### 发布到npm
 
-**步骤1：确保package.json配置正确**
+**步骤1：合并发布字段到已有 package.json**
+
+下面只列发布相关字段，保留5.1节的 `type: "module"`、scripts、dependencies 和 devDependencies。不要用这份片段替换整个文件，否则 `npm run build` 和运行时依赖会丢失。
 
 ```json
 {
@@ -1957,45 +1950,36 @@ npm config set timeout 60000
 
 ### 6.3 查看日志
 
-#### Claude Code日志
+#### Claude Code 日志
 
-**macOS：**
+让 CLI 把本次排障日志写到你指定的文件：
+
 ```bash
-tail -f ~/Library/Logs/Claude/mcp*.log
+claude --debug-file ./claude-mcp-debug.log
 ```
 
-**Windows：**
-```powershell
-Get-Content "$env:LOCALAPPDATA\Claude\logs\mcp*.log" -Wait
-```
-
-**Linux：**
-```bash
-tail -f ~/.local/share/claude/logs/mcp*.log
-```
+在会话里用 `/mcp` 查看状态，再读取这份日志定位连接错误。macOS / Linux 可用 `tail -f ./claude-mcp-debug.log`；PowerShell 可用 `Get-Content ./claude-mcp-debug.log -Wait`。这里使用 Claude Code CLI 的日志，不沿用 Claude Desktop 的 `Claude/mcp*.log` 路径；分享日志前检查其中的项目内容和连接信息。
 
 #### 调试模式启动
 
 ```bash
 # 开启MCP调试日志
-claude --debug mcp
+claude --debug=mcp
 ```
 
 ### 6.4 重置MCP配置
 
-如果配置混乱，可以重置：
+先用 `claude mcp list` / `claude mcp get <name>` 确认服务器来自哪个作用域，再只移除要重配的条目：
 
 ```bash
-# 删除项目级配置
-rm .mcp.json
+# 例：移除当前项目的私人配置，不影响其他服务器
+claude mcp remove --scope local github
 
-# 删除用户级配置（谨慎！）
-# macOS/Linux
-rm ~/.claude.json
-
-# Windows
-del %USERPROFILE%\.claude.json
+# 仅重置当前项目 .mcp.json 的批准选择
+claude mcp reset-project-choices
 ```
+
+`--scope` 可选 local、project 或 user，按实际来源选择。若要重配共享 `.mcp.json`，先备份文件并仅编辑相应条目。不要删除整个 `~/.claude.json`：它还保存其他项目配置、偏好和状态，删除它并不是只重置 MCP。
 
 ---
 
@@ -2016,17 +2000,17 @@ del %USERPROFILE%\.claude.json
 
 #### Q2：MCP服务器需要一直运行吗？
 
-**A**：不需要。Claude Code会在需要时自动启动MCP服务器，使用完毕后自动关闭。
+**A**：要区分连接方式。stdio 服务器通常作为 Claude Code 管理的子进程运行；HTTP 等远程服务由服务方独立运行。部分有缓存的远程服务器会显示 `cached`，在第一次工具调用时连接，但不能因此推断每次调用后都会关闭。用 `/mcp` 查看实际连接状态，结束会话与单次工具调用也不是同一个生命周期。
 
 #### Q3：配置多个MCP服务器会影响性能吗？
 
-**A**：不会。MCP服务器是按需启动的，只有被调用时才会运行。配置10个服务器但只用1个，不会有额外开销。
+**A**：可能影响。服务器连接、子进程、工具发现与加载都可能消耗时间和资源；工具搜索可以减少工具定义占用的上下文，部分缓存的远程服务也能延后连接，但这些机制不等于零开销。先看 `/mcp` 的状态和工具数量，再关闭本次任务不需要的服务器。
 
 #### Q4：MCP服务器的数据安全吗？
 
 **A**：取决于配置。
-- ✅ Filesystem MCP只能访问你指定的目录
-- ✅ 所有操作都需要你确认
+- Filesystem 参考服务器限制访问它当前允许的目录；支持 Roots 的客户端提供 Roots 后，会替换启动参数中的允许目录，可用 `list_allowed_directories` 核对。Claude Code 的 `/add-dir` 等操作也会改变提供给服务器的 Roots
+- 是否逐次询问确认取决于权限模式、规则和已有授权；MCP 协议本身不保证所有操作都弹确认
 - ⚠️ 但API Key等敏感信息要妥善保管
 - ⚠️ 不要把敏感Token写在配置文件里
 
@@ -2101,19 +2085,16 @@ del %USERPROFILE%\.claude.json
 
 #### Q12：如何更新MCP服务器？
 
-**A**：npx会自动获取最新版本。如需强制更新：
+**A**：要区分部署方式。HTTP 服务由服务方更新；本地 npx 启动的包会受版本声明、本地安装和缓存影响，不保证每次启动自动更新。若要跟随发布者的最新稳定标签，在配置里使用明确的 `@latest`，例如：
 
-```bash
-# 清除npx缓存
-npx clear-npx-cache
-
-# 或删除缓存目录
-# macOS/Linux
-rm -rf ~/.npm/_npx
-
-# Windows
-rd /s /q %LOCALAPPDATA%\npm-cache\_npx
+```json
+{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem@latest", "."]
+}
 ```
+
+核对版本和变更后重新连接或重启。需要可重复部署时固定具体版本；自行开发的服务器应更新源码、安装依赖并重新构建。不要为了更新一个包就运行来源不明的清缓存包或删除整片缓存目录。
 
 ### 开发问题
 
@@ -2167,7 +2148,7 @@ npm publish --access public
 
 #### Q18：MCP服务器能访问我的所有文件吗？
 
-**A**：不能。Filesystem MCP只能访问你在配置中指定的目录。
+**A**：MCP 协议不会统一限制所有服务器的文件权限。本课的 Filesystem 参考服务器按当前允许目录检查访问；客户端提供 Roots 时，会替换命令行配置的目录。用它的 `list_allowed_directories` 核对实际范围，其他服务器要看各自的实现。
 
 ### 其他问题
 
@@ -2211,7 +2192,7 @@ npm publish --access public
 - [ ] `.mcp.json` 文件存在且格式正确
 - [ ] 所需环境变量已配置
 - [ ] API Key安全存储（不在配置文件中硬编码）
-- [ ] Claude Code启动时显示MCP服务器已连接
+- [ ] 已在 `/mcp` 核对服务器状态，并完成需要的项目批准或认证
 - [ ] 至少测试过一个MCP工具调用
 
 ### 推荐下一步
@@ -2225,7 +2206,9 @@ npm publish --access public
 
 ## 附录
 
-### 附录A：完整.mcp.json模板
+### 附录A：组合.mcp.json模板
+
+先安装所需的 Node.js / uv，创建配置中实际使用的目录，并设置环境变量。SQLite 和 Puppeteer 条目是已归档的历史示例，不作为新项目推荐；按需求删去不用的服务器。已有 `.mcp.json` 时合并条目，不要覆盖原配置。
 
 ```json
 {
@@ -2236,10 +2219,10 @@ npm publish --access public
       "env": {}
     },
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     },
     "sqlite": {
@@ -2254,7 +2237,7 @@ npm publish --access public
     },
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
@@ -2291,16 +2274,18 @@ npm publish --access public
 | `claude mcp add` | 添加MCP服务器 | `claude mcp add fs npx -y @.../server-filesystem ./` | ⭐ |
 | `claude mcp get` | 查看服务器详情 | `claude mcp get github` |  |
 | `claude mcp remove` | 删除服务器 | `claude mcp remove github` |  |
-| `claude --debug mcp` | 调试模式启动 | `claude --debug mcp` | ⭐ |
+| `claude --debug=mcp` | 调试模式启动 | `claude --debug=mcp` | ⭐ |
 
-> ⚠️ **重要澄清**：`claude mcp test` 和 `claude mcp restart` 命令**不存在**。如需测试服务器，使用 `claude mcp get <name>` 查看状态；如需重启，退出并重新启动Claude Code。
+> ⚠️ **重要澄清**：`claude mcp test` 和 `claude mcp restart` 命令不存在。`claude mcp get <name>` 用于检查状态，实际调用一个工具才能验证功能。当前交互会话可在 `/mcp` 中选择 Reconnect；v2.1.284 起终端支持 `/mcp reconnect all` 重试失败或需认证的服务器。修改配置后按提示重连，必要时退出并重启。
 
-### 附录C：官方MCP服务器列表
+### 附录C：参考服务器与维护者服务
+
+这张表用于识别包名和来源。modelcontextprotocol 的参考实现用于教学，不等于生产服务保证；GitHub、GitLab、SQLite、PostgreSQL、Puppeteer 旧参考实现已归档。
 
 | 服务器 | 包名 | 功能 | 重要 |
 |--------|------|------|:----:|
 | Filesystem | `@modelcontextprotocol/server-filesystem` | 文件系统操作 | ⭐ |
-| GitHub | `@modelcontextprotocol/server-github` | GitHub仓库管理 | ⭐ |
+| GitHub | `https://api.githubcopilot.com/mcp/` | GitHub 维护的远程服务；旧参考包已归档 | ⭐ |
 | GitLab | `@modelcontextprotocol/server-gitlab` | GitLab仓库管理 |  |
 | Git | `mcp-server-git`（Python/uvx） | 本地Git操作 |  |
 | SQLite | `mcp-server-sqlite`（Python/uvx） | SQLite数据库 | ⭐ |
@@ -2310,7 +2295,7 @@ npm publish --access public
 | Time | `mcp-server-time`（Python/uvx） | 时间服务 |  |
 | Sequential Thinking | `@modelcontextprotocol/server-sequential-thinking` | 顺序思考 |  |
 | Puppeteer | `@modelcontextprotocol/server-puppeteer` | 浏览器自动化 |  |
-| Brave Search | `@modelcontextprotocol/server-brave-search` | 网页搜索 | ⭐ |
+| Brave Search | `@brave/brave-search-mcp-server` | Brave 维护的网页搜索服务；使用 stdio 时传 `--transport stdio` | ⭐ |
 | Context7 | `@upstash/context7-mcp` | 技术文档 | ⭐ |
 
 ### 附录D：资源链接
@@ -2333,7 +2318,7 @@ npm publish --access public
 
 > 📌 **信息来源**：
 > - [MCP官方文档](https://modelcontextprotocol.io/) | 验证日期：2026-05-30
-> - [GitHub MCP Server仓库](https://github.com/modelcontextprotocol/servers) | 验证日期：2026-05-30
+> - [GitHub 维护的 MCP Server 仓库](https://github.com/github/github-mcp-server) | 本轮只读核对：2026-10-03
 > - [Claude Code文档](https://code.claude.com/docs/en/mcp) | 验证日期：2026-05-30
 
 **作者**：老金

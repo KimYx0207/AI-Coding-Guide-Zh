@@ -23,7 +23,7 @@
 
 1. **理解Claude Code的核心价值**：掌握Claude Code与传统AI编程工具的本质区别
 2. **了解两条安装路径**：知道什么时候优先用原生安装，什么时候仍然可以走 npm 标准安装
-3. **配置Anthropic服务**：获取并正确配置API密钥
+3. **选择认证方式**：根据已有订阅、Console 或组织提供的服务完成登录；只有使用 API Key 时才配置密钥
 4. **完成Claude Code安装**：掌握原生安装与 npm 标准安装两条主路径
 5. **集成到主流IDE**：VS Code、Cursor、JetBrains等编辑器配置
 6. **验证环境可用性**：通过Hello World测试确认所有组件正常工作
@@ -44,12 +44,12 @@
 
 ```
 ✅ 术语表（3分钟） - 快速了解关键概念
-✅ 第3部分：API Key配置（10分钟）
-✅ 第4部分：Claude Code原生安装（5分钟） - 一行命令搞定！
-✅ 第5部分：启动与验证（12分钟）
+✅ 第4部分：选择账号和认证方式（10分钟）
+✅ 第5部分：选择一条安装路径（5分钟）
+✅ 第6部分：首次启动与验证（12分钟）
 ```
 
-**30分钟后你能达到**：成功启动Claude Code，运行Hello World示例
+**完成这条路径后**：你应能启动 Claude Code，并检查 Hello World 示例的文件和运行结果。这里的时间只是学习安排，登录、下载和排障可能需要更久。
 
 ---
 
@@ -60,9 +60,9 @@
 **学习顺序**：从头到尾所有章节
 
 **建议分段学习**：
-- 第1阶段（1小时）：第1-4部分（理解+API Key+安装）
-- 第2阶段（1小时）：第5-6部分（验证+IDE集成）
-- 第3阶段（30分钟）：第7-8部分（故障排查+FAQ）
+- 第1阶段（约1小时）：第1–5部分，了解工具、检查系统、选择账号和安装方式
+- 第2阶段（约1小时）：第6–7部分，验证启动并按需配置 IDE
+- 第3阶段（约30分钟）：第8–9部分，查故障排查和 FAQ；模型配置可在安装成功后按需阅读
 
 ---
 
@@ -215,8 +215,8 @@ Claude Code：
 **需要慎重考虑：**
 
 1. **编程零基础**：建议先学基础语法和终端操作（建议学习时长：3-6个月）
-2. **只用图形界面**：Claude Code需要熟悉命令行
-3. **网络受限**：需要访问Anthropic API（国内需代理）
+2. **只用图形界面**：可以选择 IDE 扩展或 Desktop；本章的终端路径需要先熟悉基本命令行操作
+3. **网络受限**：先确认所选服务支持你的所在地区，以及当前网络能访问对应登录和模型端点；组织网络按管理员提供的代理配置处理
 
 ---
 
@@ -228,14 +228,14 @@ Claude Code：
 
 | 检查项                      | 状态            | 如果未完成                   |
 | --------------------------- | --------------- | ---------------------------- |
-| **操作系统兼容**      | [ ] 确认        | Windows 10+ / macOS 10.15+ / Linux |
-| **ANTHROPIC_API_KEY** | [ ] 已配置      | 中转站或官网获取(见第三部分) |
-| **终端可用**          | [ ] 能打开      | macOS用终端，Windows用PowerShell |
-| **网络连接**          | [ ] 可访问外网  | 国内用户需代理(见附录)        |
+| **操作系统兼容** | [ ] 确认 | macOS 13+；Windows 10 1809+ / Server 2019+；Linux 发行版见第二部分 |
+| **账号或服务可用** | [ ] 已确认 | 订阅、Console 或组织提供的云服务，见第四部分；API Key 仅适用于相应路径 |
+| **终端可用** | [ ] 能打开 | macOS 用终端，Windows 用 PowerShell 或 CMD |
+| **网络连接** | [ ] 可访问所选服务 | 核对服务地区、登录端点和模型端点；代理使用实际提供的地址 |
 
 **如果所有项都已完成,让我们开始吧!**
 
-> 💡 **提示**：相比旧版本，你现在**省去了安装 Node.js 的时间**！原生安装器自带所有依赖，一条命令搞定！
+> 💡 **提示**：选择原生安装时无需为 Claude Code 单独安装 Node.js；选择 npm 时仍需 Node.js 22+。运行项目所需的 Python、Git 等工具要按项目要求另行准备，Alpine 还需安装官方列出的系统依赖。
 
 ---
 
@@ -294,11 +294,9 @@ curl -I https://api.anthropic.com
 
 ## 第三部分：原生安装说明（⭐ 重要更新）
 
-> 💡 **2026年重大变化**：Claude Code已切换到**原生安装器**！
+> 💡 **安装路径**：原生安装是官方推荐方式，不需要 Node.js；npm 标准安装仍受支持，需要 Node.js 22+。下面按你的平台选择一条路径。
 >
-> **好消息**：你**不再需要安装Node.js**了！官方从npm安装迁移到原生安装，安装过程从40分钟缩短到5分钟！
->
-> ⏱️ **预计时间**：5分钟完成安装
+> ⏱️ **预计时间**：安装本身可能只需几分钟，实际下载、登录与排障时间另计。
 
 ### 3.1 为什么切换到原生安装？
 
@@ -355,7 +353,7 @@ curl -I https://api.anthropic.com
 **原生安装器的一大优势：自动更新！**
 
 - ✅ 后台自动检查更新（无需手动操作）
-- ✅ 增量更新（只下载变化部分，省流量）
+- ✅ 更新在后台下载并安装，下次启动时使用新版本
 - ✅ 可配置更新策略（见高级配置）
 
 **如何禁用自动更新？（可选）**
@@ -365,7 +363,7 @@ curl -I https://api.anthropic.com
 export DISABLE_AUTOUPDATER=1
 ```
 
-> 💡 **建议**：大多数人保持默认开启就好，自动更新让你始终使用最新最安全的版本。
+> 💡 **建议**：保留自动更新通常更省心。更新跟随所选的 `latest` 或 `stable` 通道；`stable` 通常稍晚，不能把自动更新理解为始终运行最新发布版本。
 
 ### 3.4 如果你之前用npm安装过？
 
@@ -377,10 +375,7 @@ export DISABLE_AUTOUPDATER=1
 claude install
 ```
 
-这会：
-1. 下载并安装原生版本
-2. 保留你的所有配置
-3. 删除旧的npm版本
+这会下载并安装原生版本。安装程序与原有配置分开管理；迁移前仍建议备份自己的规则和设置。完成后运行 `claude doctor` 检查实际启动路径，确认新副本可用后，再按附录卸载不再需要的 npm 副本。
 
 **详细迁移步骤** → 见附录：从npm迁移指南
 
@@ -388,60 +383,25 @@ claude install
 
 ## 第四部分：Anthropic 账号准备
 
-> **💡 为什么现在就要准备API Key？**
->
-> **小白常见疑问**："我还没装Claude Code，为什么先要API Key？"
->
-> **答案很简单**：
-> 1. Claude Code是AI助手，需要连接Anthropic的AI服务才能工作
-> 2. API Key就像"通行证"，证明你有权使用AI服务
-> 3. **提前准备好Key的好处**：装完Claude Code立即就能用，不用再等待
->
-> **生活类比**：
-> - Claude Code = 你新买的手机
-> - API Key = SIM卡
-> - 先办好SIM卡，手机到手插卡就能用！
+先确认你准备用哪种账号，再安装和登录；API Key 是其中一种认证凭据。
 
-> **💡 选择提示**：可选择使用**中转站**（更便宜、更稳定），或官方账号。
->
-> - **中转站优势**：价格低（约官方1/3-1/2）、无需科学上网、支付方便
-> - **官方账号优势**：更稳定、有免费额度、支持订阅
->
-> 本课程同时讲解两种方式的配置方法。
+- **已有 Pro、Max、Team 或 Enterprise**：安装后用 claude.ai 账号在浏览器中登录。团队用户先确认管理员已邀请你并给了相应席位。
+- **使用 Claude Console**：按 API 用量结算。当前客户端也支持 Console 浏览器登录而不创建 API Key；组织策略可能改变可选路径。
+- **组织使用 Bedrock、Google Cloud Agent Platform、Foundry 或 Claude apps gateway**：先拿到管理员提供的接入说明，再按对应官方部署文档配置。
 
-### 4.1 注册 Anthropic 账号
+### 4.1 准备可用账号
 
-**注册流程：**
+订阅入口见 [Claude 价格页](https://claude.com/pricing)，Console 入口见 [Claude Console](https://platform.claude.com/)。已有账号无需为了跟练再注册。创建账号前先核对[官方支持的国家和地区](https://www.anthropic.com/supported-countries)，注册方式、验证要求和组织资格以实际页面为准。
 
-1. **访问注册页面**：https://console.anthropic.com/
-2. **点击"Sign Up"（注册）**
-3. **选择注册方式**（三种任选其一）：
+本教程没有验证中国大陆手机号注册成功率，也不能承诺固定赠送额度。验证码或地区资格有问题时，请查官方支持说明或联系支持，不要依据旧教程猜测可用号码或登录按钮。
 
-   - Google账号登录（推荐，最快）
-   - 邮箱+密码注册
-   - GitHub账号登录
-4. **完善账号信息**：
-
-   - 姓名：真实姓名或开发者昵称
-   - 使用场景：选择"Personal Use"（个人使用）或"Business"（商业）
-   - 主要编程语言：可多选
-5. **手机验证（可能需要）**：
-
-   - 支持中国大陆号码（+86）
-   - 会收到6位数验证码短信
-   - 如果未收到，可选择语音验证
-
-> **注意**：国内手机号注册成功率约80%。如果多次失败，可尝试使用Google Voice虚拟号码、香港/台湾号码，或联系Anthropic支持。
+下一节只供选择 API Key 路径的读者使用；订阅和 Console 浏览器登录用户可以直接进入第五部分。
 
 ### 4.2 API Key 获取步骤
 
 **什么是API Key？**
 
-API Key是一串密钥，作用类似密码，用于：
-
-- 证明你有权使用Claude AI服务
-- 追踪API调用次数（计费依据）
-- 控制访问权限
+API Key 是一串认证凭据，用来证明调用者身份并把请求计入所属组织。API 费用按实际模型和用量计算，不是只按请求次数结算。
 
 **格式示例：**
 
@@ -451,58 +411,16 @@ sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 **获取步骤：**
 
-1. **进入API Keys页面**
-
-   登录后点击左侧菜单：`Settings → API Keys`
-
-   或直接访问：https://console.anthropic.com/settings/keys
-2. **创建新Key**
-
-   点击"Create Key"按钮，填写：
-
-   - Key名称：例如"claude-code-laptop"（方便区分多个key）
-   - 权限：选择"Full Access"（完全访问）
-3. **复制并保存Key**
-
-   ⚠️ **关键警告**：
-
-   - Key只显示一次！关闭窗口后无法再看到
-   - 必须立即复制并保存到安全位置
-   - 不要分享给任何人
-
-   **保存方法**：
-
-   1. 创建文本文件 `anthropic-key.txt`
-   2. 粘贴完整key
-   3. 保存到电脑安全位置（如Documents文件夹）
-4. **验证Key有效性**
+1. 打开 [Console 的 API Keys 页面](https://platform.claude.com/settings/keys)，确认当前组织和工作区。
+2. 按实际页面创建 Key。组织角色可能限制你能创建的密钥；不要为了跟练默认扩大权限。
+3. 把凭据存入自己的密码管理器或组织认可的凭据存储。不要把它保存成项目文件，也不要认为 Documents 中的明文文本自动安全。
+4. 配置到本机后，用下面的命令检查客户端当前使用哪种认证：
 
    ```bash
-   # macOS/Linux
-   curl https://api.anthropic.com/v1/messages \
-     -H "x-api-key: 你的API_KEY" \
-     -H "anthropic-version: 2023-06-01" \
-     -H "content-type: application/json" \
-     -d '{
-       "model": "claude-sonnet-5",
-       "max_tokens": 1024,
-       "messages": [{"role": "user", "content": "Hello"}]
-     }'
-
-   # 如果返回JSON响应(而不是错误),说明Key有效
+   claude auth status --text
    ```
 
-   **Windows PowerShell测试：**
-
-   ```powershell
-   $headers = @{
-       "x-api-key" = "你的API_KEY"
-       "anthropic-version" = "2023-06-01"
-       "content-type" = "application/json"
-   }
-   $body = '{"model":"claude-sonnet-5","max_tokens":1024,"messages":[{"role":"user","content":"Hello"}]}'
-   Invoke-RestMethod -Uri "https://api.anthropic.com/v1/messages" -Method POST -Headers $headers -Body $body
-   ```
+这条命令显示认证状态，不发起模型生成请求，也不证明余额和模型资格都已可用。等首次实际任务成功后，再核对客户端结果与 Console 用量。不要为了验证安装先执行一条可能计费的 `/v1/messages` 请求，也不要把密钥打印到终端或贴到排障截图里。
 
 ### 4.3 环境变量配置
 
@@ -512,9 +430,9 @@ sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 **好处：**
 
-- ✅ 安全：不会意外提交到GitHub
-- ✅ 灵活：不同电脑可用不同Key
-- ✅ 标准：所有开发工具都支持
+- ✅ 减少把密钥直接写入源码的需要，但环境变量仍可能被进程、日志或 shell 历史泄露
+- ✅ 不同电脑可以使用不同凭据
+- ✅ Claude Code 支持 `ANTHROPIC_API_KEY`；其他工具要按自己的文档配置
 
 #### Windows配置方法
 
@@ -524,10 +442,8 @@ sk-ant-api03-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 # 永久添加用户环境变量（PowerShell 7）
 [System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'sk-ant-api03-你的key', 'User')
 
-# 验证配置
-$env:ANTHROPIC_API_KEY
-
-# 重启PowerShell后生效
+# 关闭并重新打开 PowerShell 后，检查是否已配置；不要显示密钥值
+[bool]$env:ANTHROPIC_API_KEY
 ```
 
 **临时配置（仅当前终端有效）：**
@@ -568,8 +484,8 @@ export ANTHROPIC_API_KEY="sk-ant-api03-你的key"
 # 保存后重新加载
 source ~/.zshrc  # 或 source ~/.bashrc
 
-# 验证
-echo $ANTHROPIC_API_KEY
+# 只检查是否设置，不打印密钥
+if [ -n "$ANTHROPIC_API_KEY" ]; then echo "API Key 已配置"; else echo "API Key 未配置"; fi
 ```
 
 **使用nano编辑器示例：**
@@ -607,17 +523,9 @@ export ANTHROPIC_API_KEY="sk-ant-api03-xxxxx"
 
 ### 4.3.1 API中转站配置（可选）
 
-> 💡 **什么是API中转站？** 中转站是第三方提供的API代理服务，将你的请求转发到Anthropic官方API。对于国内用户来说，中转站可以解决网络访问问题，通常价格也更低。
+> 💡 **自定义端点是什么？** 组织网关或第三方服务可能给你一个不同的 API 地址。它与 Anthropic 官方订阅、Console 或官方支持的云平台接入不是同一件事。
 
-**中转站 vs 官方API对比：**
-
-| 对比项 | 官方API | 中转站 |
-|--------|---------|--------|
-| 价格 | 官方定价 | 通常为官方的 1/3 ~ 1/2 |
-| 网络要求 | 需要科学上网 | 无需科学上网 |
-| 支付方式 | 信用卡（Visa/Master） | 支付宝/微信 |
-| 稳定性 | 最稳定 | 取决于中转站质量 |
-| 免费额度 | 新用户有 $5 额度 | 通常无免费额度 |
+这里不评价第三方服务的价格、稳定性、支付方式或赠送额度。接入前先确认它是否兼容 Claude Code 所需的 Anthropic 协议、实际认证变量和模型名称，以及谁能看到请求内容；不能仅凭“可以连接”认定所有功能都受支持。
 
 **配置方法：**
 
@@ -630,7 +538,7 @@ export ANTHROPIC_API_KEY="sk-ant-api03-xxxxx"
 [System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', '你的中转站Key', 'User')
 
 # 设置中转站API地址
-[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'https://你的中转站地址/v1', 'User')
+[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'https://网关提供的实际基础地址', 'User')
 
 # 重启终端后验证
 $env:ANTHROPIC_BASE_URL
@@ -641,10 +549,10 @@ $env:ANTHROPIC_BASE_URL
 ```bash
 # 在 ~/.zshrc 或 ~/.bashrc 中添加
 export ANTHROPIC_API_KEY="你的中转站Key"
-export ANTHROPIC_BASE_URL="https://你的中转站地址/v1"
+export ANTHROPIC_BASE_URL="https://网关提供的实际基础地址"
 
-# 使配置生效
-source ~/.zshrc
+# 根据你使用的 shell 重新加载对应文件
+source ~/.zshrc  # Bash 用户改为 source ~/.bashrc
 ```
 
 **验证中转站是否生效：**
@@ -653,42 +561,28 @@ source ~/.zshrc
 # 启动Claude Code后，观察是否能正常连接
 claude
 
-# 如果连接成功，说明中转站配置正确
-# 如果报错，检查URL末尾是否需要 /v1
+# 连接成功后，用 /status 核对认证和模型，再检查实际任务结果
+# 报错时按服务提供方的文档核对 Base URL、认证方式和协议；不要随意补 /v1
 ```
 
-> ⚠️ **安全提醒**：选择中转站时注意甄别，优先选择口碑好、运营时间长的服务商。中转站可以看到你的API请求内容，避免传输高度敏感的数据。
+> 自定义端点会改变请求接收方。仅把允许交给该服务的材料放入任务；如果要恢复官方接入，还要核对并移除不再需要的 Base URL 与第三方认证配置。
 
 ### 4.4 计费与订阅
 
 **Claude Code需要付费吗？**
 
-两层计费：
+费用取决于你选择的接入方式：
 
-1. **Claude Code工具本身**
+1. **Claude 订阅**：Pro、Max、Team、Enterprise 通过相应计划使用 Claude Code，仍有用量和席位条件；需要额外用量的功能可能另收 usage credits。
+2. **Console 或云提供商**：按对应模型、输入输出、缓存等实际用量计费，组织可以设置支出限制。
 
-   - ✅ 免费开源
-   - 无需购买License
-2. **Claude API使用费**
+公开 GitHub 仓库不等于 Claude Code 本体采用开源许可。其[官方许可](https://github.com/anthropics/claude-code/blob/main/LICENSE.md)说明使用受 Anthropic 的服务条款约束；本课程的 MIT 许可也不适用于 Claude Code 产品。
 
-   - ⚠️ 按调用量计费
-   - 类似手机话费（用多少付多少）
+**Token 是什么？**
 
-**Token是什么？**
+Token 是模型处理文本的单位。分词结果随语言、文本和模型变化，不能用固定的“1–2 个汉字”或“1000 tokens = 750 字”精确推算账单。API 计费还要区分输入、输出和缓存。
 
-Token是AI处理文本的最小单位，用于计费：
-
-- 1 token ≈ 0.75个英文单词
-- 1 token ≈ 1-2个汉字
-- 1000 tokens ≈ 750字短文
-
-> 💡 **成本说明**：
->
-> Claude Code的使用成本取决于你的API调用量。具体计费方式和价格请查看：
-> - **官方价格页面**：https://www.anthropic.com/pricing
-> - **Console账单页面**：https://console.anthropic.com/ → Settings → Billing
->
-> 建议在实际使用中监控自己的消耗情况，根据需求调整使用频率。
+具体计划见 [Claude 价格页](https://claude.com/pricing)，API 价格见 [官方 API 价格文档](https://platform.claude.com/docs/en/about-claude/pricing)。使用中运行 `/usage` 查看当前客户端提供的用量信息，实际支出再到所用服务的账单页面核对。
 
 ---
 
@@ -699,15 +593,17 @@ Token是AI处理文本的最小单位，用于计费：
 
 ### 5.1 安装方式概览
 
-**原生安装提供3种方式**，任选其一即可：
+**下面列出常见安装方式**，选择其中一条即可：
 
-| 安装方式       | 适用平台           | 命令                          | 推荐度 |
-| -------------- | ------------------ | ----------------------------- | ------ |
-| **脚本安装** ⭐ | macOS/Linux/WSL   | `curl ... | bash`         | ⭐⭐⭐⭐⭐ |
-| **PowerShell**  | Windows           | `irm ... | iex`            | ⭐⭐⭐⭐⭐ |
-| **Homebrew**    | macOS/Linux       | `brew install --cask`    | ⭐⭐⭐⭐   |
-| **WinGet**      | Windows 10/11     | `winget install`         | ⭐⭐⭐⭐   |
-| **NPM** ⚠️    | 全平台（需Node.js） | `npm install -g`         | ⭐⭐⭐     |
+| 安装方式 | 适用平台 | 要检查什么 |
+|----------|----------|------------|
+| **脚本安装** | macOS / Linux / WSL | 使用对应 shell；Alpine 先准备系统依赖 |
+| **PowerShell** | 原生 Windows | 用户目录安装，不必默认管理员 |
+| **Homebrew cask** | macOS / Linux，按当前 cask 支持列表确认 | 由 Homebrew 管理，按 cask 通道升级 |
+| **WinGet** | 支持 WinGet 的 Windows | 包管理器升级方式与原生自动更新不同 |
+| **npm** | 支持的平台 | Node.js 22+，不要禁用 optional dependencies |
+
+Linux 还可使用官方 apt / dnf / apk 软件源；需要这条路径时参照[官方安装说明](https://code.claude.com/docs/en/setup#install-with-linux-package-managers)。
 
 > 💡 **推荐**：
 > - **Windows用户**：用PowerShell（最简单）
@@ -946,7 +842,7 @@ claude --help
 # 应该显示完整帮助信息
 
 # 检查安装位置
-where claude     # Windows
+where.exe claude  # Windows PowerShell / CMD
 which claude     # macOS/Linux
 ```
 
@@ -1006,7 +902,7 @@ Error: EACCES: permission denied
 # 如果还是提示权限，检查目录所有权
 ls -la ~/.local/bin
 
-# Windows: 以管理员身份运行PowerShell
+# Windows 原生用户目录安装也通常不需要管理员；先检查实际路径、文件占用和组织策略
 ```
 
 #### 问题3：网络连接失败
@@ -1034,38 +930,30 @@ Windows已保护你的电脑
 
 **解决方案：**
 
-1. 点击"更多信息"
-2. 点击"仍要运行"
-3. 原因：原生安装器由Anthropic签名，SmartScreen可能不认识新签名
+先核对文件是否来自官方安装入口，并按[官方签名说明](https://code.claude.com/docs/en/setup#platform-code-signatures)验证发布者和完整性。来源或签名异常时不要继续运行；公司设备按管理员流程处理。不能仅凭出现 SmartScreen 就断定是新签名误报并点击“仍要运行”。
 
 ---
 
 ### 5.9 卸载 Claude Code
 
-**如果你需要卸载：**
+先用 `claude doctor` 确认安装方式，按对应路径卸载。以下两个代码块只用于原生安装：
 
-**macOS/Linux:**
+**macOS/Linux：**
 
 ```bash
-# 删除可执行文件
-rm ~/.local/bin/claude
-
-# 删除配置和数据（可选）
-rm -rf ~/.claude
+# 移除原生启动器和版本文件
+rm -f ~/.local/bin/claude
+rm -rf ~/.local/share/claude
 ```
 
-**Windows:**
+**Windows PowerShell：**
 
 ```powershell
-# 删除可执行文件
-Remove-Item -Force "$env:USERPROFILE\.local\bin\claude.exe"
-
-# 删除配置和数据（可选）
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude"
-
-# 从 PATH 中移除安装目录（可选）
-# 通过 系统属性 → 环境变量 → 用户变量 Path → 删除 %USERPROFILE%\.local\bin
+Remove-Item -LiteralPath "$env:USERPROFILE\.local\bin\claude.exe" -Force
+Remove-Item -LiteralPath "$env:USERPROFILE\.local\share\claude" -Recurse -Force
 ```
+
+这些步骤保留用户设置和会话。只有明确要清除数据时，先备份自己的规则和记录，再按[官方清理配置说明](https://code.claude.com/docs/en/setup#remove-configuration-files)处理 `~/.claude/` 和 `~/.claude.json`。不要从 Path 中直接删除整个 `.local/bin`，因为其他程序也可能使用这个目录。
 
 **Homebrew卸载：**
 
@@ -1126,66 +1014,22 @@ echo "分析这段代码" | claude -p
 
 **配置步骤1：选择主题**
 
-```
-? Choose your theme:
-  ❯ Light (浅色主题,适合白天)
-    Dark (深色主题,适合夜晚)
-    System (跟随系统设置,推荐)
-```
-
-使用 ↑/↓ 箭头键选择，按回车确认。
-
-**主题说明：**
-
-| 主题   | 特点               | 适用场景         |
-| ------ | ------------------ | ---------------- |
-| Light  | 浅色背景，深色文字 | 光线充足的环境   |
-| Dark   | 深色背景，浅色文字 | 长时间编程，护眼 |
-| System | 自动跟随系统       | 推荐选择         |
+按照终端中实际列出的主题选择，使用箭头键和 Enter 确认。菜单会随版本变化，不必寻找本教程旧示意中的 `System` 选项；进入会话后还能用 `/theme` 调整。
 
 **配置步骤2：安全须知确认**
 
-```
-╭─────────────────────────────────────────────────────────╮
-│                     Safety Notice                       │
-├─────────────────────────────────────────────────────────┤
-│  Claude Code will operate in the current directory:    │
-│  /Users/yourname/projects/my-app                        │
-│                                                         │
-│  This means Claude can:                                 │
-│  ✓ Read files in this directory and subdirectories     │
-│  ✓ Create new files                                    │
-│  ✓ Modify existing files (with your confirmation)      │
-│  ✓ Run commands (with your confirmation)               │
-│                                                         │
-│  Claude will NOT:                                       │
-│  ✗ Access files outside this directory                 │
-│  ✗ Access your personal data                           │
-│  ✗ Execute commands without permission                 │
-╰─────────────────────────────────────────────────────────╯
-
-? Do you understand and accept these conditions?
-  ❯ Yes, I understand and accept
-    No, exit and reconsider
-```
+阅读当前客户端显示的使用和安全提示，确认你理解工具可以读取文件、修改文件并运行命令。不要把目录信任提示理解为系统隔离；下面的权限说明才是检查操作边界的入口。
 
 **重要理解 - Claude Code的权限模型：**
 
-1. **沙盒隔离** - 只能访问当前目录
-2. **确认机制** - 危险操作需要你确认
-3. **只读优先** - 默认只读，修改需授权
-4. **审计日志** - 所有操作都有记录
+1. **先看当前权限模式**：工具调用按模式、已有规则和组织策略处理，不一定每次修改都再问你。v2.1.283 起，交互终端和 VS Code 在满足可用条件时默认使用 auto；显式设置和部分环境会改变起始模式，详见[官方起始模式说明](https://code.claude.com/docs/en/permission-modes#which-mode-a-session-starts-in)。
+2. **目录不是隔离边界**：在项目目录启动不代表只能访问这里；额外目录、工具、MCP、hooks 与权限规则都要结合检查。
+3. **沙箱另行配置**：OS sandbox 主要约束 shell 的文件与网络访问，需要按平台启用；原生 Windows 不支持，不能假定安装后自动获得隔离。
+4. **用结果核对操作**：查看会话中的工具调用和实际文件改动；需要组织审计时另行配置日志，不能把会话记录当完整的安全审计系统。
 
 **配置步骤3：目录信任确认**
 
-```
-? Trust this directory?
-  /Users/yourname/projects/my-app
-
-  ❯ Yes, trust this directory
-    No, exit
-    Trust this directory and all parent directories
-```
+客户端请求信任目录时，先检查显示的实际路径和仓库来源，再按界面中的选项决定是否继续。本教程不要求你信任上级目录；具体选项以当前客户端为准。
 
 **不要信任以下目录：**
 
@@ -1196,74 +1040,33 @@ echo "分析这段代码" | claude -p
 
 **配置步骤4：认证方式选择**
 
-```
-? How would you like to authenticate?
+按照第四部分选好的账号登录。订阅和 Team / Enterprise 用户通常走 claude.ai 浏览器登录；Console 用户可以选择当前支持的浏览器登录路径或 API Key；组织云平台用户按对应接入说明配置。
 
-  ❯ API Key (recommended for API users)
-    Use environment variable: ANTHROPIC_API_KEY
-    Most flexible and secure
-
-    Claude App Login (for Pro/Max subscribers)
-    Login via browser
-    Uses your subscription quota
-
-    Manual Entry
-    Enter API key now
-    Stored in config file
-```
-
-**认证方式对比：**
-
-| 方式     | 优点               | 缺点            | 推荐度     |
-| -------- | ------------------ | --------------- | ---------- |
-| 环境变量 | 最安全，跨项目共享 | 需要提前配置    | ⭐⭐⭐⭐⭐ |
-| App登录  | 使用订阅配额       | 需要Pro/Max订阅 | ⭐⭐⭐⭐   |
-| 手动输入 | 方便               | 不安全，易泄露  | ⭐⭐       |
+若已设置 `ANTHROPIC_API_KEY`，客户端可能先要求确认使用该凭据，而不打开订阅登录流程。登录完成后，在 shell 运行 `claude auth status --text`，在会话中用 `/status` 核对实际认证。环境变量、浏览器登录和密钥存储各有用途，不能用星级断言一种总是最安全。
 
 **第三方平台与 AWS Bedrock（v2.1.92，摘自官方 release）**：[v2.1.92](https://github.com/anthropics/claude-code/releases/tag/v2.1.92) 写明，在登录界面选择 **「3rd-party platform」** 时，可使用 **interactive Bedrock setup wizard**，引导完成 *AWS authentication, region configuration, credential verification, and model pinning*。菜单文案与步骤顺序以你安装的 CLI 版本为准；与仅使用 API Key / `modelOverrides` 走 Bedrock 的路径是否等价，请按官方文档区分场景。
 
 **配置步骤5：完成初始化**
 
-```
-╭─────────────────────────────────────────────────────────╮
-│            Setup Complete! 🎉                           │
-├─────────────────────────────────────────────────────────┤
-│  Configuration summary:                                 │
-│  ✓ Theme: System                                        │
-│  ✓ Authentication: API Key (environment variable)      │
-│  ✓ Trusted directory: /Users/yourname/projects/my-app  │
-│  ✓ Model: claude-sonnet-4 (default)                    │
-│                                                         │
-│  Quick start:                                           │
-│  • Type your message to chat with Claude               │
-│  • Use /help to see available commands                 │
-│  • Use /exit to quit                                    │
-╰─────────────────────────────────────────────────────────╯
-
-Claude Code v2.1.92
-Working directory: /Users/yourname/projects/my-app
-
-You: █
-```
+完成后，确认可以输入任务，并用 `/status` 查看实际工作目录、模型与认证。界面版本号和默认模型随安装渠道、账号和组织设置变化，不必和旧示意中的 v2.1.92 / Sonnet 4 相同。
 
 ### 6.3 配置文件结构
 
-Claude Code的配置分为**全局**和**项目**两级：
+常用配置位置如下。先分清项目指令、设置文件和客户端状态，再决定改哪一份：
 
+```text
+~/.claude/settings.json             用户设置
+~/.claude.json                      客户端状态与部分全局配置
+项目目录/CLAUDE.md                  项目指令
+项目目录/.claude/settings.json      项目共享设置
+项目目录/.claude/settings.local.json 个人项目设置
+项目目录/.claude/agents/            子代理定义
+项目目录/.claude/skills/            Skills
+项目目录/.claude/commands/          legacy commands
+项目目录/.mcp.json                  项目 MCP 配置
 ```
-~/.claude/                      ← 全局配置目录
-├── config.json                 ← 全局配置文件
-├── auth-token.json             ← 认证令牌
-├── trusted-directories.json    ← 信任的目录列表
-├── cache/                      ← 缓存目录
-└── logs/                       ← 日志目录
 
-项目目录/.claude/              ← 项目级配置
-├── config.json                 ← 项目配置（覆盖全局）
-├── commands/                   ← 自定义命令
-├── skills/                     ← 自定义技能
-└── hooks/                      ← 自定义钩子
-```
+组织还可以提供 managed settings；部分配置有专属作用域。认证凭据的存储方式随平台和认证路径变化，不要照着旧 `auth-token.json` 文件名手工创建或编辑。详见[官方设置文件与优先级](https://code.claude.com/docs/en/settings)。
 
 ---
 
@@ -1329,10 +1132,10 @@ You: █
 
 | 参数                                      | 作用                   | 什么时候用           |
 | ----------------------------------------- | ---------------------- | -------------------- |
-| `claude`                                | 默认启动（会询问权限） | 日常使用             |
-| `claude --dangerously-skip-permissions` | 跳过权限询问           | 信任的项目，快速开发 |
+| `claude` | 默认启动；权限按当前模式与规则处理 | 日常使用 |
+| `claude --dangerously-skip-permissions` | 跳过大多数权限确认 | 仅限已做好隔离的受控环境 |
 | `claude -p "你的问题"`                  | 直接提问模式           | 快速查询，不需要对话 |
-| `claude --headless`                     | 无界面模式             | 脚本自动化           |
+| `claude -p "任务" --output-format json` | 打印模式，输出 JSON | 脚本读取结构化结果 |
 
 #### --dangerously-skip-permissions 详解（重要！）
 
@@ -1349,80 +1152,30 @@ You: █
 
 如果跳过权限询问，AI做错了你可能来不及阻止！
 
-**风险参考（社区案例）：**
+**理解风险：**
 
-> ⚠️ **风险数据**：
-> - **相当比例的开发者**使用此参数时遇到过**文件误修改**
-> - **少数案例涉及数据损失或损坏**
->
-> **数据来源**：https://www.ksred.com/claude-code-dangerously-skip-permissions
+这个参数等同于进入 `bypassPermissions`，会跳过权限流程中的大多数检查，但不是所有来源信任与配置规则都消失。它也不会建立 OS sandbox。文件、shell 和外部工具都可能造成实际改动，使用前应按[官方权限模式说明](https://code.claude.com/docs/en/permission-modes)检查边界。
 
-**生活类比：**
-- 不加参数 = 保姆做事前都问你"这样行吗？"（安全）
-- 加这个参数 = 保姆直接干，不问你（快但危险）
+不加参数时也不一定每次操作都问你：当前交互会话可能从 auto 开始，已有 allow 规则也可能免确认。需要手动检查时，用 `claude --permission-mode default` 从 Manual 开始，再看每次提示。
 
-**什么时候该用？**
+**什么时候考虑使用？**
 
-✅ **推荐使用场景：**
-- 你自己的个人项目（信任的代码）
-- 快速开发，频繁修改（避免反复确认）
-- 只读操作（查询、分析，不修改代码）
-- 你已经很熟悉Claude Code的行为
+只在你已经建立隔离边界、能接受工作区被改动的受控环境里考虑使用。官方建议使用隔离容器或虚拟机，并限制它能接触的文件和网络。模型调用本身仍需要连接所选服务；“隔离网络”指限制其他网络访问，不是让 Claude 离线推理。
 
-❌ **绝对不要用：**
-- 公司项目、开源项目（不是你一个人的代码）
-- 第一次用Claude Code（还不了解它会干什么）
-- 生产环境代码（一个错误可能造成事故）
-- 包含敏感数据的项目（财务、用户隐私）
-
-**安全使用建议（Anthropic官方）：**
-
-1. **容器隔离**：在Docker容器中使用（无网络访问）
-2. **白名单限制**：配置 `.claude/settings.json`（权限通过 `permissions.allow` 管理，详见 [官方权限文档](https://code.claude.com/docs/en/permissions)）
-   ```json
-   {
-     "permissions": {
-       "allow": [
-         "Read",
-         "Grep",
-         "Glob",
-         "Bash(npm test)",
-         "Bash(git status)"
-       ]
-     }
-   }
-   ```
-3. **Git保护**：确保代码已提交，随时可回滚
+`permissions.allow` 只指定哪些调用可以免审批，不会把其余工具从会话中移除，也不能恢复 bypass 模式跳过的确认。日常开发优先保留正常权限流程；文件分析可以使用下面的受限打印模式。Git 能帮助恢复已跟踪的改动，但不能保护未提交内容、密钥或外部服务。
 
 **使用示例：**
 
 ```bash
-# ✅ 场景1：只读查询（安全）
-claude --dangerously-skip-permissions -p "分析这个项目的依赖关系"
+# 文件分析：v2.1.248+ 的受限模式移除命令执行等工具
+# 它仍不是操作系统级隔离，具体限制见 CLI 参考
+claude --restricted -p "分析这个项目的依赖关系"
 
-# ⚠️ 场景2：信任的个人项目（谨慎）
-cd ~/my-toy-project
-claude --dangerously-skip-permissions
-
-# ❌ 场景3：公司项目（绝对不要）
-cd ~/company-critical-project
-claude --dangerously-skip-permissions  # 💀 别这么干！
+# 若希望跟练时手动查看权限提示，从 Manual 开始
+claude --permission-mode default
 ```
 
-> ⚠️ **重要建议**：
->
-> **新手阶段（前1个月）**：**绝对不要加这个参数**！让AI每次操作都问你，你能学到它在做什么，还能避免误操作。
->
-> **熟练阶段（1个月后）**：自己的学习项目可以加，但：
-> - ✅ 代码先提交到Git
-> - ✅ 不包含重要数据
-> - ✅ 随时能删重来
->
-> **专业阶段**：公司项目、开源项目**永远别加**！社区已记录用此参数把项目搞坏的案例，具体风险分析见下方参考链接。
->
-> **参考**：
-> - 官方最佳实践：https://www.anthropic.com/engineering/claude-code-best-practices
-> - 风险分析：https://claudelog.com/mechanics/dangerous-skip-permissions
+> 是否考虑 bypass，取决于文件与网络隔离、可恢复的数据和明确的任务范围，不取决于已经学了几周，也不取决于仓库属于个人还是公司。初次练习保留正常权限流程，查看实际工具调用和 diff；需要自动化时再为具体工具配置有限的允许规则。
 
 #### 启动验证清单
 
@@ -1454,11 +1207,11 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 **适用工具：**
 
 - VS Code（需要安装Claude Code扩展）
-- Cursor（可以通过Tasks集成，见第7章）
+- Cursor（可安装官方扩展，也可在集成终端或 Tasks 中运行 CLI）
 
 #### VS Code扩展安装（官方扩展已发布）
 
-> ✅ **2026年2月最新**：Claude Code官方VS Code扩展已正式发布（Beta版）！
+> 官方提供 VS Code 扩展，也支持 Cursor 等兼容编辑器；安装和登录条件见[官方 IDE 指南](https://code.claude.com/docs/en/vs-code)。
 
 **扩展信息：**
 - **名称**：Claude Code for VS Code
@@ -1488,39 +1241,13 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 
 **参考文档**：https://code.claude.com/docs/en/vs-code
 
-#### Cursor集成方式（需要手动安装）
+#### Cursor 集成方式
 
-**重要提示**：Cursor虽然基于VS Code，但Claude Code扩展**不能自动检测**Cursor为兼容IDE。
+1. 在 Cursor 的扩展面板搜索 **Claude Code**，或使用[官方页面的 Install for Cursor 入口](https://code.claude.com/docs/en/vs-code#install-the-extension)。
+2. 安装后打开 Claude Code 面板，按实际页面完成登录；没出现时重启编辑器或执行 `Developer: Reload Window`。
+3. 确认面板可接受任务。扩展带有供聊天面板使用的 CLI 副本；如果还要在集成终端运行 `claude`，需完成本章独立 CLI 安装。
 
-**解决方案（社区验证通常能成功）：手动安装VSIX文件**
-
-**步骤：**
-
-1. **找到VSIX文件**
-   - 位置：本地Claude Code安装目录
-   - 或从VS Code Marketplace下载VSIX
-
-2. **手动安装到Cursor**
-   ```bash
-   # 方法1：命令行安装
-   cursor --install-extension /path/to/claude-code.vsix
-
-   # 方法2：拖拽安装
-   # 把VSIX文件拖到Cursor的扩展面板
-   ```
-
-3. **验证安装**
-   - 重启Cursor
-   - 左侧应出现Claude Code图标
-
-**详细教程**：https://www.cursor-ide.com/blog/claude-code-cursor-extension-guide
-
-**替代方案：Tasks集成（推荐新手）**
-
-如果扩展安装失败，可以用Tasks方式（见第7.1节配置）：
-1. 配置 `tasks.json`
-2. 通过命令面板运行任务
-3. 效果类似但更稳定
+编辑器无法安装扩展时，可以在集成终端运行 CLI，或按第7.1节建立 Tasks。Tasks 是调用终端命令的快捷入口，不包含扩展的全部界面能力，也没有证据保证它更稳定。
 
 ---
 
@@ -1544,7 +1271,7 @@ claude --dangerously-skip-permissions  # 💀 别这么干！
 
 #### 6.6.1 基础功能测试（5分钟）
 
-**快速7项测试，确认核心功能正常：**
+**下面用4项检查确认基本启动和问答：** 问答会发起模型请求，可能消耗订阅额度或 API 用量；不要求回复逐字等于示意。
 
 ```bash
 # 测试1：版本检查
@@ -1580,28 +1307,20 @@ claude --help
 
 **操作步骤：**
 
-```bash
-# 步骤1：创建项目目录
-mkdir ~/claude-hello-world
-cd ~/claude-hello-world
+先确认已经有 Python：macOS/Linux 通常用 `python3 --version`，Windows 可用 `python --version` 或 `py --version`。这些运行时不随原生 Claude Code 一起安装；未准备好时，可以先检查文件，运行结果留到环境就绪后验证。这个练习不需要 Git，已有 Git 的读者可以自行建仓库观察 diff。
 
-# 步骤2：初始化Git仓库
-git init
+1. 用编辑器创建空目录 `claude-hello-world`，在该目录打开终端。
+2. 运行 `claude`，在交互会话中输入：
 
-# 步骤3：让Claude创建项目结构
-claude -p "请创建一个Python Hello World项目，包含：
-1. hello.py - 打印 'Hello, Claude Code!'
-2. README.md - 项目说明
-3. .gitignore - Python标准忽略文件"
+   ```text
+   在当前练习目录创建一个 Python Hello World 项目：
+   hello.py 打印 Hello, Claude Code!，README.md 说明运行命令，
+   .gitignore 写入 Python 常见忽略项。只修改这个目录，不新增依赖。
+   完成后告诉我实际创建了哪些文件；没有运行 Python 就明确说明。
+   ```
 
-# 步骤4：验证文件是否创建
-ls -la
-# 预期看到：hello.py, README.md, .gitignore
-
-# 步骤5：运行程序
-python hello.py
-# 预期输出：Hello, Claude Code!
-```
+3. 按当前权限提示处理，并在编辑器中核对 `hello.py`、`README.md` 和 `.gitignore` 的实际内容。不要仅凭回复里列了文件就认为已经创建。
+4. 返回 shell，在这个目录运行 `python3 hello.py`（macOS/Linux）或已确认可用的 `python hello.py` / `py hello.py`（Windows）。预期输出为 `Hello, Claude Code!`；没出现时按实际报错排查。
 
 **预期项目结构：**
 ```
@@ -1627,10 +1346,10 @@ claude-hello-world/
 |--------|------|----------|------|
 | 版本信息 | `claude --version` | 显示当前安装版本 | [ ] |
 | 帮助文档 | `claude --help` | 显示命令列表 | [ ] |
-| API Key | `echo $ANTHROPIC_API_KEY` | 显示完整Key | [ ] |
-| 网络连通 | `ping api.anthropic.com` | 有响应 | [ ] |
-| 文件操作 | Hello World项目 | 成功创建文件 | [ ] |
-| 代码执行 | `python hello.py` | 正常输出 | [ ] |
+| 认证方式 | `claude auth status --text` | 符合你选择的账号或提供商 | [ ] |
+| 网络连通 | 对所用服务做 HTTPS 检查 | 能收到 HTTP 响应；不代表已获模型权限 | [ ] |
+| 文件操作 | 在编辑器中核对 Hello World 文件 | 内容符合练习任务 | [ ] |
+| 代码执行 | 使用上一步确认可用的 Python 命令 | 正常输出；没有 Python 时先补环境 | [ ] |
 
 **全部打勾 → Claude Code 安装和配置成功。**
 
@@ -1670,18 +1389,18 @@ code --version
 # 如果未安装，访问：https://code.visualstudio.com/
 ```
 
-> ⚠️ **Cursor用户注意**：Cursor是基于VS Code魔改的编辑器，所有VS Code的配置在Cursor里都能用！如果你用Cursor，把下面的"VS Code"理解成"Cursor"就行。
+> 💡 **Cursor 用户**：下面的终端和 Tasks 配置可作为参考；编辑器版本、扩展和快捷键可能不同，合并时保留已有设置并逐项验证。
 
 #### 步骤2：配置集成终端
 
 **这是什么？**
 "集成终端"就是编辑器下方那个黑框框（或白框框），用来运行命令的地方。配置它就是告诉编辑器："用哪个翻译器来执行我的命令"。
 
-**为什么要配置？**
-不配置的话，编辑器可能用错误的"翻译器"（Shell），导致命令运行失败或报错。
+**什么时候需要配置？**
+先打开编辑器自带终端，运行 `claude --version`。能用就不必重写终端配置；需要更换 shell 或调整显示时，再按下面的设置添加相应项目。
 
 **操作方法：**
-打开设置（`Ctrl/Cmd + ,`），点击右上角"打开设置(JSON)"，添加：
+打开设置（`Ctrl/Cmd + ,`），从命令面板打开 **Preferences: Open User Settings (JSON)**，把需要的字段合并到现有对象中。下面指定 `pwsh.exe` 的部分要求先安装 PowerShell 7；只有系统自带 PowerShell 5.1 时，保留已可用的终端配置，不要照抄这个 profile。
 
 ```json
 {
@@ -1856,7 +1575,7 @@ echo $SHELL
 更快！按一个键盘快捷键 vs 打开菜单找任务，哪个快？当然是快捷键！
 
 **操作方法：**
-创建或编辑 `.vscode/keybindings.json`：
+从命令面板打开 **Preferences: Open Keyboard Shortcuts (JSON)**，把下面的绑定加入用户 `keybindings.json`。它不放在项目 `.vscode/keybindings.json` 中；已有绑定要合并，并先检查快捷键冲突。
 
 ```json
 [
@@ -1899,9 +1618,7 @@ Cursor是基于VS Code魔改的AI编辑器，自带AI助手。和Claude Code配�
 - ✓ AI代码补全（边写边提示）
 - ✓ 与Claude Code互补而非冲突（两个AI工具不打架）
 
-> 💡 **重要提示**：Cursor的所有配置和VS Code**完全相同**！上面第7.1节的配置，在Cursor里一字不差地照搬就行。
-
-**唯一不同：打开设置文件的方法**
+> 💡 **复用配置时**：Cursor 支持常见的 VS Code 终端和 Tasks 设置，但具体扩展、设置入口和快捷键仍要在当前编辑器中验证。先确认 `claude --version` 能在集成终端运行，再按需加 Tasks。
 
 Cursor界面和VS Code略有不同，打开设置JSON文件的方法如下：
 
@@ -1946,18 +1663,7 @@ C:\Users\你的用户名\AppData\Roaming\Cursor\User\settings.json
 
 ---
 
-**配置完成后，Cursor就能完美运行Claude Code了！**
-
-Cursor的配置与VS Code完全相同，如果上面VSCode中配置过，可以直接复用上面的配置：
-
-```bash
-# 将VS Code配置复制到Cursor
-# macOS/Linux:
-cp -r ~/project/.vscode ~/project/.cursor
-
-# Windows:
-xcopy /E /I %USERPROFILE%\project\.vscode %USERPROFILE%\project\.cursor
-```
+同一项目中的 `.vscode/tasks.json` 可以继续作为任务配置，不要为了 Cursor 把整个 `.vscode` 复制或改名成 `.cursor`。用户设置和快捷键属于各编辑器自己的配置；在 Cursor 中分别打开对应 JSON 文件，合并实际需要的字段。
 
 **推荐工作流：**
 
@@ -2013,41 +1719,15 @@ xcopy /E /I %USERPROFILE%\project\.vscode %USERPROFILE%\project\.cursor
 
 #### Windows平台
 
-**问题1：PowerShell执行策略限制**
+**问题1：PowerShell 执行策略限制 npm 启动脚本**
 
-```powershell
-# 错误信息（原生安装时可能遇到）
-claude : 无法加载文件，因为在此系统上禁止运行脚本。
-```
+如果错误提到 `npm.ps1` 或 `claude.ps1`，PowerShell 的执行策略可能在阻止 npm 创建的脚本启动器。原生 `claude.exe` 与 `irm ... | iex` 安装方式不受这个脚本文件策略影响，不要把该报错归因于原生二进制。
 
-**原因**：Windows默认安全策略禁止运行未签名脚本
+先用 `npm.cmd` / `claude.cmd` 验证对应 npm 启动器，或选择原生安装。如果确实需要改变自己的脚本策略，并且组织允许，可以按[官方排障说明](https://code.claude.com/docs/en/troubleshoot-install#running-scripts-is-disabled-on-this-system)设置 `RemoteSigned -Scope CurrentUser`；这个用户级设置通常不需要管理员权限。
 
-**解决方案：**
+**问题2：安全软件阻止或隔离文件**
 
-```powershell
-# 方法1：修改执行策略（管理员PowerShell）- 推荐
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# 方法2：使用CMD而不是PowerShell
-# Win+R → cmd
-
-# 方法3：每次临时允许执行
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-**问题2：Windows Defender误报**
-
-```bash
-# 症状：安装过程中文件被删除
-# 原因：Windows Defender将claude.exe识别为潜在威胁
-
-# 解决方案
-# 1. 添加 Claude Code 安装目录到排除列表
-#    Windows安全 → 病毒和威胁防护 → 排除项
-#    添加：C:\Users\<用户名>\.local\bin
-
-# 2. 临时禁用实时保护（不推荐）
-```
+先查看安全软件的检测记录、文件路径和来源，不要直接判定为误报。确认安装来自官方入口，并按[官方签名与完整性说明](https://code.claude.com/docs/en/setup#binary-integrity-and-code-signing)核对；公司电脑交给管理员处理。不要为了完成安装把整个 `.local/bin` 加入排除列表或关闭实时保护。
 
 **问题3：命令找不到**
 
@@ -2114,7 +1794,7 @@ Win+R → 输入 sysdm.cpl → 回车 → 高级 → 环境变量 → 用户变�
 # 症状
 claude: command not found
 
-# 原因：PATH未更新（原生安装应该自动配置）
+# 原因可能是安装目录未在当前终端 PATH 中；以安装器提示和实际路径为准
 
 # 解决方案：检查原生安装位置
 ls ~/.local/bin/claude
@@ -2128,17 +1808,7 @@ source ~/.zshrc
 
 **问题2：macOS Gatekeeper阻止**
 
-```bash
-# 症状
-"claude" cannot be opened because the developer cannot be verified
-
-# 解决方案
-# 方法1：移除隔离属性
-sudo xattr -r -d com.apple.quarantine ~/.local/bin/claude
-
-# 方法2：在系统设置中允许
-# 系统设置 → 隐私与安全性 → 点击"仍要打开"
-```
+先核对下载来源、实际发布文件及其代码签名。Claude Code 的 macOS 官方二进制有签名和公证说明，见[官方平台签名文档](https://code.claude.com/docs/en/setup#platform-code-signatures)。文件来源不明或签名异常时不要通过移除隔离属性继续运行；组织设备按管理员要求排查。
 
 ---
 
@@ -2165,8 +1835,9 @@ brew install --cask claude-code
 # 或
 winget install Anthropic.ClaudeCode
 
-# 方案3：手动下载安装包
-# 访问 https://claude.ai/download 下载对应平台的安装包
+# 方案3：按官方排障页面选其他 CLI 安装方法
+# https://code.claude.com/docs/en/troubleshoot-install
+# claude.ai/download 是图形应用入口，不要把 Desktop 安装包当 CLI 安装包
 ```
 
 **问题2：安装版本不是最新**
@@ -2205,30 +1876,17 @@ claude install
 
 ### 8.3 网络连接问题
 
-**问题：无法访问api.anthropic.com**
+**问题：访问所用服务超时**
+
+先确定当前认证和端点。`ping` 用的是 ICMP，超时不能证明 HTTPS API 不可用；对 Anthropic API 可以在 shell 做下面的只读检查：
 
 ```bash
-ping api.anthropic.com
-# 请求超时
+curl -I https://api.anthropic.com
 ```
 
-**解决方案：**
+Windows PowerShell 可用 `curl.exe -I https://api.anthropic.com`。收到 HTTP 错误码也说明服务器有响应，但不证明你有模型资格或认证成功。订阅登录和其他提供商还需检查各自端点，参照[官方网络配置](https://code.claude.com/docs/en/network-config)。
 
-```bash
-# 方案1：配置代理（推荐）
-export https_proxy=http://127.0.0.1:7890
-export http_proxy=http://127.0.0.1:7890
-# Windows PowerShell：
-$env:https_proxy="http://127.0.0.1:7890"
-$env:http_proxy="http://127.0.0.1:7890"
-
-# 方案2：修改DNS
-# Windows：设置DNS为8.8.8.8或114.114.114.114
-# macOS/Linux：编辑/etc/resolv.conf添加nameserver 8.8.8.8
-
-# 方案3：使用API中转服务
-# 设置自定义API端点（见第三部分API Key配置）
-```
+组织要求代理时，使用管理员提供的实际 HTTP/HTTPS 代理地址，再启动新会话；`127.0.0.1:7890` 只是示例，只有本机确有代理监听才可使用。不要仅因一次超时就改系统 DNS、绕过服务地区条件或改用未经确认的中转服务。
 
 **问题2：SSL证书错误**
 
@@ -2279,36 +1937,23 @@ env | grep -i proxy
 
 ### 8.4 API Key 配置问题
 
+这一节只排查选择了 API Key 的路径。订阅或 Console 浏览器登录用户先运行 `claude auth status --text`，不要因环境变量为空就创建或更换 API Key。
+
 **问题：环境变量未生效**
 
-```bash
-echo $ANTHROPIC_API_KEY
-# 显示为空
-```
-
-**解决方案：**
+只检查是否设置，不回显凭据。在 Bash / Zsh 中运行：
 
 ```bash
-# macOS/Linux：确认配置文件
-cat ~/.zshrc | grep ANTHROPIC
-# 应该看到：export ANTHROPIC_API_KEY="sk-ant-..."
-
-# 如果没有，手动添加
-echo 'export ANTHROPIC_API_KEY="你的key"' >> ~/.zshrc
-source ~/.zshrc
+if [ -n "$ANTHROPIC_API_KEY" ]; then echo "API Key 已配置"; else echo "API Key 未配置"; fi
 ```
 
-**Windows：**
+Windows PowerShell 中运行：
 
 ```powershell
-# 检查是否配置
-[System.Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY', 'User')
-
-# 如果为空，重新配置
-[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', 'sk-ant-api03-你的key', 'User')
-
-# 重启PowerShell
+[bool]$env:ANTHROPIC_API_KEY
 ```
+
+若当前进程没有值，回到第4.3节检查你实际使用的 shell 配置。修改用户级永久变量后重新打开终端；已有 Claude Code 进程不会自动读取 shell 后续变更。
 
 **问题：Key无效或过期**
 
@@ -2333,32 +1978,9 @@ source ~/.zshrc
 
 **症状**：Key看起来不完整或有空格
 
-**正确格式检查（PowerShell 7）：**
+**检查方法：**
 
-```powershell
-# Key应该满足：
-# 1. 以"sk-ant-api03-"开头
-# 2. 后面跟长串字母数字
-# 3. 总长度约95字符
-# 4. 无空格、无换行
-
-# 验证长度
-$env:ANTHROPIC_API_KEY.Length
-# 应该输出：95左右
-
-# 验证格式
-$env:ANTHROPIC_API_KEY -match '^sk-ant-api03-[A-Za-z0-9_-]+$'
-# 应该输出：True
-```
-
-**常见格式错误：**
-
-```bash
-❌ sk-ant-XXXXX （缺少api03）
-❌ sk-XXXXX （缺少ant-api03）
-❌ 有空格或换行符
-❌ 复制时多复制/少复制字符
-```
+确认复制时没有前后空格、换行或缺字，并核对凭据来自你实际使用的服务。不要用固定 `api03` 前缀或“约95字符”判断所有 Key；第三方凭据格式也可能不同。只检查存在性和复制完整性，不打印完整值。仍报认证错误时，到相应提供方检查凭据状态或按官方登录排障处理。
 
 ### 8.5 终端相关问题
 
@@ -2467,16 +2089,11 @@ history | tail -20
 
 #### Q1：运行 `code --version` 报错说找不到命令？
 
-**A1：你可能在Cursor里运行的！**
+**A1：先分清命令属于哪个程序，再检查它是否在 PATH 中。**
 
-- `code` 是 **VS Code** 的命令
-- `cursor` 是 **Cursor** 的命令
-
-**正确做法：**
-
-- 在Cursor里运行：`cursor --version`
-- 在VS Code里运行：`code --version`
-- 查看Claude Code版本：`claude --version`
+- `code --version` 检查 VS Code；`cursor --version` 检查 Cursor；`claude --version` 检查 Claude Code。
+- 命令不由你当前打开哪个编辑器决定。在 Cursor 终端里也可能运行 `code`，前提是 VS Code 的 CLI 已安装并加入 PATH。
+- 要打开 IDE 配置而相应命令不可用时，可先用编辑器菜单或命令面板；安装 Claude Code 本身不要求 `code` 可用。
 
 #### Q2：找不到settings.json文件在哪儿？
 
@@ -2521,21 +2138,16 @@ history | tail -20
 | **Mac**     | zsh        | 2019年后的系统默认 |
 | **Linux**   | bash       | 通用标准           |
 
-**你不用手动选**，按照第7.1节配置后，编辑器会自动选对的！
+先用编辑器当前能打开的 shell；要更换时，确认目标 shell 已安装。第7.1节中的 PowerShell 7 profile 依赖 `pwsh.exe`，不能替系统自动安装它。
 
 #### Q5：怎么知道我现在用的是哪个Shell？
 
-**A5：打开终端运行这个命令：**
+**A5：根据当前终端检查。**
 
-```bash
-echo $SHELL
-```
+- Windows PowerShell：运行 `$PSVersionTable.PSVersion`，查看实际 PowerShell 版本。
+- Bash / Zsh：`echo "$SHELL"` 通常显示账号的默认登录 shell；如果你临时切换过 shell，再用 `ps -p $$ -o comm=` 检查当前进程。
 
-**看输出：**
-
-- 显示 `/bin/zsh` → 你在用zsh
-- 显示 `/bin/bash` → 你在用bash
-- Windows显示 `powershell` → 你在用PowerShell
+PowerShell 中的 `$SHELL` 通常没有对应值，不能期待它返回 `powershell`。
 
 ---
 
@@ -2584,18 +2196,9 @@ You: █
 
 **A8：这个参数跳过权限询问，新手别用！**
 
-**通俗解释：**
+先看会话底部的权限模式。当前交互会话可能默认使用 auto，已有允许规则也会影响是否询问；不加参数不等于每次都要确认。
 
-- 不加参数 = AI做事前都问你"可以吗？"
-- 加参数 = AI直接干，不问你
-
-**老金建议：**
-
-- 🟢 **新手（前2周）**：别加！让AI问你，你能学到它在做什么
-- 🟡 **熟练后**：自己的小项目可以加，省时间
-- 🔴 **重要项目**：永远别加！安全第一
-
-详细说明见第6.5.2节。
+需要手动查看权限提示时，从 `claude --permission-mode default` 的 Manual 开始。减少常规询问时，检查 auto、acceptEdits 或有限的 allow 规则。只有明确建立文件和网络隔离的受控环境才考虑 bypass；“学了两周”和“个人小项目”都不能替代隔离。详细说明见第6.5.2节。
 
 #### Q9：启动Claude Code后怎么退出？
 
@@ -2691,7 +2294,7 @@ You: █
 **工作原理：**
 
 1. 你问问题 → Claude Code读取相关文件
-2. 把文件内容发给Anthropic API处理
+2. 把任务所需的上下文发给当前配置的模型提供商处理
 3. 收到AI回复后显示给你
 
 **隐私保护：**
@@ -2727,19 +2330,9 @@ You: █
 
 **A16：检查网络和上下文大小！**
 
-**网络检查：**
+先看 `/context`，确认是不是上下文过大，再核对当前模型、服务状态和网络。到无关的新任务可以用 `/clear`，同一任务需要保留重点时用 `/compact`。
 
-```bash
-# 测试到Anthropic的延迟
-ping api.anthropic.com
-# 延迟<500ms = 正常，>1000ms = 慢
-```
-
-**优化方法：**
-
-1. ✅ 使用代理（国内用户必需）
-2. ✅ 减少上下文（不要让AI读太多文件）
-3. ✅ 使用 `.claudeignore` 排除无关文件
+网络检查使用实际服务的 HTTPS 端点，不能用 `ping` 延迟阈值保证模型响应速度。减少无关材料时明确任务范围，并把生成目录加入合适的搜索忽略配置；官方没有把 `.claudeignore` 定义为统一的文件访问或上下文控制入口。代理只在你的网络实际需要时配置。
 
 #### Q17：国内网络访问Anthropic API很慢？
 
@@ -2819,17 +2412,13 @@ export HTTP_PROXY=http://127.0.0.1:7890
 
 #### Q19：启动时报错 `API key not found`？
 
-**A19：没配置ANTHROPIC_API_KEY环境变量！**
-
-**快速检查：**
+**A19：先看实际认证，不要仅凭旧报错文字断定缺环境变量。**
 
 ```bash
-# 查看环境变量是否存在
-echo $ANTHROPIC_API_KEY  # macOS/Linux
-echo $env:ANTHROPIC_API_KEY  # Windows
+claude auth status --text
 ```
 
-**如果显示空 → 没配置，回到第四部分重新配置。**
+订阅或 Console 浏览器登录不必设置 `ANTHROPIC_API_KEY`。选择 API Key 路径却未配置时，回到第四部分处理；已经设置却报错时，检查凭据状态、当前提供商和残留配置。不要把完整密钥输出到终端。
 
 #### Q20：我之前用npm安装过Claude Code，怎么办？
 
@@ -2840,10 +2429,7 @@ echo $env:ANTHROPIC_API_KEY  # Windows
 claude install
 ```
 
-这个命令会：
-1. 下载并安装原生版本
-2. 保留你的所有配置
-3. 自动卸载旧的npm版本
+`claude install` 安装原生副本。随后运行下面的只读检查，确认实际启动路径和新版本；旧 npm 副本是否还在，要以诊断结果为准，不能保证自动卸载。
 
 **验证迁移成功：**
 
@@ -2853,11 +2439,10 @@ claude doctor
 # 核对版本、安装类型与实际启动路径
 ```
 
-**如果迁移失败，手动卸载npm版本：**
+**确认原生副本已经可用后，需要时再卸载旧 npm 副本：**
 
 ```bash
 npm uninstall -g @anthropic-ai/claude-code
-# 然后重新运行原生安装
 ```
 
 #### Q21：原生安装和npm安装有什么区别？
@@ -2874,20 +2459,15 @@ npm uninstall -g @anthropic-ai/claude-code
 
 #### Q22：原生安装可以离线使用吗？
 
-**A22：可以！安装后只需要网络访问API即可。**
+**A22：常规 Anthropic 或云提供商接入需要联网。**
 
-- ✅ 安装时需要网络（下载安装包）
-- ✅ 安装后可以离线使用（但需要能访问Anthropic API）
-- ✅ 配合本地模型（如Ollama）可以完全离线
+原生安装省去 Node.js 依赖，不会把 Claude 模型安装到本机。安装包下载、登录、模型请求与更新都有各自网络需求。Ollama 提供[单独的 Claude Code 集成](https://docs.ollama.com/integrations/claude-code)；只有已下载的本地模型、相应硬件和不依赖外网的工具链都就绪时，才可以讨论离线运行，不能把云模型或整个 Claude Code 功能都算作离线可用。
 
 #### Q23：原生安装会占用多少空间？
 
-**A23：大约100-200MB。**
+**A23：按实际安装目录和保留版本检查。**
 
-- Windows: `~150MB` 在 `C:\Users\你的用户名\.local\bin\`
-- macOS/Linux: `~100MB` 在 `~/.local/bin/` 和 `~/.claude/`
-
-相比npm安装节省约50%空间。
+原生启动器位于 `~/.local/bin`，版本文件位于 `~/.local/share/claude`；用户设置和会话还会占用 `~/.claude`。具体大小随平台、版本和记录变化，不能保证固定100–200MB或比npm节省50%。
 
 #### Q24：我电脑上已经有Node.js了，还需要卸载吗？
 
@@ -2904,8 +2484,8 @@ npm uninstall -g @anthropic-ai/claude-code
 **查看更新状态：**
 
 ```bash
-claude --version
-# 查看当前版本
+claude doctor
+# 查看 Auto-updates 与最近更新诊断；--version 只显示当前版本
 ```
 
 **禁用自动更新：**
@@ -2921,31 +2501,21 @@ $env:DISABLE_AUTOUPDATER="1"
 **手动更新：**
 
 ```bash
-claude install
-# 重新运行安装命令即可更新
+claude update
+# 原生安装手动更新；包管理器安装按对应管理器升级
 ```
 
 #### Q26：公司电脑安装需要管理员权限吗？
 
-**A26：Windows需要，Mac/Linux不需要！**
+**A26：原生用户目录安装通常不需要管理员权限，Windows 也一样。**
 
-**Windows：**
-- ⚠️ 建议以管理员身份运行PowerShell
-- 原因：需要写入 `AppData` 目录
-
-**macOS/Linux：**
-- ✅ 不需要sudo
-- 安装到用户目录 `~/.local/bin/`
+Windows 原生安装写入自己的用户目录，不必以管理员身份运行 PowerShell。Homebrew、WinGet、Linux 包管理器、WSL 启用或组织策略可能有各自的权限要求；遇到权限错误时先确定安装路径和错误来源，不要一律提权。公司设备按管理员的部署要求操作。
 
 #### Q27：安装脚本安全吗？会不会有病毒？
 
-**A27：官方脚本，经过签名和验证！**
+**A27：从官方入口取得脚本，并核对实际发布文件。**
 
-**安全验证：**
-
-1. 官方域名：`claude.ai/install.sh` 和 `claude.ai/install.ps1`
-2. 代码签名：由Anthropic PBC签名
-3. 开源透明：脚本内容可在GitHub公开查看
+下载脚本可读不等于产品采用开源许可，也不能保证所有平台的脚本和二进制都以同一种方式签名。官方分别说明 macOS / Windows 代码签名以及 Linux 的 manifest 完整性验证；按[官方验证步骤](https://code.claude.com/docs/en/setup#binary-integrity-and-code-signing)检查你的安装方式。
 
 **如果你担心，可以先查看脚本：**
 
@@ -2958,12 +2528,12 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 #### Q28：我的问题不在这里，怎么办？
 
-**A20：这样做：**
+**A28：这样做：**
 
-1. ✅ 运行 `claude --help` 查看官方帮助
-2. ✅ 查看日志文件：`~/.claude/logs/` 找错误信息
-3. ✅ 访问官方文档：https://docs.claude.ai/code
-4. ✅ GitHub搜索类似问题：https://github.com/anthropics/claude-code/issues
+1. 运行 `claude --help` 和 `claude doctor` 查看帮助与只读诊断。
+2. 需要日志时，用 `claude --debug-file <实际日志路径>` 明确日志位置，再查看错误；不要假定所有版本都写入 `~/.claude/logs/`。
+3. 访问[官方排障文档](https://code.claude.com/docs/en/troubleshooting)。
+4. 在[官方 GitHub Issues](https://github.com/anthropics/claude-code/issues)搜索类似问题。
 5. ✅ 把错误信息截图，在学习群里问老金！
 
 **提问时请提供：**
@@ -3093,7 +2663,7 @@ claude --model opus
 **官方建议**：
 
 - **Opus 4.8 用户推荐默认 `xhigh`**
-- `low`/`medium` 适合 Sonnet/Haiku 模型日常使用
+- 先在当前模型上查看支持等级；例如官方 effort 支持列表没有列 Haiku，不能假定它也接受 low / medium
 - `max` 只在确实需要时开
 - 如果只是偶发一次深推理，不一定非要改全局设置，可以在 prompt 中写 `ultrathink`
 
@@ -3155,7 +2725,7 @@ CLAUDE_CODE_DISABLE_1M_CONTEXT=1
 
 #### `availableModels`
 
-如果你是团队管理员，想限制"用户能选什么"，用的是 `availableModels`。
+如果你是团队管理员，想限制“用户能选什么”，可以在组织托管设置中配置 `availableModels`。下面是字段示例；普通用户或项目文件里的列表不能当作不可绕过的组织约束。
 
 ```json
 {
@@ -3327,21 +2897,20 @@ claude --model opusplan
 
 **系统要求：**
 
-- [ ] 操作系统兼容（Windows 10+ / macOS 10.15+ / Linux）
-- [ ] 终端可用（PowerShell / Terminal / Bash）
-- [ ] 至少2GB可用磁盘空间
+- [ ] 操作系统和硬件满足第二部分的要求
+- [ ] 终端可用（PowerShell / CMD / Terminal / Bash）
+- [ ] 磁盘有足够空间，具体占用按实际安装检查
 
 **账号准备：**
 
-- [ ] 注册了Anthropic账号（或使用中转站）
-- [ ] 获取了API Key
-- [ ] Key已保存到安全位置
+- [ ] 已确认所选订阅、Console 或组织服务允许使用 Claude Code
+- [ ] `claude auth status --text` 的认证方式符合预期
+- [ ] 只有使用 API Key 时才配置并妥善保管凭据
 
 **系统配置：**
 
-- [ ] 环境变量ANTHROPIC_API_KEY已配置
 - [ ] 终端能正确显示中文
-- [ ] 网络能访问api.anthropic.com（或配置了代理）
+- [ ] 所选服务的登录与模型端点可访问；组织要求代理时已使用实际配置
 
 **Claude Code安装：**
 
@@ -3376,17 +2945,15 @@ claude                     # 进入交互模式
 claude "你的问题"          # 带初始问题进入交互会话
 claude -p "问题"           # 打印模式（脚本友好）
 
-# 更新Claude Code
-claude install             # 重新安装/更新到最新版本
+# 更新原生安装；包管理器安装用对应管理器升级
+claude update
 
-# 环境变量查看
-$env:ANTHROPIC_API_KEY     # PowerShell 7（推荐）
-echo $ANTHROPIC_API_KEY    # macOS/Linux
-echo %ANTHROPIC_API_KEY%   # Windows CMD（不推荐）
+# 查看认证状态，不打印密钥
+claude auth status --text
 
-# 网络测试
-ping api.anthropic.com     # 测试连通性
-curl -I https://api.anthropic.com  # 测试HTTPS访问
+# HTTPS 检查（Windows PowerShell 用 curl.exe）
+curl -I https://api.anthropic.com
+# 收到HTTP响应不等于认证或模型调用成功
 
 # 配置管理
 claude                    # 启动交互会话
@@ -3424,37 +2991,20 @@ claude doctor
 npm uninstall -g @anthropic-ai/claude-code
 ```
 
-**迁移时会保留：**
-- ✅ 所有配置文件（`~/.claude/`）
-- ✅ API Key配置
-- ✅ 自定义命令和技能
-- ✅ 信任目录设置
+迁移通常沿用已有用户设置，但先备份自己的规则和记录，并在新副本中核对实际加载结果；常用位置包括 `~/.claude/` 和 `~/.claude.json`。
 
-**特殊场景：使用nvm的用户**
+**特殊场景：使用 nvm / asdf 的用户**
 
-如果你用nvm管理多个Node版本，可能需要手动处理：
+先完成原生安装和验证，再用 `nvm ls` 查看实际已安装的 Node 版本。逐个切换到确实留有旧 Claude Code npm 包的版本，按需卸载该包；不要照抄 `nvm use 20` / `22` 当成自己的版本列表。卸载旧包后再运行 `claude doctor` 核对路径。
 
-```bash
-# 1. 对每个Node版本卸载
-nvm use 20
-npm uninstall -g @anthropic-ai/claude-code
-
-nvm use 22
-npm uninstall -g @anthropic-ai/claude-code
-
-# 2. 然后运行原生安装
-claude install
-
-# 3. 清理nvm shims
-rm ~/.asdf/shims/claude  # 如果你用asdf
-```
+如果使用 asdf，按 asdf 的命令重新生成相应 shims，不要直接删除一个猜测的 shim 文件。否则在删掉最后一个 npm 启动器后再执行 `claude install`，可能已经找不到该命令。
 
 ### C. 推荐学习资源
 
 **Claude Code官方文档：**
 
-- 英文：https://docs.anthropic.com/en/docs/claude-code
-- 中文：https://code.claude.com/docs/en/
+- 英文：https://code.claude.com/docs/en/
+- 中文：https://code.claude.com/docs/zh-CN/
 
 **Anthropic API文档：**
 

@@ -22,7 +22,7 @@
 
 完成本课学习后，你将能够：
 
-1. **理解Commands本质**：掌握Slash命令就是Markdown提示词的核心概念
+1. **理解Commands本质**：分清内置操作命令与用 Markdown 编写的自定义工作流入口
 2. **5分钟创建第一个命令**：从零开始创建并运行自定义命令
 3. **分清 legacy commands 与 Skills**：知道什么时候继续用 `.claude/commands/`，什么时候应该迁移到 Skills
 4. **掌握内置命令的新表面**：了解 `/plan`、`/plugin`、`/release-notes`、`/rewind`、`/insights`、`/schedule`、`/statusline`
@@ -54,7 +54,7 @@
 
 ---
 
-### 路径B：完整学习（3-4小时）
+### 路径B：完整学习（4-6小时）
 
 **适合人群**：想系统掌握Commands系统，成为命令开发高手
 
@@ -65,7 +65,7 @@
 - 第1天（30分钟）：第1-3部分（简介+快速开始+内置命令速查）
 - 第2天（1.5小时）：第4部分（自定义命令开发）⭐ 核心内容
 - 第3天（1小时）：第5部分（高级用法）
-- 第4天（0.5小时）：第6-7部分（FAQ+附录）
+- 第4天（1.5小时）：第6-7部分与附录（FAQ + 实战练习 + 模板查阅）
 
 > **注意**：内置命令的详细用法已在「02-基础使用完整指南」中讲解，本教程重点是**自定义命令开发**！
 
@@ -219,9 +219,9 @@ Claude Code做的事：
 4. 执行这个提示词
 ```
 
-### 1.2 命令的三大类型
+### 1.2 命令的类型与来源
 
-Claude Code的命令分为三大类：
+下表分别列出内置命令、自定义命令的两种作用域，以及当前推荐的 Skills：
 
 | 类型                 | 来源               | 存放位置                | 特点               |
 | -------------------- | ------------------ | ----------------------- | ------------------ |
@@ -524,7 +524,7 @@ You: /hello
 |                      | `/plugin`        | 管理插件        | 安装/卸载插件  |      |
 |                      | `/reload-plugins` | 重载插件      | 调试插件改动   |      |
 |                      | `/skills`        | 查看 Skills     | 管理可用工作流 |      |
-|                      | `/reload-skills` | 重新扫描 Skills | 安装/调试 Skill 后立即生效 |      |
+|                      | `/reload-skills` | 重新扫描 Skills | 安装/调试 Skill 后重新发现入口，再调用核对新指令 |      |
 | **其他**       | `/help`          | 显示帮助        | 快速查命令     |  ⭐  |
 |                      | `/release-notes` | 更新日志（v2.1.92+ 为交互式版本选择器） | 查看新功能     |      |
 |                      | `/loop`          | Bundled skill：定时循环执行 | 监控部署状态   |  ⭐  |
@@ -647,34 +647,26 @@ You: /powerup
 
 > 💡 **其他设置方式**：`claude --effort xhigh`（CLI 参数）或 `CLAUDE_CODE_EFFORT_LEVEL=xhigh`（环境变量）。
 
-#### /sandbox - 沙箱隔离模式
+#### /sandbox - shell 命令沙箱
 
-**一句话理解**：给Claude套上"安全围栏"——限制它能读写哪些文件、能不能访问网络。
+**一句话理解**：给 Claude 运行的 shell 命令及其子进程设一道文件与网络边界。文件工具、MCP 和 Hook 不在这道边界内，要另查它们的权限与来源。
 
-```bash
-/sandbox        # 启用OS级沙箱隔离
-```
+在 Claude Code 会话中输入 `/sandbox` 打开面板，选择模式并确认已启用；输入命令本身不等于完成配置。OS 沙箱支持 macOS、Linux 和 WSL2，原生 Windows 的命令不受它保护。
 
-**隔离能力**：
-- **文件系统隔离**：限制可读写的目录范围
-- **网络隔离**：限制外部网络访问
-- **进程隔离**：OS级别的沙箱保护
-
-在 `settings.json` 中可以精细配置：
+下方是项目 `.claude/settings.json` 的合并片段，开启沙箱并拒绝 shell 读取两份敏感文件：
 
 ```json
 {
   "sandbox": {
+    "enabled": true,
     "filesystem": {
-      "allowWrite": ["/tmp", "./src"],
-      "allowRead": ["./", "/usr/lib"],
       "denyRead": [".env", "credentials.json"]
     }
   }
 }
 ```
 
-> ⚠️ **安全提示**：处理不信任的代码或敏感项目时，强烈建议启用沙箱模式。
+它不会把整个机器变成只读，也不会限制读取仅发生在某个目录内。`allowRead` 用来重新开放较宽拒绝区域中的具体路径；`allowWrite` 可以扩大默认写入范围。还要核对额外工作目录、排除命令和允许脱离沙箱重试的设置，详见 [官方沙箱说明](https://code.claude.com/docs/en/sandboxing)。
 
 #### /color - 会话颜色设置
 
@@ -689,7 +681,7 @@ You: /powerup
 
 ```bash
 /copy           # 复制最新一条AI回复到剪贴板
-/copy 3         # 复制第3条AI回复到剪贴板
+/copy 3         # 复制倒数第3条AI回复到剪贴板
 ```
 
 #### /branch - 会话分支
@@ -757,29 +749,13 @@ model: claude-sonnet-5
 | **项目级** | `.claude/commands/`   | 仅当前项目 | 团队共享、项目特定 |
 | **用户级** | `~/.claude/commands/` | 所有项目   | 个人工具、通用模板 |
 
-#### 优先级规则
+#### 同名命令怎样处理
 
-当同名命令存在于多个位置时，按以下优先级：
+当前官方把兼容 command 文件也纳入 Skill 的同名解析规则：企业级高于个人级，个人级高于项目级；Skill 与 `.claude/commands/` 文件同名时，Skill 优先。插件 Skill 带插件命名空间，不能只按项目与用户目录排一条完整优先链。
 
-```
-1. 项目级（最高）: .claude/commands/
-2. 用户级: ~/.claude/commands/
-3. 内置命令（最低）
-```
+本地终端里的自定义 Skill 还可能替换同名内置命令，而内置别名仍保留原行为。不要把 `/clear`、`/help` 等名称当作永久受保护的自定义命名测试。给练习命令起不同名称，输入 `/` 核对实际来源，再调用。
 
-> ⚠️ **重要澄清**：核心系统命令（如 `/clear`、`/help`、`/compact`、`/doctor` 等）是**受保护的**，不能被自定义命令覆盖。上述优先级规则仅适用于**非核心内置命令**。
-
-**示例**：
-
-假设存在：
-
-- `.claude/commands/deploy.md`（项目级）
-- `~/.claude/commands/deploy.md`（用户级）
-- 另一个同名的共享 skill `/deploy`
-
-执行 `/deploy` 时，优先使用项目级的 `deploy.md`。
-
-**但是**：创建 `.claude/commands/clear.md` **不会**覆盖内置的 `/clear` 命令。
+例如，已有 `/deploy` Skill 时，不要只创建 `deploy.md` 就认定会运行这个文件。将练习保存为 `.claude/commands/deploy-lab.md`，用 `/deploy-lab` 验证；维护旧项目时对照 [官方同名解析表](https://code.claude.com/docs/en/skills#resolve-skills-that-share-a-name)。
 
 #### 目录结构建议
 
@@ -815,7 +791,7 @@ description: 这是命令的一句话描述
 # 参数提示（输入/命令后显示的占位符）
 argument-hint: <必需参数> [可选参数]
 
-# 允许使用的工具（限制命令可调用的工具）
+# 在调用此工作流的当前轮次中预先批准这些工具
 allowed-tools:
   - Read
   - Write
@@ -828,7 +804,7 @@ allowed-tools:
 # 指定使用的模型
 model: claude-sonnet-5
 
-# 禁用模型调用（用于纯文本替换命令）
+# 禁止 Claude 自动调用此工作流；用户手动调用仍交给模型处理
 # disable-model-invocation: true
 
 # === 非官方字段（可选，用于自己管理）===
@@ -895,30 +871,21 @@ model: claude-opus-4-8
 
 作用：强制使用指定模型执行命令（覆盖当前会话模型）。
 
-**5. disable-model-invocation（禁用模型调用）**
+**5. disable-model-invocation（只允许用户手动调用）**
 
-```yaml
-disable-model-invocation: true
-```
+设为 `true` 后，Claude 不能自行选择这个工作流。用户仍可输入 `/命令名` 调用，正文也仍会交给模型处理；它不是“零模型调用”或单纯文本插入开关。
 
-作用：当设置为`true`时，命令只进行简单的文本替换，不会触发AI模型推理。
-
-**适用场景**：
-- 纯文本模板命令（快速插入固定内容）
-- 变量替换命令（`$ARGUMENTS` 直接替换）
-- 节省Token和响应时间
-
-**示例**：
 ```markdown
 ---
-description: 快速插入版权声明
+description: 根据姓名生成版权声明，仅手动使用
 disable-model-invocation: true
 ---
 
-© 2025 $ARGUMENTS. All rights reserved.
+请输出版权声明：© 2026 $ARGUMENTS. All rights reserved.
+不要添加其他文字。
 ```
 
-执行 `/copyright 老金` 会直接输出 `© 2025 老金. All rights reserved.`，不经过AI处理。
+把完整示例保存为 `.claude/commands/copyright.md`，手动执行 `/copyright 老金` 后核对生成文本。此设置适合控制工作流的触发时机，不能用来保证免 token 消耗；部署、提交等副作用仍受实际权限与任务授权约束。
 
 ### 4.4 $ARGUMENTS参数处理
 
@@ -987,7 +954,7 @@ $ARGUMENTS 格式：<主题> [风格] [字数]
 
 ### 4.5 工具调用语法
 
-自定义命令可以调用Claude Code的所有工具。
+自定义命令的正文是给 Claude 的指令，下面的 `Read(...)`、`Grep(...)` 写法用于说明希望调用什么工具，并不是可以直接运行的程序。实际可用工具和调用权限取决于本次会话。
 
 #### 基础工具调用
 
@@ -1014,6 +981,8 @@ npm run test
 ````
 
 #### MCP工具调用
+
+下方的 `mcp-router` 工具名和参数仅演示如何在提示词中描述调用意图。本章没有安装或定义这台服务器；先按 04 章连接真实 MCP，在 `/mcp` 中核对当前工具名与输入 schema，再按对应接口编写要求，不能把示意函数当作已有 SDK API。
 
 > 💡 **什么是MCP？**
 >
@@ -1141,7 +1110,7 @@ allowed-tools:
 
 ### 步骤2：信息收集
 使用WebSearch搜索主题相关的最新信息：
-WebSearch(query="$ARGUMENTS 最新资讯 2025")
+搜索词：$ARGUMENTS 最新资讯；按本次任务的基准日期核对发布日期
 
 收集以下信息：
 - 核心概念和定义
@@ -1252,6 +1221,8 @@ You: /write Claude Code入门
 - 便于团队管理
 
 ### 5.2 命令组合与链式调用
+
+下面是提示词编排示例，不是 Claude Code 的自动 shell 流水线。先准备并单独验证示例中引用的 `/hotspot`、`/write`、`/pre-check` 等工作流；本章只给出了部分内容，其余要自行定义或按来源说明安装。Claude 可通过 Skill 工具调用允许自动调用的自定义工作流，`disable-model-invocation: true` 的工作流需要用户手动调用，不能靠在另一个命令里写名称绕过。缺少能力时停下说明，不假装已执行。
 
 #### 在命令中调用其他命令
 
@@ -1381,7 +1352,8 @@ Read(".claude/modules/writing-style.md")
 git clone https://github.com/qdhenry/Claude-Command-Suite.git
 
 # 复制需要的命令到你的项目
-cp Claude-Command-Suite/.claude/commands/dev/* .claude/commands/dev/
+mkdir -p .claude/commands/dev
+cp -R Claude-Command-Suite/.claude/commands/dev/. .claude/commands/dev/
 ```
 
 **常用命令示例**：
@@ -1439,8 +1411,8 @@ claude
 # YAML语法错误会导致命令无法解析
 # 使用在线YAML验证器检查
 
-# 2. 检查allowed-tools配置
-# 如果限制了工具，确保需要的工具在列表中
+# 2. 检查工具是否可用及实际权限
+# allowed-tools只预批准当前轮次；另查disallowed-tools和基础deny规则
 
 # 3. 检查$ARGUMENTS使用
 # 确保参数格式正确
@@ -1585,17 +1557,13 @@ argument-hint: <主题> [--style=formal]
 
 **Q10: 项目级和用户级命令同名怎么办？**
 
-项目级优先。优先级顺序：
-
-1. 项目级 `.claude/commands/`
-2. 用户级 `~/.claude/commands/`
-3. 内置命令
+按 4.2 节核对当前来源与同名解析规则：企业级高于个人级，个人级高于项目级；Skill 与兼容 command 文件同名时优先用 Skill。先在 `/` 列表确认实际入口，练习时改用不冲突的名称，不能只按“项目级优先”判断。
 
 ### 开发问题
 
 **Q11: 命令可以调用其他命令吗？**
 
-可以！在命令中说明调用哪个命令：
+可以在提示词中说明要使用哪个已安装、可由 Claude 调用的工作流。先按 5.2 节检查依赖；仅允许手动调用的工作流需要用户执行：
 
 ```markdown
 ## 步骤3
@@ -1606,7 +1574,7 @@ argument-hint: <主题> [--style=formal]
 
 **Q12: 如何在命令中使用MCP工具？**
 
-直接调用MCP工具函数：
+把希望使用的 MCP 工具写入提示词，并在 `/mcp` 中确认工具名与参数。下面是调用意图示意，不是可执行函数定义：
 
 ````markdown
 ## 搜索信息
@@ -1756,6 +1724,7 @@ argument-hint: <姓名>
 - 终止执行
 
 ### 步骤2：判断时间段
+先用当前可用的本机时间工具或 shell 命令取得时间，并注明时区；没有可靠时间来源时先向用户询问，不凭上下文猜测。
 - 6:00-11:59 → 早上好
 - 12:00-17:59 → 下午好
 - 18:00-21:59 → 晚上好
@@ -1778,7 +1747,7 @@ argument-hint: <姓名>
 
 **任务**：
 
-1. 创建 `.claude/commands/code-review.md`
+1. 创建 `.claude/commands/scan-code.md`
 2. 实现以下功能：
    - 接收文件路径参数
    - 读取文件内容
@@ -1864,7 +1833,7 @@ Read("$ARGUMENTS")
 **测试**：
 
 ```bash
-/code-review src/main.py
+/scan-code src/main.py
 ```
 
 ### 7.3 练习3：创建工作流命令（30分钟）
@@ -2087,13 +2056,13 @@ allowed-tools:
 - 第2部分：基础使用 - CLI启动和交互模式
 - 第4部分：MCP集成 - 外部工具连接
 - 第5部分：Hooks系统 - 自动化工作流
-- 第6部分：Skills定制 - 技能包开发
+- 第7篇：Skills定制 - 技能包开发
 
 ## 学习总结
 
 通过本课学习，你已经掌握：
 
-1. **Commands核心概念**：Slash命令就是Markdown提示词文件
+1. **Commands核心概念**：内置命令控制会话，自定义 prompt 工作流可用 Markdown 文件定义
 2. **自定义命令开发**：frontmatter配置、$ARGUMENTS参数处理、工具调用
 3. **高级技巧**：命令命名空间、组合调用、模块化设计
 4. **社区资源**：Claude Command Suite等专业命令库
@@ -2108,7 +2077,7 @@ allowed-tools:
 3. 参考第四部分的实战案例，逐步构建命令库
 4. 探索社区资源，学习优秀命令的设计模式
 
-**记住**：Commands的核心价值是"一次配置，永久使用"。花时间设计好命令，能让你的开发效率翻倍！
+**记住**：把经常重复的要求写成工作流，下一次就能复用。工具和项目变化后，还要检查依赖、权限与结果，按需要维护命令。
 
 ---
 

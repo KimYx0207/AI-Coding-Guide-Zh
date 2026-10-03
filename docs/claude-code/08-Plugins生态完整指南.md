@@ -103,7 +103,7 @@ Plugin是Claude Code的扩展包，可以添加新的命令、专业能力和自
 操作系统(iOS/Android) | Claude Code核心
 App Store        | Plugin Marketplace（网页）
 安装的APP        | 已安装的Plugins
-APP更新          | Plugin手动更新（git pull）
+APP更新          | 市场插件用 /plugin 更新；开发目录才用 git pull
 ```
 
 **核心价值**：
@@ -112,6 +112,12 @@ APP更新          | Plugin手动更新（git pull）
 2. **易分享性**：通过GitHub一键克隆
 3. **模块化**：每个Plugin专注一个领域
 4. **社区驱动**：社区持续贡献优质Plugin
+
+### 插件的新扩展方式：Mods
+
+v2.1.287（2026-10-01）新增 Claude Mods：插件可以用 mods 注册事件处理、界面面板、命令和工具调用规则。它适合需要更深行为或界面扩展的插件，普通 Markdown Skill 仍按原方式使用。先看[官方 Mods 概览](https://code.claude.com/docs/en/plugins/mods/overview)，核对客户端版本、运行环境和组织策略；本课的 Hello World 不依赖 Mods。
+
+此外，v2.1.275 起，claude.ai 账号启用的 skills 和 plugins 可以同步到已登录的终端。需要关闭对应同步时，使用 `syncClaudeAiSkills: false` 或 `syncClaudeAiPlugins: false`。遇到“本地没有装却出现了资源”，先检查账号同步和 `/plugin`，再排查项目目录。
 
 ### 1.2 Plugins vs Commands/Skills/MCP
 
@@ -145,7 +151,7 @@ Plugin = manifest + runtime resources + optional markets/scope + 文档
 
 2. **Jeremy Longshore社区合集**：
    - URL：`https://github.com/jeremylongshore/claude-code-plugins-plus`
-   - 特点：100%符合Anthropic Skills Schema
+   - 特点：社区维护的插件合集；安装前按具体插件检查清单、资源目录和依赖，不能保证整个合集都通过当前官方校验
 
 3. **GitHub搜索**：
    - 搜索关键词：`claude-code-plugin`
@@ -201,55 +207,33 @@ cd /path/to/your/project
 
 这一段按三步走：先把插件目录放进本地项目，再用 `--plugin-dir` 指给 Claude Code，最后在会话里确认资源是否出现。
 
-**步骤1：克隆Plugin到本地**
+**步骤1：准备一个真正的插件目录**
+
+先完成第4.2节的 `hello-world-plugin`，或者克隆你已检查过的单个插件仓库。若下载的是插件合集，应按其目录说明找到具体插件；合集仓库根目录不一定就是一个可加载的插件。
+
+**步骤2：加载该插件目录**
 
 ```bash
-# 创建plugins目录（如果不存在）
-mkdir -p .claude/plugins
-
-# 克隆一个Plugin（以社区Plugin为例）
-git clone https://github.com/jeremylongshore/claude-code-plugins-plus .claude/plugins/plugins-plus
+claude --plugin-dir /path/to/hello-world-plugin
 ```
 
-**步骤2：使用 `--plugin-dir` 加载Plugin**
+插件资源位于标准目录时，manifest 可以省略；需要元数据、自定义路径或配置选项时，再使用 `.claude-plugin/plugin.json`。
 
-```bash
-# 启动Claude Code时指定Plugin目录
-claude --plugin-dir .claude/plugins/plugins-plus
+**步骤3：在会话里确认入口**
+
+```text
+/hello-world-plugin:hello
 ```
 
-Claude Code 会自动扫描该目录下的 `.claude-plugin/plugin.json`，加载其中定义的 manifest、skills、hooks、agents 等资源。
-
-> 💡 **开发小技巧**：开发本地 Plugin 时，优先把 `--plugin-dir` 当成调试入口，而不是最终分发方式。
-
-**步骤3：验证Plugin已加载**
-
-在Claude Code交互模式中：
+**加载多个插件目录**：
 
 ```bash
-You: /help
-
-# 如果Plugin包含自定义命令，你会在命令列表中看到它们
-# 如果Plugin包含Skills，Claude会自动获得对应能力
-```
-
-**步骤4：多个Plugin目录**
-
-```bash
-# 可以同时加载多个Plugin目录
 claude --plugin-dir ./plugin-a --plugin-dir ./plugin-b
 ```
 
 ### 2.3 卸载Plugin
 
-如果你是通过市场安装，优先在 `/plugin` 里卸载；如果你是本地目录加载，删除目录即可：
-
-```bash
-# 删除Plugin目录
-rm -rf .claude/plugins/plugins-plus
-
-# 下次启动不带 --plugin-dir 参数即可
-```
+通过市场安装的插件，在 `/plugin` 中卸载，或用 `claude plugin uninstall <name>@<marketplace> --scope <scope>`，作用域与安装时一致。通过 `--plugin-dir` 加载的开发目录，下一次启动不再传该目录即可；不用先删除开发文件。想回收空间时，确认具体目录和文件都不再需要后再自行清理。
 
 ---
 
@@ -270,12 +254,16 @@ Marketplace 是插件目录，Claude Code 通过已注册的目录发现插件�
 |------|------|
 | **分类浏览** | 按用途分类：文档处理、代码质量、项目管理等 |
 | **搜索** | 按关键词搜索Plugin |
-| **详情页** | 查看 Plugin 说明、安装量、评分、仓库链接 |
-| **安装指引** | 每个Plugin页面提供安装命令（git clone） |
+| **详情页** | 查看当前条目的说明、来源、组件及安装信息；展示内容以页面为准 |
+| **安装指引** | 按条目所属市场安装，通常为 `/plugin install <name>@<marketplace>`；克隆仓库只用于需要自己加载的开发目录 |
 
 ### 3.2 安装Plugin的方式
 
-**方式1：从GitHub克隆（最常用）**
+**方式1：通过已注册市场安装（日常主路径）**
+
+在会话里先用 `/plugin` 浏览，然后执行 `/plugin install <name>@<marketplace>`。如果是开发中的插件或尚未加入市场的单独仓库，再按下面的本地加载方式操作。
+
+**本地开发：克隆单个插件仓库**
 
 ```bash
 # 在Marketplace找到Plugin后，复制其GitHub地址
@@ -310,16 +298,19 @@ claude --plugin-dir .
 ls .claude/plugins/
 
 # 更新Plugin（git pull最新版本）
-cd .claude/plugins/my-plugin && git pull
+git -C .claude/plugins/my-plugin pull
 
 # 切换Plugin版本
-cd .claude/plugins/my-plugin && git checkout v1.2.0
+git -C .claude/plugins/my-plugin checkout v1.2.0
+# 仅当仓库确实存在该 tag；有本地修改时先妥善保存
 
 # 查看Plugin信息
 cat .claude/plugins/my-plugin/.claude-plugin/plugin.json
 ```
 
 ### 3.4 Plugin配置
+
+v2.1.285 起，终端可以用 `claude plugin configure <name>@<marketplace>` 查看插件提供的选项及缺失值；先用 `claude plugin list` 取得完整 ID，configure 不接受单独的插件名。交互会话也可以在 `/plugin` 的插件详情中配置。只有插件声明了相应选项才会出现，具体取值以它的说明为准。不要直接编辑市场安装的插件缓存；自动化输入方式先查 `claude plugin configure --help`。
 
 部分Plugin支持自定义配置。查看Plugin的 `.claude-plugin/plugin.json`：
 
@@ -328,7 +319,7 @@ cat .claude/plugins/my-plugin/.claude-plugin/plugin.json
 cat .claude/plugins/my-plugin/.claude-plugin/plugin.json
 ```
 
-配置方式取决于Plugin的实现——通常在Plugin目录下创建配置文件。具体请参考每个Plugin的README。
+对于你自己维护并用 `--plugin-dir` 加载的开发目录，配置文件按其 README 创建。市场安装的插件按 `/plugin` 或 `claude plugin configure` 提供的选项配置；如果 README 要求外部配置文件，使用它指定的位置，不要把设置写到安装缓存中。
 
 ---
 
@@ -351,8 +342,9 @@ my-plugin/
 │   └── my-command.md
 ├── agents/              # 可选：Agent定义
 │   └── my-agent.md
-└── hooks/               # 可选：Hooks
-    └── pre-commit.py
+└── hooks/               # 可选：Hook配置与脚本
+    ├── hooks.json       # 注册事件与处理器；仅放脚本不会自动执行
+    └── pre-commit.py    # 由hooks.json里的command处理器调用
 ```
 
 **.claude-plugin/plugin.json 规范**：
@@ -416,7 +408,7 @@ A simple plugin that adds a namespaced skill to Claude Code.
 ## Installation
 
 \`\`\`bash
-claude --plugin-dir ./hello-world-plugin
+claude --plugin-dir /path/to/hello-world-plugin
 \`\`\`
 
 ## Usage
@@ -428,9 +420,8 @@ You: /hello-world-plugin:hello
 
 ## Features
 
-- Creative greetings
-- Current date display
-- Random programming jokes
+- A friendly greeting
+- A question about how Claude can help
 ```
 
 **步骤5：测试 Plugin**
@@ -489,7 +480,7 @@ Output format:
 
 ```markdown
 Review the current git diff and provide a detailed code review.
-Use the code-reviewer skill for analysis.
+Use the code-review-plugin:code-reviewer skill for analysis.
 Focus on security, performance, and maintainability.
 ```
 
@@ -519,7 +510,8 @@ You: /code-review-plugin:review
 ### 5.1 发布前检查清单
 
 ```
-✅ .claude-plugin/plugin.json 字段完整（至少有 name / version / description；author 推荐但可选）
+✅ 使用 manifest 时包含必填 name，并按需填写 version、description、author；标准目录插件可以省略 manifest
+✅ 运行 claude plugin validate <插件目录>，检查错误与警告
 ✅ README.md 包含安装和使用说明
 ✅ 所有命令和Skills已测试通过
 ✅ 无硬编码密钥或敏感信息
@@ -575,11 +567,11 @@ git push --tags
 **排查步骤**：
 
 ```bash
-# 1. 确认路径正确
-ls /path/to/your/plugin/.claude-plugin/plugin.json
+# 1. 确认指定的是实际插件根目录
+ls /path/to/your/plugin
 
-# 2. 验证plugin.json格式
-cat /path/to/your/plugin/.claude-plugin/plugin.json | python3 -m json.tool
+# 2. 校验资源、manifest和自定义路径；标准目录插件可省略manifest
+claude plugin validate /path/to/your/plugin
 
 # 3. 使用debug模式启动
 claude --plugin-dir /path/to/your/plugin --debug
@@ -593,7 +585,7 @@ claude --plugin-dir /path/to/your/plugin --debug
 |------|----------|
 | commands目录路径错误 | 确认在Plugin根目录下有 `commands/` 目录 |
 | 命令文件不是.md格式 | 命令文件必须是 `.md` 后缀 |
-| .claude-plugin/plugin.json 缺失 | 确认Plugin根目录下有 `.claude-plugin/plugin.json` |
+| manifest 格式错误或自定义路径错误 | 运行 `claude plugin validate <path>`；标准目录插件可不带 manifest |
 | 文件权限问题 | 确认文件可读：`chmod 644 commands/*.md` |
 
 ### 6.3 Skills不生效
@@ -662,7 +654,7 @@ claude plugin uninstall my-plugin@my-marketplace
 
 ### Q6：可以同时加载多少个Plugin？
 
-没有硬性限制，但每个Plugin都会增加上下文占用。建议同时加载不超过5个Plugin，按需加载。
+当前文档没有给出统一的插件数量上限，也没有“最多5个”的通用建议。开销取决于各插件的常驻指令、工具、Hook 和服务；用 `claude plugin details <name>@<marketplace>` 看组件和预估上下文成本，再禁用本次任务不需要的插件。
 
 ### Q7：Plugin开发需要懂编程吗？
 
@@ -674,13 +666,13 @@ claude plugin uninstall my-plugin@my-marketplace
 
 ### Q9：如何让Plugin在所有项目中生效？
 
-```bash
-# 方法1：每次启动时指定
-claude --plugin-dir ~/.claude/global-plugins/my-plugin
+市场插件在 user 作用域安装即可对所有项目生效：
 
-# 方法2：设置shell别名
-alias claude='claude --plugin-dir ~/.claude/global-plugins/my-plugin'
+```bash
+claude plugin install my-plugin@my-marketplace --scope user
 ```
+
+先注册对应市场，并替换为实际条目。`--plugin-dir /path/to/my-plugin` 适用于开发目录的单次加载；不要为了全局生效把 `claude` 命令本身替换为带固定路径的别名。
 
 ### Q10：Plugin报错如何获取帮助？
 
@@ -710,9 +702,9 @@ alias claude='claude --plugin-dir ~/.claude/global-plugins/my-plugin'
 | **本地开发加载** | `claude --plugin-dir .claude/plugins/<name>` |
 | **本地加载多个** | `claude --plugin-dir ./a --plugin-dir ./b` |
 | **更新本地克隆** | `cd .claude/plugins/<name> && git pull` |
-| **卸载本地Plugin** | `rm -rf .claude/plugins/<name>` |
+| **停止加载开发目录** | 下一次启动不传该目录的 `--plugin-dir` 参数 |
 | **查看Plugin信息** | `cat .claude/plugins/<name>/.claude-plugin/plugin.json` |
-| **开发时重载** | 修改后重新启动会话，或重新以 `--plugin-dir` 进入调试 |
+| **开发时重载** | 会话中 `/reload-plugins`；按当前提示处理，必要时重启 |
 | **调试Plugin** | `claude --plugin-dir <path> --debug` |
 
 ### Plugin目录结构速查
@@ -726,7 +718,9 @@ my-plugin/
 ├── commands/*.md        # 可选：Slash命令
 ├── skills/*/SKILL.md    # 可选：Agent能力
 ├── agents/*.md          # 可选：Agent定义
-└── hooks/*.py           # 可选：自动化脚本
+└── hooks/
+    ├── hooks.json      # 可选：Hook事件配置
+    └── *.py            # 可选：由配置调用的脚本
 ```
 
 > 💡 **命名空间**：Plugin中的Skills会自动添加命名空间前缀，格式为 `/plugin-name:skill-name`，避免与其他Plugin冲突。
