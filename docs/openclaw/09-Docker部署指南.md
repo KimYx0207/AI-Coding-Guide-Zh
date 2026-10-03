@@ -29,17 +29,17 @@
 
 ### Docker 部署的优势
 
-**环境一致性** — 本地能跑的，服务器上一定能跑。不会出现"我这里没问题啊"的经典场景。Docker 把 Node.js 版本、系统依赖、配置文件全部打包在一起，消除了环境差异。
+**环境一致性** — 镜像固定了运行时和依赖，可以减少机器间的环境差异。换服务器仍要确认 CPU 架构、挂载路径、文件权限和网络；配置与数据需要单独持久化。
 
-**一键部署** — 不需要在服务器上手动装 Node.js、配置 npm、处理依赖冲突。一条 `docker compose up` 搞定一切。
+**统一启动** — 使用预构建镜像时，无需在宿主机安装 Node.js。先准备持久化目录、完成 onboarding 和认证，再用 `docker compose up -d` 启动服务。
 
 **隔离性** — OpenClaw 跑在自己的容器里，不会污染宿主机环境。你可以在同一台机器上跑多个版本的 OpenClaw，互不干扰。
 
 **易于迁移** — 想换服务器？把 docker-compose.yml（Docker 的编排工具，用一个配置文件管理多个容器）和数据卷拷过去，几分钟就能恢复。
 
-**Agent 沙箱** — Docker 天然适合做 Agent 工具执行的沙箱。通过 `agents.defaults.sandbox.mode` 配置（默认 `"non-main"`），非主会话的 Agent 自动在独立 Docker 容器中隔离执行，不会搞坏宿主机。
+**Agent 沙箱** — 可以另行启用 Docker 沙箱隔离工具执行。`agents.defaults.sandbox.mode` 默认是 `"off"`，需要显式选择 `"non-main"` 或 `"all"`。隔离程度还取决于挂载、网络和工具权限；容器化 Gateway 本身不会自动启用工具沙箱。
 
-**回滚方便** — 升级出问题？切回上一个镜像（容器的模板，包含了运行所需的一切）版本就行，数据都在 volume（数据卷，让容器重启后数据不丢失）里，不受影响。
+**版本可固定** — 可以保留旧镜像供回滚使用，但旧程序必须兼容现有数据库结构。发生迁移后要用匹配版本和已验证的升级前备份恢复；volume 负责持久化，不保证旧版本能读取新数据。
 
 ### 什么时候不需要 Docker
 
@@ -179,16 +179,18 @@ v2026.5.22 对 Gateway 启动路径做了多处性能和诊断优化：插件元
 
 ### 快速启动单容器
 
-不想写 docker-compose.yml？一条命令也能跑：
+新环境推荐先走官方 Docker 初始化流程。下面固定本章已有的 `2026.9.4` 示例版本，避免镜像和脚本来自不同版本；升级时另选经过验证的 tag。
 
 ```bash
-docker run -d --name openclaw-gateway -p 18789:18789 \
-  -v ~/.openclaw:/home/node/.openclaw \
-  -e OPENCLAW_GATEWAY_TOKEN=your-token-here \
-  --restart unless-stopped openclaw/openclaw:latest
+git clone --branch v2026.9.4 --depth 1 https://github.com/openclaw/openclaw.git
+cd openclaw
+export OPENCLAW_IMAGE=openclaw/openclaw:2026.9.4
+./scripts/docker/setup.sh
 ```
 
-但对于生产环境，强烈建议用 Docker Compose。
+脚本会准备目录与权限、运行 onboarding、配置 Gateway 并启动官方 Compose。完成后按终端提示打开 Control UI，使用初始化生成的 Gateway token。已有部署先备份配置、卷与外部工作区，再按原部署方式更新，不能直接拿新空卷替换。
+
+下面继续说明手动 Compose；它使用独立项目和命名卷，不要与上面的官方 bind mount 部署混用。
 
 ---
 
@@ -202,10 +204,11 @@ docker run -d --name openclaw-gateway -p 18789:18789 \
 # docker-compose.yml
 services:
   openclaw-gateway:
-    image: openclaw/openclaw:latest
+    image: openclaw/openclaw:2026.9.4
+    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
     container_name: openclaw-gateway
     ports:
-      - "18789:18789"
+      - "127.0.0.1:18789:18789"
     volumes:
       - openclaw-data:/home/node/.openclaw
       - openclaw-workspace:/home/node/.openclaw/workspace
@@ -213,7 +216,7 @@ services:
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/health').then(r => { if (!r.ok) process.exit(1) })"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/healthz').then(r => { if (!r.ok) process.exit(1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -233,10 +236,11 @@ volumes:
 services:
   # ========== OpenClaw Gateway ==========
   openclaw-gateway:
-    image: openclaw/openclaw:latest
+    image: openclaw/openclaw:2026.9.4
+    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
     container_name: openclaw-gateway
     ports:
-      - "18789:18789"
+      - "127.0.0.1:18789:18789"
     volumes:
       - openclaw-data:/home/node/.openclaw
       - openclaw-workspace:/home/node/.openclaw/workspace
@@ -254,7 +258,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/health').then(r => { if (!r.ok) process.exit(1) })"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/healthz').then(r => { if (!r.ok) process.exit(1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -309,6 +313,22 @@ networks:
 ```
 
 ### 启动和管理
+
+先在当前目录创建 `.env`，设置一个随机 Gateway token。基础示例只传入这个变量，模型认证由下面的 onboarding 完成。每份部署只初始化一次；后续重启不需要重复授权。
+
+```bash
+umask 077
+printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$(openssl rand -hex 32)" > .env
+docker compose pull openclaw-gateway
+docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
+  dist/index.js onboard --mode local --no-install-daemon
+docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
+  dist/index.js config set gateway.mode local
+docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
+  dist/index.js config set gateway.controlUi.allowedOrigins '["http://localhost:18789","http://127.0.0.1:18789"]' --strict-json
+```
+
+浏览器通过 SSH 隧道访问时可以沿用上面的本地 origin。用域名反代时，将实际 HTTPS origin 加入 `gateway.controlUi.allowedOrigins`，不要用通配符替代。保持 token 认证；生产实例上线前检查反代地址与 `gateway.trustedProxies`。
 
 ```bash
 docker compose up -d                          # 启动所有服务（后台）
@@ -636,7 +656,7 @@ services:
   openclaw-gateway:
     healthcheck:
       # 检查 Gateway 是否响应（注意：OpenClaw 镜像中没有 curl，使用 Node.js fetch）
-      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/health').then(r => { if (!r.ok) process.exit(1) })"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/healthz').then(r => { if (!r.ok) process.exit(1) })"]
       interval: 30s       # 每 30 秒检查一次
       timeout: 10s        # 超时时间
       retries: 3          # 连续失败 3 次标记为 unhealthy
@@ -697,7 +717,7 @@ services:
       - ./logs:/var/log/openclaw
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/health').then(r => { if (!r.ok) process.exit(1) })"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:18789/healthz').then(r => { if (!r.ok) process.exit(1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -713,7 +733,7 @@ volumes:
   openclaw-workspace:
 ```
 
-第四步，启动：
+第四步，先初始化，再启动。新部署使用上文“启动和管理”的 onboarding、`gateway.mode` 和 origin 配置步骤；域名反代时把 `https://openclaw.example.com` 换成实际 HTTPS origin 加入允许列表。初始化后再运行：
 
 ```bash
 docker compose pull
@@ -725,7 +745,7 @@ docker compose logs --tail 100 openclaw-gateway
 第五步，本机探测：
 
 ```bash
-curl -i http://127.0.0.1:18789/health
+curl -i http://127.0.0.1:18789/healthz
 ```
 
 第六步，再配置反向代理和 TLS。确认反代能访问后，再尝试外部访问域名。不要在 Gateway 没有 token、没有 TLS、没有反代限制时把 `18789` 直接暴露到公网。
@@ -922,14 +942,14 @@ OpenClaw 的沙箱通过 `agents.defaults.sandbox.mode` 控制。配置文件位
         // "all"      — 所有会话都在沙箱中运行
         // "off"      — 关闭沙箱
         "mode": "non-main",
-        "image": "openclaw:sandbox"
+        "docker": { "image": "openclaw:sandbox" }
       }
     }
   }
 }
 ```
 
-`"non-main"` 是推荐的默认值：主会话直接在宿主环境执行以保证交互性能，而 Agent 派生的子会话自动在 Docker 容器中隔离运行，防止工具执行影响宿主机。
+`"non-main"` 表示非主会话使用沙箱，并不是只隔离某几个 Agent。默认沙箱关闭；启用后还要检查实际会话键、workspace 访问方式和容器挂载。对所有会话都要求隔离时选择 `"all"`。
 
 ### 沙箱镜像类型
 
@@ -1059,7 +1079,7 @@ docker compose logs --tail 200 openclaw-gateway
 观察这几件事：
 
 ```bash
-curl -i http://127.0.0.1:18789/health
+curl -i http://127.0.0.1:18789/healthz
 docker inspect openclaw-gateway --format='{{.State.Health.Status}}'
 docker compose logs --since "10m" openclaw-gateway
 ```
@@ -1103,7 +1123,7 @@ docker compose up -d
 echo "[5/5] health"
 sleep 10
 docker compose ps
-curl -i http://127.0.0.1:18789/health
+curl -i http://127.0.0.1:18789/healthz
 ```
 
 更新成功并观察一段时间后，再清理：
@@ -1384,7 +1404,7 @@ name: openclaw-restore-drill
 ```bash
 bash scripts/restore-stack.sh "$BACKUP_PATH"
 docker compose ps
-curl -i http://127.0.0.1:28789/health
+curl -i http://127.0.0.1:28789/healthz
 docker compose logs --tail 100 openclaw-gateway
 ```
 
@@ -1413,7 +1433,7 @@ services:
   openclaw-gateway:
     image: openclaw/openclaw:latest
     ports:
-      - "18789:18789"
+      - "127.0.0.1:18789:18789"
 ```
 
 这个配置没有持久化挂载。容器重建后，你可能丢失工作空间。
@@ -1516,7 +1536,7 @@ docker compose exec openclaw-gateway ping postgres
 ```bash
 GATEWAY_CONTAINER=$(docker compose ps -aq openclaw-gateway)
 [ -n "$GATEWAY_CONTAINER" ] || { echo "没有找到 Gateway 容器" >&2; exit 1; }
-docker inspect "$GATEWAY_CONTAINER" --format '{{json .Mounts}}
+docker inspect "$GATEWAY_CONTAINER" --format '{{json .Mounts}}'
 # Gateway 运行时，从实际挂载检查内容
 docker compose exec openclaw-gateway ls -la /home/node/.openclaw
 docker compose exec openclaw-gateway ls -la /home/node/.openclaw/workspace

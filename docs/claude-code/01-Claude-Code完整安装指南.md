@@ -249,7 +249,7 @@ Claude Code：
 
 | 检查项 | 最低要求 | 如何检查 | 不符合怎么办 |
 |--------|---------|---------|-------------|
-| **操作系统** | Windows 10 / macOS 10.15+ / Linux | 查看系统版本 | 升级系统或换电脑 |
+| **操作系统** | macOS 13.0+；Windows 10 1809+ / Server 2019+；Ubuntu 20.04+、Debian 10+、Alpine 3.19+ | 查看系统版本 | 按官方支持范围升级系统或换环境 |
 | **内存** | 4GB RAM | 右键"此电脑"→属性 | 不足4GB无法运行 |
 | **网络** | 能访问外网 | 打开 google.com 试试 | 国内用户需要配置代理（见附录B） |
 
@@ -257,10 +257,10 @@ Claude Code：
 
 **所有平台通用：**
 ```bash
-# 检查能否访问Anthropic API
-ping api.anthropic.com
-# 能ping通 → ✅ 网络OK
-# ping不通 → ⚠️ 需要配置代理
+# 检查 API 的 HTTPS 连接；PowerShell 中请用 curl.exe
+curl -I https://api.anthropic.com
+# 收到 HTTP 响应可确认已连到服务；不代表认证已通过
+# 超时或 TLS 错误时，检查代理、证书和防火墙；ping 失败不能证明 HTTPS 不通
 ```
 
 **如果3项全部✅ → 恭喜，你的电脑满足要求，继续往下！**
@@ -277,9 +277,9 @@ ping api.anthropic.com
 
 | 操作系统 | 最低版本 | 推荐版本 | 说明 |
 |---------|---------|---------|------|
-| Windows | Windows 10 | Windows 11 | 64位系统 |
-| macOS | 10.15 Catalina | macOS 13+ | Intel/Apple Silicon都支持 |
-| Linux | 内核3.10+ | 5.x+ | Ubuntu/Debian/Fedora等主流发行版 |
+| Windows | Windows 10 1809+ / Server 2019+ | Windows 11 | x64 或 ARM64；原生 Windows 不支持 OS sandbox |
+| macOS | 13.0+ | 当前受支持版本 | Intel / Apple Silicon 均支持 |
+| Linux | Ubuntu 20.04+、Debian 10+、Alpine 3.19+ | 当前受支持版本 | 同时核对发行版及依赖，不能只看内核版本 |
 
 **硬件推荐（非强制）：**
 - **CPU**：双核+（i3或同等性能即可）
@@ -362,7 +362,7 @@ ping api.anthropic.com
 
 ```bash
 # 如果你想手动控制更新，可以设置环境变量
-export CLAUDE_AUTO_UPDATE=false
+export DISABLE_AUTOUPDATER=1
 ```
 
 > 💡 **建议**：大多数人保持默认开启就好，自动更新让你始终使用最新最安全的版本。
@@ -731,7 +731,7 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 | 部分                      | 作用                                   |
 | ------------------------- | -------------------------------------- |
-| `curl -fsSL`             | 下载安装脚本（-f失败继续，-s静默，-S显示错误，-L跟随重定向） |
+| `curl -fsSL`             | 下载安装脚本（-f遇到 HTTP 错误时返回失败，-s静默，-S显示错误，-L跟随重定向） |
 | `https://claude.ai/install.sh` | Anthropic官方安装脚本地址              |
 | `| bash`                 | 把下载的内容直接传给bash执行           |
 
@@ -760,7 +760,7 @@ claude --version
 
 - 按 `Win` 键
 - 输入 `PowerShell`
-- 按 `Ctrl + Shift + Enter`（以管理员身份运行）
+- 按 `Enter` 打开普通 PowerShell 窗口；原生安装不需要管理员权限
 
 **步骤2：执行安装命令**
 
@@ -825,7 +825,7 @@ winget install Anthropic.ClaudeCode
 
 ### 5.5 方式4：NPM安装（标准兼容路径）
 
-> ⚠️ **重要说明**：当前官方文档仍保留 `npm install -g @anthropic-ai/claude-code` 这条标准安装路径，只是对新环境更鼓励优先尝试原生安装。你可以把 npm 安装理解成“兼容性更广的标准入口”，而不是“已经不能用的旧方式”。
+> ⚠️ **重要说明**：npm 安装已被官方标记为弃用，已有安装可以迁移，但新环境优先选择原生安装、Homebrew 或 WinGet。下列 npm 命令仅供维护旧环境时参考；是否仍可安装以官方包和当前客户端为准。
 
 **前提条件**：需要先安装 [Node.js](https://nodejs.org/) 18 或更高版本。
 
@@ -1083,7 +1083,7 @@ winget uninstall Anthropic.ClaudeCode
 
 ## 第六部分：首次启动与验证
 
-### 6.1 启动 Claude Code 的三种方式
+### 6.1 启动 Claude Code：交互会话与打印模式
 
 **方式1：标准交互模式（最常用）**
 
@@ -1097,10 +1097,10 @@ claude
 # 3. 进入交互式对话界面
 ```
 
-**方式2：单次命令模式**
+**方式2：带初始问题的交互会话**
 
 ```bash
-# 执行单个命令后退出
+# 启动交互会话，并把这句话作为第一条消息
 claude "你的问题或指令"
 
 # 示例：
@@ -2689,7 +2689,7 @@ You: █
 
 #### Q14：Claude Code会偷偷上传我的代码吗？
 
-**A14：不会！Claude Code只上传你让它处理的内容。**
+**A14：Claude Code 会把完成任务所需的上下文发给模型服务，包括它读取的相关文件、对话和工具结果；这不一定仅限你逐个点名的文件。**
 
 **工作原理：**
 
@@ -2699,27 +2699,28 @@ You: █
 
 **隐私保护：**
 
-- ✅ 只上传你明确要求处理的文件
-- ✅ 你可以通过权限控制它能访问什么
-- ✅ 不会后台扫描或上传整个项目
+- 先确认当前服务提供方和数据使用政策，再决定哪些内容可以交给模型。
+- 用权限规则限制文件工具，并为 shell、MCP 等其他访问路径单独设置边界。
+- 项目规则和忽略文件有不同用途，不能把它们当成数据隔离保证。
 
 #### Q15：我不想让Claude Code访问某些文件，怎么办？
 
-**A15：用 `.gitignore` 或 `.claudeignore` 排除！**
+**A15：在 `.claude/settings.json` 中配置权限拒绝规则，并核对其他工具的访问能力。**
 
-**方法1：.gitignore（推荐）**
-Claude Code默认会忽略 `.gitignore` 里的文件。
-
-**方法2：.claudeignore**
-在项目根目录创建 `.claudeignore` 文件：
-
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/*.key)",
+      "Read(./secrets/**)",
+      "Read(./config/production.json)"
+    ]
+  }
+}
 ```
-# 不让Claude访问的文件
-.env
-*.key
-secrets/
-config/production.json
-```
+
+`.gitignore` 控制 Git 跟踪和部分搜索行为，不是保密边界；官方没有把 `.claudeignore` 定义为统一的文件访问控制入口。`Read` 拒绝规则限制相应文件工具，仍须审查 shell、MCP、hooks 等其他读取路径。需要严格隔离时，把敏感文件留在执行环境之外或结合 OS sandbox。
 
 ---
 
@@ -2914,7 +2915,7 @@ claude --version
 
 ```bash
 # macOS/Linux
-export CLAUDE_AUTO_UPDATE=false
+export DISABLE_AUTOUPDATER=1
 
 # Windows PowerShell
 $env:CLAUDE_AUTO_UPDATE="false"

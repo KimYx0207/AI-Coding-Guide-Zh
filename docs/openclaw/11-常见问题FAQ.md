@@ -212,7 +212,7 @@ ls -la ~/.openclaw/
 # ~/.openclaw/gateway/        — Gateway 运行时数据
 
 # 用命令查看当前配置
-openclaw config get
+openclaw config get agents.defaults.model
 
 # 用命令修改配置（推荐，会自动验证格式）
 openclaw config set <key> <value>
@@ -406,8 +406,8 @@ openclaw daemon
 openclaw channels status whatsapp
 
 # 第三步：如果断开了，重新连接
-openclaw channels logout whatsapp
-openclaw channels login whatsapp
+openclaw channels logout --channel whatsapp
+openclaw channels login --channel whatsapp
 
 # 第四步：查看断开原因
 openclaw logs --limit 50 | grep whatsapp
@@ -443,8 +443,8 @@ openclaw config get channels.telegram.botToken
 openclaw logs --limit 50 | grep telegram
 
 # 第五步：重新连接
-openclaw channels logout telegram
-openclaw channels login telegram
+openclaw channels logout --channel telegram
+openclaw channels login --channel telegram
 ```
 
 ### Q18: Telegram Bot 在群组中不回复
@@ -481,8 +481,8 @@ openclaw channels login telegram
 ```bash
 # 配置 Discord Bot Token（注意：Discord 用的字段是 token，不是 botToken）
 openclaw config set channels.discord.token "your-discord-bot-token"
-openclaw channels logout discord
-openclaw channels login discord
+openclaw channels logout --channel discord
+openclaw channels login --channel discord
 ```
 
 ### Q20: 消息延迟严重（发了好久才回复）
@@ -538,7 +538,7 @@ openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
 
 ```bash
 # 第一步：确认 Gateway 的公网地址可达
-curl https://your-domain.com:18789/health
+curl https://your-domain.com:18789/healthz
 
 # 第二步：在飞书开放平台配置事件订阅
 # 事件订阅 URL：https://your-domain.com:18789/webhook/feishu
@@ -1292,7 +1292,7 @@ openclaw config set logging.level "info"
 
 ```bash
 # 内置健康检查
-curl http://localhost:18789/health
+curl http://localhost:18789/healthz
 
 # 查看详细状态
 openclaw status
@@ -1305,7 +1305,7 @@ openclaw status
 # CPU: 2%
 
 # 配置外部监控（推荐 UptimeRobot 或类似服务）
-# 监控 URL: http://your-server:18789/health
+# 监控 URL: http://your-server:18789/healthz
 # 检查间隔: 5 分钟
 ```
 
@@ -1857,7 +1857,7 @@ OPENCLAW_HOME=~/.openclaw-2 openclaw gateway --port 19789
 
 ```bash
 # 查看所有配置
-openclaw config get
+openclaw config get agents.defaults.model
 
 # 查看特定配置项
 openclaw config get providers
