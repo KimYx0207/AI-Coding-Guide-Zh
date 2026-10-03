@@ -73,7 +73,7 @@ CLI 是 App 的辅助，不是“更高级才算会用”。先分清它的几�
 | `plugin marketplace` | 管理 marketplace 来源 | 管来源，不是普通插件列表 |
 | `--sandbox` | 指定命令执行边界 | 不知道就保守 |
 | `--ask-for-approval` | 指定审批策略 | 不要默认 `never` |
-| `--profile` | 选择 permission profile | 团队配置时很重要 |
+| `--profile` | 叠加 `$CODEX_HOME/<name>.config.toml` 配置 profile | 权限 profile 另外由 `default_permissions` 选择；两者不要混用 |
 | `codex doctor` | 诊断环境、Git、终端、app-server 等 | 排障优先跑 |
 
 ## 0. CLI 的三种使用模式
@@ -99,7 +99,7 @@ App 用户不用一开始学完整 CLI。正确路径是：App 主线遇到“�
 |---|---|
 | App 看不到 MCP | `codex mcp list` 可辅助确认配置 |
 | CI 想跑一次性审查 | App 不适合无头运行 |
-| 远程服务器或 Linux | 没有桌面 App 主线 |
+| 远程服务器或不适合桌面 App 的 Linux 环境 | CLI 便于终端操作；支持的 Linux 桌面发行版也可使用官方 App 预览版 |
 | 权限 / profile 排障 | `codex doctor`、`--profile` 更直接 |
 | 插件 marketplace 来源 | 需要 `codex plugin marketplace ...` |
 | 自动化需要 JSON | `codex exec --output-schema` 适合脚本 |
@@ -428,7 +428,7 @@ codex plugin marketplace upgrade
 ```bash
 codex exec \
   --sandbox read-only \
-  --ask-for-approval never \
+  -c 'approval_policy="never"' \
   "Review the current PR diff for correctness, security risks, and missing tests. Do not modify files. Return findings and verification gaps."
 ```
 
@@ -470,7 +470,7 @@ CLI 看到配置只是中间证据，App 线程能调用才算主线可用。
 ```bash
 codex exec \
   --sandbox read-only \
-  --ask-for-approval never \
+  -c 'approval_policy="never"' \
   "Review the current diff for bugs, security risks, and missing tests. Do not modify files."
 ```
 
@@ -481,7 +481,7 @@ CI 中不要默认让 Codex 写代码、提交或 push。先把它当成高信�
 ```bash
 codex doctor
 codex --help
-codex --profile read-only
+codex --sandbox read-only
 ```
 
 如果团队使用 managed requirements，个人 CLI 参数可能会被组织策略限制。看到行为和本机参数不一致时，先查 managed 配置，而不是反复改命令。

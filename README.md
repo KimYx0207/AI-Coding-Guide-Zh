@@ -184,12 +184,12 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 ## 📋 环境要求
 ### Claude Code
 
-- **操作系统**：Windows 10+、macOS 10.15+、Linux
-- **安装方式**：支持标准安装（`npm install -g @anthropic-ai/claude-code`，需 Node.js 18+）和原生二进制安装（beta / 改进安装路径）
+- **操作系统**：Windows 10 1809+ / Server 2019+、macOS 13+，Linux 按官方支持的发行版与依赖选择，详见安装指南
+- **安装方式**：支持标准安装（`npm install -g @anthropic-ai/claude-code`，需 Node.js 22+）和原生二进制安装；两种方式安装同一原生二进制
 - **认证方式**：可用 Claude 订阅登录，也可用 Anthropic Console / 第三方兼容提供商配置
 - **IDE**：VS Code、Cursor、Windsurf 或其他支持的编辑器
 
-> ⚠️ **2026年更新**：Claude Code 已提供原生二进制安装，但 **Node.js 18+ 的标准 npm 安装路径仍然受支持**。本仓库安装指南现同时覆盖两条路径，并明确各自适用场景。
+> ⚠️ **2026年更新**：Claude Code 已提供原生二进制安装，但 **Node.js 22+ 的标准 npm 安装路径仍然受支持**。本仓库安装指南现同时覆盖两条路径，并明确各自适用场景。
 
 ### OpenClaw
 

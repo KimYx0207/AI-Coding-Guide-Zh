@@ -64,8 +64,8 @@ Channels 和计划任务，解决的是两类不同问题：
 
 - **research preview**
 - 需要 **Claude Code v2.1.80+**
-- 需要 **claude.ai 登录**
-- Team / Enterprise 默认可能关闭，需要管理员启用
+- 支持 **claude.ai 登录或 Claude Console API key 认证**；不支持 Bedrock、Google Cloud Agent Platform 和 Foundry
+- Team / Enterprise 以及托管 Console 组织需要管理员显式启用
 
 **v2.1.128 变更**：`--channels` 现在也支持 **Console auth（API key）登录**，不再仅限 claude.ai 登录。如果你之前因为 API key 模式无法使用 Channels，可以重新尝试。
 
@@ -93,7 +93,7 @@ Channels 和计划任务，解决的是两类不同问题：
 
 ### 4.1 基础条件
 
-- Claude Code 已安装并登录 claude.ai
+- Claude Code 已安装，并通过 claude.ai 或 Claude Console API key 完成认证
 - 能看到 `/plugin`
 - 若要跑官方 channel plugin，**必须安装 Bun**（所有官方 channel plugin 都依赖 Bun 运行时）
 
@@ -302,7 +302,7 @@ claude --channels plugin:xxx@marketplace
 另外，如果你在开发自定义 channel plugin，需要加：
 
 ```bash
-claude --channels plugin:my-channel --dangerously-load-development-channels
+claude --dangerously-load-development-channels plugin:my-channel@my-marketplace
 ```
 
 该参数绕过 marketplace 验证，仅用于本地开发调试。
@@ -317,7 +317,7 @@ claude --channels plugin:my-channel --dangerously-load-development-channels
 
 ### 7.5 事件只在会话打开时到达
 
-Channel 消息**只会在 Claude Code 会话运行时被接收**。如果你关掉了终端，消息就丢了。
+Channel 只在 Claude Code 会话运行时把事件送进会话。关闭会话后能否补收消息取决于渠道服务器及外部平台的缓冲策略，不能保证补收，也不能一概说消息必然丢失。
 
 如果你需要 always-on 的 Channel 接收：
 
@@ -441,7 +441,7 @@ in 45 minutes, check whether the integration tests passed
 
 ### 10.1 任务是 session-scoped
 
-只要当前 Claude Code 会话结束，任务就没了。
+任务绑定当前会话，只在它运行且空闲时触发。结束进程会停止调度；恢复原会话时，符合条件的 `CronCreate` 任务可以恢复，因此“停了”不等于“所有任务都删除了”。
 
 ### 10.2 不跨重启持久化（v2.1.110 部分改善）
 
@@ -449,8 +449,9 @@ in 45 minutes, check whether the integration tests passed
 
 但从 **v2.1.110** 起，如果用 `--resume` 或 `--continue` 恢复之前的会话，**未过期的计划任务会一起恢复**。也就是说：
 
-- 正常重启 → 任务丢失
-- `claude --resume` / `claude --continue` → 未过期任务自动恢复
+- 新开会话 → 不会继承旧会话的本地任务
+- `claude --resume` / `claude --continue` → 恢复未过期、未错过执行时间的 `CronCreate` 任务
+- 动态间隔的 `/loop` → 不会随恢复重启，需要再次执行 `/loop`
 
 ### 10.3 Claude 忙的时候不会插队
 
@@ -490,8 +491,9 @@ v2.1.110 的 `--resume` 恢复策略有细节：
 
 为了避免大规模部署时所有 Claude 实例在同一时刻触发：
 
-- **循环任务**：最多延迟周期的 10%（上限 15 分钟）
-- **一次性任务**：整点/半点前后最多提前 90 秒
+- **固定 cron 循环任务**：当前最多延迟 30 分钟；间隔小于一小时时，上限为该间隔的一半
+- **一次性任务**：安排在整点或半点时，最多提前 90 秒
+- **动态间隔 `/loop`**：不适用上述 jitter 规则
 
 这是确定性偏移，不是随机的。
 

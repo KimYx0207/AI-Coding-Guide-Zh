@@ -166,7 +166,7 @@ CLI、Web / Cloud、SDK 都是后续辅助。
 | 项目 | 建议 |
 |---|---|
 | Windows 版本 | Windows 11 是推荐基线；近期且 fully updated 的 Windows 10 属于 best effort，实操上至少需要 Windows 10 1809+ 的现代终端能力 |
-| 安装来源 | Microsoft Store，或 `winget install Codex -s msstore` |
+| 安装来源 | 官方 ChatGPT 桌面 App 页面进入 Microsoft Store，或 `winget install --id 9PLM9XGG6VKS -s msstore` |
 | 终端 | PowerShell 默认可用；也可在 App 设置里选 Command Prompt、Git Bash、WSL |
 | 项目位置 | 新手优先放在 Windows 文件系统，例如 `C:\Users\<你>\Projects\repo` |
 | Git | 必装，Review 面板和 diff 依赖 Git |
@@ -192,17 +192,17 @@ macOS 用户同样是一等主线，不是补充路径。安装后也要跑通�
 
 ### 1.3 Linux
 
-如果当前官方 App 没覆盖你的 Linux 桌面环境，Linux 用户先用 CLI / Web / Cloud。不要把 Windows / macOS App 步骤硬套到 Linux。
+官方已提供 [ChatGPT 桌面 App 的 Linux 预览版](https://learn.chatgpt.com/docs/linux/linux-app)，覆盖页面列出的 Ubuntu、Debian、Fedora 和 Arch Linux，并提供 x64 / ARM64 包。先按发行版选择官方安装方式；未覆盖的环境仍可使用 CLI / Web / Cloud。不要把 Windows / macOS 安装步骤硬套到 Linux。
 
 ## 2. Windows 安装：Microsoft Store 是主路径
 
 
 ### 2.1 图形界面安装
 
-1. 打开官方 Codex App 页面：[https://developers.openai.com/codex/app/windows](https://developers.openai.com/codex/app/windows)
-2. 点击页面里的 **Codex app for Windows / Microsoft Store** 链接。
+1. 打开官方 [ChatGPT 桌面 App Windows 页面](https://learn.chatgpt.com/docs/windows/windows-app)。
+2. 点击页面里的 **ChatGPT desktop app / Microsoft Store** 下载链接。
 3. 在 Microsoft Store 中点击获取 / 安装。
-4. 安装完成后，从开始菜单搜索 `Codex` 并打开。
+4. 安装完成后，从开始菜单搜索 `ChatGPT` 并打开，再进入 Codex 工作视图。
 
 注意：
 
@@ -215,7 +215,7 @@ macOS 用户同样是一等主线，不是补充路径。安装后也要跑通�
 如果你不想打开 Store 界面，或者企业环境允许 `winget`：
 
 ```powershell
-winget install Codex -s msstore
+winget install --id 9PLM9XGG6VKS -s msstore
 ```
 
 这仍然是从 Microsoft Store 源安装，不是独立安装包。
@@ -238,10 +238,10 @@ winget install Codex -s msstore
 从开始菜单启动：
 
 ```text
-开始菜单 → 搜索 Codex → 打开
+开始菜单 → 搜索 ChatGPT → 打开 → 进入 Codex 工作视图
 ```
 
-如果需要管理员权限运行某些命令，官方 Windows 页说明可以从开始菜单右键 Codex，选择 **Run as administrator**。新手不建议默认管理员运行，只有任务确实需要时再用。
+先按普通用户权限打开 ChatGPT 桌面 App。任务确实需要管理员权限时，先确认命令及影响范围，再按当前 Windows 和组织策略处理；本课的安装验证和 README 练习不需要管理员权限。
 
 ### 3.2 登录
 
@@ -354,6 +354,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 
 ## 8. macOS 安装：官方入口、系统权限和开发工具链
 
+本章提到的 App 26.908 是功能快照。官方 [2026-09-25 安全更新](https://learn.chatgpt.com/docs/changelog) 已说明 macOS 26.924.20706 修复 CVE-2026-100754；安装和更新请采用官方提供的受支持版本，不要为了复现本课界面停留在旧安全版本。这里只核对了公告，没有在 macOS 安装验证。
+
 > **2026-06-09 安装口径**：Codex App 主线按官方 App 入口、Microsoft Store / macOS 下载页与 App 内更新为准。CLI 安装只作为自动化、CI 和排查补充；官方 changelog 已确认 `install.sh` / `install.ps1` 支持 `CODEX_NON_INTERACTIVE=1` 非交互安装。App 登录适合桌面工作流，API key / CLI 路径适合自动化、CI 和排查。
 
 ### 8.1 从哪里下载
@@ -363,8 +365,8 @@ macOS 用户从官方 Codex App 页面进入下载：
 1. 打开官方 Codex App 页面：[https://developers.openai.com/codex/app/](https://developers.openai.com/codex/app/)
 2. 选择 macOS 下载入口。
 3. 按页面提示下载适合当前 Mac 的安装包。
-4. 打开安装包，把 Codex App 安装到 Applications / 应用程序。
-5. 从 Launchpad 或 Applications 打开 Codex。
+4. 按官方下载页提示，把 ChatGPT 桌面 App 安装到 Applications / 应用程序。
+5. 从 Launchpad 或 Applications 打开 ChatGPT，进入 Codex 工作视图。
 
 注意：
 
@@ -508,13 +510,13 @@ CLI 安装和深入使用放到 CX-12。安装篇只要求你知道它不是主�
 
 目标：确认 Windows 上的 App、登录、Git、Review 都能跑通。
 
-1. 用 Microsoft Store 安装 Codex，或在 PowerShell 里运行：
+1. 用 Microsoft Store 安装 ChatGPT 桌面 App，或在 PowerShell 里运行：
 
 ```powershell
-winget install Codex -s msstore
+winget install --id 9PLM9XGG6VKS -s msstore
 ```
 
-2. 启动 Codex，登录 ChatGPT / OpenAI 账号。
+2. 启动 ChatGPT 桌面 App，登录 ChatGPT / OpenAI 账号，再进入 Codex 工作视图。
 3. 如果弹出 Windows 防火墙提示，只在你信任的专用网络里放行。
 4. 打开一个测试 Git 仓库，创建 Local thread。
 5. 发送只读提示：
@@ -556,7 +558,7 @@ codex exec "Read this repo and report the test command. Do not modify files."
 
 ### Q1：Windows 一定要 Microsoft Store 吗？
 
-当前官方 Windows 页写的是从 Microsoft Store 下载；命令行路径也是 `winget install Codex -s msstore`。如果公司禁用 Store，让管理员通过企业管理工具分发。
+当前官方 Windows 页写的是从 Microsoft Store 下载；命令行路径也是 `winget install --id 9PLM9XGG6VKS -s msstore`。如果公司禁用 Store，让管理员通过企业管理工具分发。
 
 ### Q2：启动时防火墙必须允许吗？
 
@@ -1508,9 +1510,9 @@ C 类：先退出写入练习
 
 | 平台 | 安装方式 | 命令 |
 |------|---------|------|
-| Windows | Microsoft Store | `winget install Codex -s msstore` |
+| Windows | Microsoft Store | `winget install --id 9PLM9XGG6VKS -s msstore` |
 | macOS | 官方下载 | https://developers.openai.com/codex/app/ |
-| Linux | CLI / Web / Cloud | App暂无Linux桌面版 |
+| Linux | 官方 ChatGPT 桌面 App 预览版，或 CLI / Web / Cloud | [Linux 官方安装页](https://learn.chatgpt.com/docs/linux/linux-app)，先核对支持的发行版和架构 |
 
 ### B. 常用CLI辅助命令
 

@@ -2,7 +2,7 @@
 
 主要来源：OpenAI Codex Subagents、App Features、CLI Slash Commands 官方文档。
 
-> **2026-09-14 多 Agent 口径**：CLI 0.145.0 起 **多 Agent V2 已稳定**——可配置 subagent 模型、推理等级、并发上限，并恢复 V1 时期部分被限制的角色。委派模式分三档（禁用 / 仅显式请求 / 主动），可在线程 + 回合级别切换；父拥有的 subagent 线程由父线程负责控制；子代理继承当前沙盒与审批边界，是否只读或使用独立工作区要看实际配置。Guardian reviewer 工具权限被收窄。agent 任务存储从 CSV 迁到 SQLite。App-server 能列出后代线程并通过某一轮 fork 历史。演示时先讲"单 agent 边界"，再讲 V2 的可配置并发；不要第一天就开高并发。本篇当前基线是 CLI 0.154.0（2026-09-09）：0.153.0 起 Guardian 审查记录可跨压缩、重启和用户主动创建的 fork 保留，记住的 MCP 工具批准按所选连接应用账号隔离；0.154.0 新增实验性 worktrees（`--worktree` / `/worktree`），可为新建或 fork 的会话创建独立工作树。并行写入前仍要确认每个任务的实际目录和文件所有权。
+> **2026-09-14 多 Agent 口径**：CLI 0.145.0 起 **多 Agent V2 已稳定**——可配置 subagent 模型、推理等级、并发上限，并恢复 V1 时期部分被限制的角色。当前本地 Codex 需要用户明确提出使用子代理，或由适用的 `AGENTS.md` / Skill 指令要求委派；ChatGPT Work 的 Ultra 才可在合适的独立任务上主动委派。两种入口的触发规则不要混用；父拥有的 subagent 线程由父线程负责控制；子代理继承当前沙盒与审批边界，是否只读或使用独立工作区要看实际配置。Guardian reviewer 工具权限被收窄。agent 任务存储从 CSV 迁到 SQLite。App-server 能列出后代线程并通过某一轮 fork 历史。演示时先讲"单 agent 边界"，再讲 V2 的可配置并发；不要第一天就开高并发。本篇当前基线是 CLI 0.154.0（2026-09-09）：0.153.0 起 Guardian 审查记录可跨压缩、重启和用户主动创建的 fork 保留，记住的 MCP 工具批准按所选连接应用账号隔离；0.154.0 新增实验性 worktrees（`--worktree` / `/worktree`），可为新建或 fork 的会话创建独立工作树。并行写入前仍要确认每个任务的实际目录和文件所有权。
 
 ---
 

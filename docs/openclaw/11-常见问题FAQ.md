@@ -212,7 +212,7 @@ ls -la ~/.openclaw/
 # ~/.openclaw/gateway/        — Gateway 运行时数据
 
 # 用命令查看当前配置
-openclaw config get
+openclaw config get agents.defaults.model
 
 # 用命令修改配置（推荐，会自动验证格式）
 openclaw config set <key> <value>
@@ -406,8 +406,8 @@ openclaw daemon
 openclaw channels status whatsapp
 
 # 第三步：如果断开了，重新连接
-openclaw channels logout whatsapp
-openclaw channels login whatsapp
+openclaw channels logout --channel whatsapp
+openclaw channels login --channel whatsapp
 
 # 第四步：查看断开原因
 openclaw logs --limit 50 | grep whatsapp
@@ -442,9 +442,9 @@ openclaw config get channels.telegram.botToken
 # 第四步：检查日志
 openclaw logs --limit 50 | grep telegram
 
-# 第五步：重新连接
-openclaw channels logout telegram
-openclaw channels login telegram
+# 第五步：探测已配置的 Telegram Bot 认证与连接
+openclaw channels status --channel telegram --probe
+# Token 有误时，按 Telegram 接入章重新配置 Bot Token；不是扫码登录
 ```
 
 ### Q18: Telegram Bot 在群组中不回复
@@ -481,8 +481,8 @@ openclaw channels login telegram
 ```bash
 # 配置 Discord Bot Token（注意：Discord 用的字段是 token，不是 botToken）
 openclaw config set channels.discord.token "your-discord-bot-token"
-openclaw channels logout discord
-openclaw channels login discord
+openclaw channels status --channel discord --probe
+# Discord 使用 Bot Token；按 Discord 接入章核对 token 与应用权限
 ```
 
 ### Q20: 消息延迟严重（发了好久才回复）
@@ -1856,8 +1856,8 @@ OPENCLAW_HOME=~/.openclaw-2 openclaw gateway --port 19789
 **解决方案：**
 
 ```bash
-# 查看所有配置
-openclaw config get
+# 查看默认模型配置（这里只返回这个配置项）
+openclaw config get agents.defaults.model
 
 # 查看特定配置项
 openclaw config get providers

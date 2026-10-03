@@ -411,7 +411,7 @@ App 用户优先通过这几处理解权限：
 | CI / 自动化 | 外部沙箱 + 最小权限 |
 | 涉及密钥 / 生产数据 | 默认拒绝，人工确认 |
 
-> **v0.133.0→v0.154.0 权限口径（核查日：2026-09-14）**：permission profiles 不再只是单个 approval mode。新版已支持 profile 列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出、配置错误展示、加密凭证、PostToolUse blocking、远程执行权限路径保留和 Windows sandbox stale credentials 修复。`--profile` 已成为 CLI / TUI permissions / sandbox flows 的主选择器，旧 profile 配置会走迁移提示；个人项目可以继续先用 App Settings，团队项目要把 profile、`AGENTS.md`、Rules、Plugins、MCP 和 sandbox 一起看。v0.153.0 之后还有两处要注意：Full Access 下 Guardian 会跳过纯确认类操作的复查，而 Guardian 记录能跨压缩、重启和用户主动创建的 fork 保留；记住的 MCP 工具批准按所选连接应用的账号保存，换用另一个账号时，以那个账号自己的审批记录和权限为准。
+> **v0.133.0→v0.154.0 权限口径（核查日：2026-09-14）**：permission profiles 不再只是单个 approval mode。新版已支持 profile 列表、继承、managed `requirements.toml`、运行时刷新、named profiles 和更强的 Windows sandbox 集成；后续又补强了 cloud-managed config、remote-control grants、personal access token v2、plugin JSON 输出、配置错误展示、加密凭证、PostToolUse blocking、远程执行权限路径保留和 Windows sandbox stale credentials 修复。配置 profile 与权限 profile 要分开：本机 CLI 0.157.1 的 `--profile <name>` 会叠加 `$CODEX_HOME/<name>.config.toml`；权限 profile 则由 `[permissions.<name>]` 定义、通过 `default_permissions` 选择。官方 `codex sandbox` 辅助命令另有 `--permission-profile` / `-P`，使用前先核对对应子命令的帮助。旧配置是否需要迁移，要看本机提示；个人项目可以继续先用 App Settings，团队项目要把 profile、`AGENTS.md`、Rules、Plugins、MCP 和 sandbox 一起看。v0.153.0 之后还有两处要注意：Full Access 下 Guardian 会跳过纯确认类操作的复查，而 Guardian 记录能跨压缩、重启和用户主动创建的 fork 保留；记住的 MCP 工具批准按所选连接应用的账号保存，换用另一个账号时，以那个账号自己的审批记录和权限为准。
 
 实操时按这个顺序确认：
 
@@ -1056,6 +1056,9 @@ Codex 支持内置权限 profile，也支持自定义 profile。新手先记三�
 ```toml
 default_permissions = "project-edit"
 
+[features]
+network_proxy = true
+
 [permissions.project-edit]
 description = "Project editing with narrow network access."
 extends = ":workspace"
@@ -1078,7 +1081,7 @@ enabled = true
 - 从 `:workspace` 继承基本工作区权限。
 - 环境文件始终拒绝。
 - 生成目录只读。
-- 网络只开放需要的域。
+- 启用网络代理后，命令网络访问按列出的域名规则过滤；如果组织配置没有启动代理，也未启用 `features.network_proxy`，这些域名规则不会限制直接联网。
 
 ### 15.2 什么时候不用 full access
 
