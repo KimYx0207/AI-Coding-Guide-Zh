@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年5月30日
+> - **更新日期**：2026年10月3日
 > - **信息来源**：OpenAI Codex App Review、GitHub integration、Codex Cloud/Web、CLI review 官方文档
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md)、[CX-02 桌面工作流](./CX-02-Codex-App桌面工作流完整指南.md)、[CX-07 Plugins](./CX-07-Codex-Plugins连接器完整指南.md)
 
@@ -220,6 +220,19 @@ GitHub 仓库连接完成后，在 [Codex code review settings](https://app.chat
 5. 自动审查默认发布 High / Critical，手动审查默认发布 Medium / High / Critical；可分别调整阈值和路径覆盖。PR 中的 findings 对所有能看该 PR 的人可见，而完整报告留在 Codex；没有达到阈值的 findings 不会发到 PR，不代表没有运行。
 
 请求 `@codex fix ...` 属于另一个会修改代码的动作，当前官方说明它启动带 PR 上下文的 **Legacy cloud chat**，有权限时可推送到分支。查看报告、发送审查评论和授权修复是不同操作，先明确要执行哪一步。依据：[GitHub 审查集成](https://learn.chatgpt.com/docs/third-party/github)、[Security Review](https://learn.chatgpt.com/docs/security/security-review)。
+
+### 5.3 用 Codex Security Cloud 扫描整个仓库
+
+PR 的 **Security Review** 检查一批代码变化；**Codex Security Cloud** 则是另一款插件，可以在云端扫描已连接的 GitHub 仓库，并持续检查默认分支的新提交。它还能在你关闭电脑后继续运行。本地仓库扫描另用 Codex Security 插件，不能把三种入口混为一谈。
+
+开始前确认工作区访问、GitHub 仓库权限、Cloud 环境和计费条件；已有 Codex Security 客户按当前提示选择是否启用付费使用。然后按以下流程进行：
+
+1. 在网页或桌面 App 打开 **Plugins**，搜索、安装并启用 **Codex Security Cloud**，从已安装插件或侧边栏打开 **Security Cloud**。
+2. 选择 **Scan**；需要时用 **Connect GitHub** 授权目标仓库。在 **New Scan** 选择仓库，检查环境。**Auto** 会在开始时创建环境，**Customize** 可以选择现有环境。
+3. 第一次在 **Scan Method** 选择 **One-Time Scan**，核对范围后选择 **Create**。到 **Scans** 查看进度，再到 **Findings** 阅读受影响代码、验证证据和修复建议。
+4. Finding 提供 **Fix with Codex** 时，可以请求生成补丁；先审查补丁，再决定是否选择 **Create draft pull request**。没有发现或没有生成修复，都不能据此保证仓库没有漏洞。
+
+需要持续监控时，另建 **Continuous Scanning**，检查默认分支、**Scan commit history from** 和 threat model 范围。之后从 **Repositories → Monitoring settings** 调整或暂停，并保存。官方发布说明的 Daybreak Blue 访问限于 Codex Security Cloud，不等于普通 Codex 任务获得同样的模型权限。本节没有启动扫描、付费使用或创建 PR。依据：[9 月 29 日公告](https://help.openai.com/en/articles/6825453-chatgpt-release-notes)、[Cloud setup](https://learn.chatgpt.com/docs/security/setup)、[Cloud FAQ](https://learn.chatgpt.com/docs/security/faq)。
 
 ## 6. 从 App 到 GitHub PR
 

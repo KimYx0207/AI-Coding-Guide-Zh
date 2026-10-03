@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年9月14日
+> - **更新日期**：2026年10月3日
 > - **信息来源**：OpenAI Codex MCP 官方文档、Codex App Settings、Codex CLI MCP 命令
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md)、[CX-02 桌面工作流](./CX-02-Codex-App桌面工作流完整指南.md)、[CX-04 权限配置](./CX-04-Codex项目指令权限配置完整指南.md)
 
@@ -315,6 +315,10 @@ CLI v0.158.0 起，预注册 OAuth client 需要 client secret 时，`codex mcp 
 
 CLI v0.148.0 已支持 OAuth 重新认证后恢复 MCP，无需为此重启整个 Codex；v0.152.0 又修复了缓存刷新、远程插件变化和认证重试时的工具可用性。v0.154.0 会在刷新失败时提示登录，也不会自动重放已被拒绝的工具调用。登录完成后先核对状态，再决定是否重试原动作。版本依据见 [官方 changelog](https://developers.openai.com/codex/changelog)。
 
+CLI v0.155.0 起，过期且无法刷新的 MCP OAuth 凭据会明确请求重新连接，状态也可能显示 `NotLoggedIn`。看到这类提示时，按第16.3节重新登录指定 server，再用 `/mcp` 核对它是否恢复；不要仅凭本地曾保存过凭据判断连接仍有效。认证恢复后，仍由你决定是否重新发起原工具动作，尤其是写入或发送动作。
+
+OAuth 元数据发现返回 `503` 则不一定意味着凭据已撤销。v0.156.0 增加了同一 issuer 的 OIDC 元数据回退，帮助过期 token 在启动时恢复刷新；回退失败仍会报告错误。持续失败时先检查服务与网络状态，再按错误处理认证，不把重新安装或删除凭据当成固定第一步。依据：[过期凭据与重新连接](https://github.com/openai/codex/pull/43947)、[MCP认证状态](https://github.com/openai/codex/pull/44359)、[503发现回退](https://github.com/openai/codex/pull/44636)。
+
 排障时不要第一步就重装。先确认“配置在哪一层、当前线程是否加载、server 是否启动、工具是否可见、调用是否被审批拦住”。
 
 ### 9.2 生产数据访问矩阵
@@ -606,6 +610,12 @@ codex mcp login server-name
 ```
 
 如果 OAuth callback 端口或 URL 有企业网络要求，可以在 `config.toml` 配置 callback port 或 callback URL。
+
+### 16.4 本地 Mac 的 MCP 请求出现 Touch ID 验证时
+
+CLI v0.155.0 为支持的 Mac 本地 TUI 增加了 MCP 用户验证。它用于需要确认当前用户身份的工具请求，不是所有 MCP 工具都要指纹验证，也不代替外部账号连接和工具审批。出现验证提示时，先读清请求的工具与动作；决定继续后选择验证并批准，按 macOS 提示完成 Touch ID。失败或取消会取消这次验证，回到请求线程查看原因，再决定是否重试。
+
+它要求受支持的硬件、可用的本地验证能力和对应客户端；远程工作区不支持这条本地验证流程。不能因为自己的 Windows、SSH 或远程 TUI 没弹 Touch ID 就判断 MCP 配置坏了。依据：[本地TUI验证入口](https://github.com/openai/codex/pull/43712)、[Mac验证支持](https://github.com/openai/codex/pull/43624)、[客户端条件](https://github.com/openai/codex/pull/43715)。
 
 ## 17. MCP 工具审批：不是所有工具都该自动跑
 

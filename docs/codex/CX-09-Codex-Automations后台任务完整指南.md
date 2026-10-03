@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年5月30日
+> - **更新日期**：2026年10月3日
 > - **信息来源**：OpenAI Codex App Automations、App Features、Skills、Rules、CLI / GitHub Action 官方文档
 > - **前置要求**：已完成 [CX-01 安装](./CX-01-Codex-App安装与认证完整指南.md)、[CX-02 桌面工作流](./CX-02-Codex-App桌面工作流完整指南.md)
 
@@ -173,7 +173,7 @@ App 主线里可以直接自然语言创建：
 
 ### 2.1 网页端的事件触发任务
 
-符合账号与工作区条件时，ChatGPT 网页端和移动端还能在收到 Gmail、Slack 或 GitHub 事件后运行任务。这种入口不在桌面 App、CLI 或 IDE 中；一个任务可以使用多个事件触发器，但不能同时再配时间计划。
+符合账号与工作区条件时，ChatGPT 网页端和移动端还能在收到 Gmail、Slack 或 GitHub 事件后运行任务。这里说的是 Gmail、Slack、GitHub 的内置事件入口，不是下节的插件 MCP Events；不要把它套到所有桌面 Cloud 任务。一个任务可以使用多个事件触发器，但不能同时再配时间计划。
 
 1. 先连接并授权对应 App。GitHub 连接必须能访问目标仓库；Slack 需要把 `@ChatGPT` 加入每个要监控的频道。
 2. 在网页对话里说明事件和动作，例如：“当 owner/repo 的 PR 123 收到新的 review comment 时，汇总新评论和需要我决定的事项，不修改代码，也不发表评论。”
@@ -181,6 +181,14 @@ App 主线里可以直接自然语言创建：
 4. 创建后在 **Scheduled** 查看等待事件和运行记录；需要立刻处理时使用 **Run now**。相近时间的多个事件可能合并为一次运行，因此检查输出是否覆盖了全部待处理事件。
 
 企业管理员可以通过 **Allow event-triggered scheduled tasks** 控制此功能。无法使用时先核对账号和工作区设置，不把每小时轮询写成同一种事件触发机制。依据：[官方任务文档](https://learn.chatgpt.com/docs/automations#trigger-tasks-from-app-events)。
+
+### 2.2 让支持 MCP Events 的插件触发任务
+
+9 月 29 日公布的 **MCP Events** 让插件提供自己的事件，例如项目板新增事项、文档收到评论。它适用于 ChatGPT 网页的 **Work** 对话、桌面 App 选择 **Work + Cloud** 的对话，以及 dots；不能据此认定 Codex CLI 或本地项目 Automation 会接收这些事件。
+
+先安装并连接支持事件的插件，在插件详情中确认可用事件，再在上述入口说明要关注的项目或文档、触发条件和收到事件后做什么。例如：“这个文档出现新评论时，汇总修改建议和需要我决定的事项；不改文档、不发送消息。”确认任务使用的连接账号有权读取目标内容，再检查任务记录是否符合你的范围；停止关注时取消对应订阅。
+
+插件开发者需要实现 MCP 2.0 的事件发现、订阅和取消订阅，并通过签名 webhook 投递。当前 ChatGPT 集成不支持 polling 或 streaming；事件还可能合并、重试或乱序到达，因此不能承诺每个事件必定产生一条独立通知。这里介绍的是官方入口和边界，没有创建真实订阅。依据：[9 月 29 日官方公告](https://help.openai.com/en/articles/6825453-chatgpt-release-notes)、[MCP Events 使用条件与流程](https://developers.openai.com/plugins/build/mcp-events)。
 
 ## 3. Automations 的三类常见任务
 

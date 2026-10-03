@@ -20,7 +20,7 @@
 我把多 Agent 协作讲成责任拆分，而不是热闹分身；每个 agent 都要有清楚的交付物。
 
 
-> **2026-09-13 当前基线（v2026.9.4）**：多 Agent 侧这几版的变化集中在「跑得远、断得住」。v2026.8.1 起会话可以跑在配对设备或云端 worker 上，工作区随会话一起走，已经预热的机器和项目初始状态能被后续云会话复用；v2026.9.4 又支持从准备好的本地项目或公开 GitHub 仓库启动 Linux 云会话，并在开聊前先在 Control UI 里做可复用快照。观察手段也变好了：v2026.8.1 起会话进度卡能跨重载保留，subagent 活动和累积改动在网页端和原生端都能跟。可靠性上，v2026.9.2 起活动中、排队中和被委派的回复能在 Gateway 重启后恢复；v2026.9.4 起 subagent 的结果能回到 Talk（语音模式），多轮委派后也能把最终答案送出去。
+> **2026-09-13 当前基线（v2026.9.4）**：多 Agent 侧这几版的变化集中在「跑得远、断得住」。v2026.8.1 起会话可以跑在配对设备或云端 worker 上，工作区随会话一起走，已经预热的机器和项目初始状态能被后续云会话复用；v2026.9.4 又支持从准备好的本地项目或公开 GitHub 仓库启动 Linux 云会话，并在开聊前先在 Control UI 里做可复用快照。启用云端路线前，要到 Settings → Connections → Cloud workers → Pool 核对备用机器，再按服务商的实际费用核对预算；符合条件的项目可能自动准备 Ready workers，这些机器会持续产生运行费用，直到服务商确认删除。需要关闭备用池时，可在 Profiles 核对并将对应备用目标或共享池上限设为 0，等待未使用机器完成回收，不能把会话结束当成所有云端费用都已停止。具体条件见[官方 Ready workers 说明](https://docs.openclaw.ai/gateway/cloud-workers/warm-images#ready-workers)。观察手段也变好了：v2026.8.1 起会话进度卡能跨重载保留，subagent 活动和累积改动在网页端和原生端都能跟。可靠性上，v2026.9.2 起活动中、排队中和被委派的回复能在 Gateway 重启后恢复；v2026.9.4 起 subagent 的结果能回到 Talk（语音模式），多轮委派后也能把最终答案送出去。
 
 > **v2026.6.8 复核补充**：多 Agent 不只是“多开几个会话”。新版继续强化 interrupted tool calls、stale session bindings、compaction handoffs、media delivery retries、Workboard、agent coordination tools、agent run recovery、session metadata 和 Gateway runtime state。排查多 Agent 卡住时，先看 Activity / transcript / Gateway 日志、Workboard 状态和具体 channel / provider，再判断是不是 agent 设计问题。
 
@@ -94,6 +94,8 @@ Agent = 一个独立的 AI 员工
 ### 架构总览
 
 > **v2026.5.22 子代理注意**：默认子 Agent bootstrap context 已收窄到 `AGENTS.md` 与 `TOOLS.md`，不会自动把 persona、identity、user、memory、heartbeat、setup 等文件全部带入 delegated workers。多 Agent 教程里的“自动继承上下文”应按最小必要上下文理解。
+
+> **v2026.9.7+ 迁移提醒**：上面是旧版本的文件范围。当前 Agent 启动时不再读取 `TOOLS.md`；维护时用 `openclaw doctor --fix` 将其中的工具笔记合并到 `AGENTS.md`，并检查权限告警和合并内容。不要为了恢复旧行为把所有个人资料、记忆或凭据复制给子 Agent；仍然只提供完成任务所需的上下文。
 
 > ⏭️ **小白可跳过** — 这是底层运行时细节
 
@@ -564,9 +566,19 @@ openclaw cron list
 openclaw cron rm <job-id>  # 替换成列表中的实际 ID
 ```
 
+添加任务后，在 **Automations** 找到它，先核对 Agent、时区、目的地和批准范围。必要时手动 **Run now**，再查看这次运行的执行结果与送达详情；暂停中的任务也可手动跑一次，这不会启用其日常计划。执行显示 OK 不代表报告已经送到：`OK · Error` 或 `OK · Unknown` 仍需查看送达错误或不确定状态。可用 `openclaw cron runs --id <job-id>` 查看对应记录；没有报告的成功任务也可能安静结束，不能单凭没有新消息判断失败。
+
+v2026.9.6 起，实质修改自动化会使之前的 **Always allow** 批准失效，即使后来把内容改回去，也需重新批准；只暂停和恢复未改变的任务会保留批准。旧批准升级后也可能需补一次确认，所以修改后要检查下一次是否等批准。v2026.9.7 起，指定已有会话的任务使用它绑定的项目目录或 managed worktree，绑定失效会停止；先恢复绑定或从有效会话重建任务再重试。本节的 `--message` 任务可以使用相应超时设置；若另建 system-event 任务，不要加入 `--timeout-seconds`，新版会拒绝，脚本任务则用自己的 `--script-timeout-seconds`。详见[运行历史](https://docs.openclaw.ai/automation/cron-jobs)与[定时参数](https://docs.openclaw.ai/cli/cron)。
+
 **方式四：通过支持的入口触发**
 
 需要从外部系统触发指定 Agent 时，使用官方 inbound webhook 的 `/hooks/agent`，先配置 hooks token、允许的 agent ID 和对应访问策略；或者使用已经授权的 `sessions_send` 工作流。`POST /api/message` 不是这里可直接使用的 Gateway 接口。不要把 Gateway token 和 hooks token 混用，实际请求字段按 [官方 webhook 文档](https://docs.openclaw.ai/automation/webhook)准备。
+
+### 中断和后台工作怎么处理
+
+Gateway 重启后先查看父会话和子任务状态。v2026.9.7 会把被中断的子任务与失败分开记录，但不会自动重新启动子 Agent，也不会重放中断的工具调用。想重做时先确认旧任务已停止、外部文件或消息是否已经改变，再交代剩余步骤，避免重复发送或重复写入。突然丢失整台机器、SSH 会话或旧版本已丢失的编辑不具备同样的恢复保障。
+
+需要让一条命令跨回合继续执行时，要求 Agent 使用执行工具的 `background: true`，让长运行命令本身作为根命令，再通过 `process` 查看状态并收集结果。不要把 `command &` 当成持久后台任务：v2026.9.5 起根命令完成会清理它留下的子进程。sandbox 的生命周期仍由其后端控制。结束实验时，停止实际任务并核对状态，关闭网页或终端并不等于远端工作已经取消。详见[后台命令](https://docs.openclaw.ai/gateway/background-process)和[重启恢复](https://docs.openclaw.ai/gateway/restart-recovery)。
 
 ## 消息路由和绑定配置
 
@@ -736,6 +748,37 @@ openclaw agents list
 #   telegram: chat=-100123456789
 ```
 
+## 让多个 Agent 在同一个群里讨论：Room Teams
+
+普通 bindings 为一条消息选择接收 Agent；实验性的 Room Teams 使用顶层 `broadcast`，让多个已配置 Agent 各自在自己的会话里回应，再在限定轮数内互相补充。v2026.9.5 的发布记录强调 Discord / Slack 的参与者回复归属；当前官方配置还支持其他明确列出的群通道。先在一个你有管理权限的测试群里做，别直接接管生产群。
+
+1. 先按本章创建 `reviewer`、`writer`，给它们不同的工作区，分别确认模型和实际工具权限。用 `openclaw agents list --bindings` 检查它们已存在。
+2. 按第 5 章配置并允许这个测试群，保留其普通路由绑定；Room Teams 不替代频道连接、发送者白名单或群准入。
+3. 把下面片段合并到现有配置，保留两 Agent 原有字段，并把 `slack:C0123` 换成真实的 `<channel>:<peerId>`。如果测试 Discord，使用 `discord:实际频道ID`。不要覆盖现有其他 bindings 或 broadcast 条目。
+
+```json5
+{
+  agents: {
+    entries: {
+      reviewer: { groupChat: { mentionPatterns: ["@reviewer\\b"] } },
+      writer: { groupChat: { mentionPatterns: ["@writer\\b"] } },
+    },
+  },
+  broadcast: {
+    "slack:C0123": {
+      agents: ["reviewer", "writer"],
+      mentionGating: true,
+      maxRounds: 2,
+      maxTurns: 4,
+    },
+  },
+}
+```
+
+配置加载后，在该测试群发送 `@reviewer @writer 请分别检查这段公开文案，最多补充一轮，只输出建议。` 检查回复是否标出参与者，并在各自 transcript 里核对内容。只点名 `@writer` 会选择它开始首轮；`mentionGating: true` 下没有匹配的参与者 mention 时会选全部，频道自己的 requireMention 仍然生效。
+
+`maxRounds` 包含首轮，`maxTurns` 限制启动的 Agent 回合，不是平台实际消息条数；长回复仍可能分成多条。每轮后续看到的是前一轮的署名摘要，顺序策略也不等于同轮流水线。讨论会消耗多次模型请求，活跃轮数与预算保存在内存，Gateway 重启后不能接着恢复原预算。想结束实验，先停止仍在执行的参与者会话，再移除这个 broadcast 条目并核对配置，避免新消息继续触发。完整字段与限制见[官方群组讨论配置](https://docs.openclaw.ai/channels/broadcast-groups)。
+
 ## 任务分发和协调策略
 
 
@@ -879,6 +922,46 @@ openclaw agents list
 ```
 
 这种策略可以通过 `sessions_send` 工具直接传递、定时任务或 HTTP API 来串联（详见上面的"Agent 间通信机制"章节）。
+
+## 批量并行委派：先做一个有上限的 Swarm
+
+普通 `sessions_spawn` 适合一个或少数子任务。Swarm 适合一批相似、能独立交付的任务，例如让多个助手分别检查几段文案；它从 Code Mode 编排，用 collector 子任务返回结果，不向父会话自动发送完成通知。
+
+先使用当前 OpenClaw 运行时，明确开启 Code Mode，确认原生 `sessions_spawn` 在当前工具目录且有权限。只有同名 MCP 工具不满足要求，目标 Agent 也必须满足 `subagents.allowAgents`。把下面片段合并到现有配置，先用小上限：
+
+```json5
+{
+  tools: {
+    codeMode: true,
+    swarm: {
+      maxConcurrent: 2,
+      maxChildrenPerGroup: 5,
+      maxTotalPerGroup: 5,
+    },
+  },
+}
+```
+
+在新对话里让助手先读 `API.read("agents.d.ts")` 核对当前 API，再把下面 JavaScript 交给 **OpenClaw Code Mode** 执行。它只总结你提供的五句话，不能作为 shell 脚本运行：
+
+```javascript
+const excerpts = ["明确交付物。", "保留来源。", "限制修改范围。", "先检查已有结果。", "报告无法确认的部分。"];
+const outcomes = await Promise.allSettled(
+  excerpts.map((text, index) => agents.run(
+    `只解释这句话的意思，最多30字，不调用外部工具：${text}`,
+    { label: `note-${index + 1}` },
+  )),
+);
+return outcomes.map((outcome, index) => outcome.status === "fulfilled"
+  ? { index, answer: outcome.value }
+  : { index, error: String(outcome.reason) });
+```
+
+这会发起五个模型子任务，最多同时执行两个；按你自己的账户计费和限额。`Promise.allSettled` 保留成功与失败结果，不要因为某个失败就自动重开整批。结果必须由 `agents.run()` 的 await 或低层 `agents_wait` 收集，不能用 `sessions_yield` 等待 collector 的自动通知。
+
+需要停止时，点击父对话 **Stop**，检查其关联子任务和清理是否都结束。若 Stop 超时或报告未完成，通过 subagent 列表核对剩余子任务再取消；父任务停止不等于所有后代进程已停止。实验结束把 `tools.swarm` 改为 `false`，并检查是否有 Agent 级别显式重新启用。
+
+v2026.9.7 起默认每组 collector 并发从 8 提到 32，且使用独立执行通道，不与普通子任务共享运行槽；普通子任务限额也按各发起会话分别计算。上面的明确小限额适合第一次练习。Swarm 是带权限与资源上限的委派，不是默认生成无限 Agent。详见[官方 Swarm 流程与停止说明](https://docs.openclaw.ai/tools/swarm)。
 
 ## 实战案例
 
@@ -1379,6 +1462,28 @@ tech-support Agent：
 ```
 
 这样写的关键，是不要让第一个 Agent “代替”第二个 Agent 做判断。转交应该保留上下文，让接收方能重新判断。
+
+## 并行改同一个代码仓库：使用 managed worktree
+
+共享目录适合交接报告；两个 Agent 同时编辑同一份代码时，更适合给任务各建一个 managed worktree，也就是独立工作副本。它会分开各自的修改，但不会自动形成安全隔离，也不会自动安装依赖或合并成果。
+
+使用当前 v2026.9.8 时，先选一个你已授权 Agent 修改、已有提交的仓库，把下面路径换成它的实际绝对路径：
+
+```bash
+openclaw worktrees create /path/to/repo --name review-task
+openclaw worktrees list --json
+```
+
+在 Control UI 的新会话位置选择中确认任务使用这个工作副本，再交代允许修改的范围和交付物。v2026.9.6 起，新 worktree 在未指定起始分支时会优先使用获取到的远端默认分支；如果任务依赖某个本地分支，在创建时明确指定 `--base-ref`，不要只凭原目录当前分支推测。
+
+完成后先审阅改动并处理未提交、未推送的成果，再清理。需要仅删除不丢失工作的副本时，使用实际 worktree ID：
+
+```bash
+openclaw worktrees remove <id> --if-lossless
+openclaw worktrees list --json
+```
+
+这个选项会保留不符合清理条件的副本。普通 `remove` 是归档路线，并不等于 Git 的非强制删除；`--force` 可能允许快照丢失，不能拿来处理“为什么没删掉”。高级的精确状态归档和恢复另按[官方 managed worktree 说明](https://docs.openclaw.ai/concepts/managed-worktrees)操作。固定 v2026.9.4 环境要先查本机 `openclaw worktrees --help`，不要直接套用当前版新增选项。
 
 ## 共享文件协作：什么时候用共享目录，什么时候不用
 
@@ -2033,6 +2138,8 @@ openclaw gateway --port 18789
 ### Q5：多个 Agent 绑定同一个频道会怎样？
 
 同一条入站消息通常只路由到一个 Agent。先比较 bindings 的匹配范围：具体会话或群组范围优先于账号、通道的兜底规则；同一优先级内才由 bindings 数组中靠前的规则决定。Agent 配置对象的排列顺序不决定路由。重叠绑定时核对 accountId、peer、guildId 或 teamId，并显式设置默认 Agent。
+
+显式配置了本章的 Room Teams / `broadcast` 时，符合群准入的一条消息可以交给多个参与者；这项设置优先于普通路由绑定。匹配的 ACP 类型绑定则是独占路线，会交给指定 ACP 会话，不进行 broadcast fan-out。排查时先区分普通绑定、broadcast 与 ACP，不能靠把同一频道绑定多次来实现团队讨论。
 
 ### Q6：Agent 的会话是独立的吗？
 

@@ -6,7 +6,7 @@
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Stars" src="https://img.shields.io/github/stars/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Stars"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh/forks"><img alt="Forks" src="https://img.shields.io/github/forks/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Forks"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;label=License"></a>
-  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.4-blueviolet.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.5-blueviolet.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Claude Code 参考版本" src="https://img.shields.io/badge/Claude_Code-2.1.270-green.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="OpenClaw 参考版本" src="https://img.shields.io/badge/OpenClaw-v2026.9.4-blue.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Codex App 功能快照" src="https://img.shields.io/badge/Codex_App-26.908-orange.svg"></a>
@@ -317,7 +317,7 @@ Meta_Kim 的介绍与开始入口放在首页前面。学习 Hook 与 Skill 时�
 
 | 产品 | 教程参考与本次核查范围 | 官方发布记录（2026-10-03 查询） | 官方来源 |
 |---|---|---|---|
-| Claude Code | 保留 2.1.270 的历史功能说明；按现行文档修正安装、权限、SDK 等。本机 CLI 2.1.236 只读核查 | changelog 最新条目 2.1.288；没有升级本机或执行模型请求 | [Claude Code changelog](https://code.claude.com/docs/en/changelog) |
+| Claude Code | 保留 2.1.270 的历史功能说明；按现行文档修正安装、权限、SDK 等。原 CLI 2.1.236 只读核查；隔离的官方 2.1.288 用于 Mods 离线检查 | changelog 最新条目 2.1.288；未改全局客户端或执行模型请求 | [Claude Code changelog](https://code.claude.com/docs/en/changelog) |
 | OpenClaw | 配置与 Docker 示例按 v2026.9.4 源码复核；本机 2026.7.1-2 只核 help，不验证新版服务行为 | 最新 Release v2026.9.8；不能由版本号推断旧状态可以直接降级 | [GitHub Releases](https://github.com/openclaw/openclaw/releases) |
 | ChatGPT / Codex 桌面 App | 26.908 为原功能快照，安装走当前 ChatGPT 桌面入口 | macOS 26.924.20706 修复 9 月 25 日公告的安全问题；安装取官网更新版本 | [ChatGPT & Codex changelog](https://learn.chatgpt.com/docs/changelog) |
 | Codex CLI | 本机 0.157.1 的 help 与已装入口，以及官方 0.160.0 源码、schema | rust-v0.160.0，10 月 1 日发布；没有升级本机 | [GitHub Release](https://github.com/openai/codex/releases/tag/rust-v0.160.0) |
@@ -333,7 +333,9 @@ Codex 的 Rules 示例改成真正注册规则，并用离线匹配确认效果�
 
 OpenClaw 保留 9.4 的固定部署参考，同时讲清 9.8 的 Windows 状态迁移和会话返回变化；修正后台服务重复启动、消息平台命令、技能与记忆入口，以及 Docker 初始化、更新和恢复中的矛盾。WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤，定时摘要使用明确日期的虚构日志；真实报价仍保留待核，不把旧价改成最新价。
 
-详细记录统一放在 [CHANGELOG.md](CHANGELOG.md)。[逐章核查清单](docs/2026-10-03-核查清单.md)列出了全部章节和四工具的功能覆盖矩阵，也说明了保留内容、进阶专题与未能核实的范围。参考答案用于对照事实，离线检查不表示当天已经在 AI 客户端跑过所有流程。
+近期发布复核又补了一批实际操作：Claude Code 的 Mods 有从三个文件到加载、热重载、离线测试和停用的完整工坊，权限、插件和云任务说明也补了适用条件；Codex 补任务管理、工作树与 MCP 排障，并区分 ChatGPT 插件界面、MCP Events 和 Security Cloud；OpenClaw 讲清技能搜索与自学习、只读配置、媒体迁移和升级回滚；WorkBuddy 补原生手机 App、文件浏览器、专家和连接器的步骤。Mods 已通过隔离官方 2.1.288 客户端的离线检查，登录后的界面与手机流程仍未实跑。
+
+详细记录统一放在 [CHANGELOG.md](CHANGELOG.md)。[逐章核查清单](docs/2026-10-03-核查清单.md)列出了全部章节的修改与保留情况，并纠正了第二轮把功能简介当成完整覆盖的判断。精选功能记录不是产品全部发布项的覆盖率；参考答案用于对照事实，离线检查也不表示当天已经在 AI 客户端跑过所有流程。
 
 ---
 

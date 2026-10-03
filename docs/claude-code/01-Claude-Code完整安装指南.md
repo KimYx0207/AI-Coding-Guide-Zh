@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时（原生安装更简单！）
 > - **难度等级**：⭐ 零基础入门
-> - **更新日期**：2026年9月14日
-> - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：Claude Code v2.1.270 为 2026-09-14 的历史参考；截至 2026-10-03 的新增行为按正文标注版本与官方文档
 > - **重要更新**：当前同时支持原生安装与标准 npm 安装；原生更省心，npm 路径仍然受支持且需要 Node.js 22+
 
 ---
@@ -2580,13 +2580,27 @@ Claude Code 现在的模型配置，不只是"选 Sonnet 还是 Opus"。
 | 别名 | 含义 | 适合场景 |
 |------|------|----------|
 | `default` | 回到系统默认模型，不是具体模型名 | 不想手动管版本时 |
-| `best` | 当前最强可用模型，现阶段等价于 `opus` | 直接追求最强效果 |
+| `best` | 可用时选择 `fable` 对应模型；否则回退到 `opus` | 最困难、最长时间的任务 |
+| `fable` | 当前部署可用的 Fable；是否可选还受账号与组织规则限制 | 长时间自主任务 |
 | `sonnet` | 最新 Sonnet，用于日常编码 | 默认主力 |
 | `opus` | 最新 Opus，用于复杂推理 | 架构、疑难问题 |
 | `haiku` | 更快更轻量 | 简单任务、快速处理 |
 | `sonnet[1m]` | Sonnet + 1M 上下文 | 大项目、长会话 |
 | `opus[1m]` | Opus + 1M 上下文 | 超长上下文 + 深度推理 |
 | `opusplan` | 规划时用 Opus，执行时切回 Sonnet | 复杂任务又要控成本 |
+
+选择 `default` 时，先用 `/status` 核对实际模型。从 v2.1.280 起，Pro 与 Team Standard 的账号默认由 Sonnet 改为 Opus；当前官方配置页列出的 Pro、Max、Team、Enterprise 和 Anthropic API 默认是 Opus 5.5，Microsoft Foundry 的默认则是 Sonnet 4.5。组织默认、账号保存的选择和模型治理可能改变实际结果，所以不要把“我以前默认用 Sonnet”当成所有账号的固定行为。详见[官方 default 模型说明](https://code.claude.com/docs/en/model-config#default-model-setting)。
+
+别名会随客户端版本和提供商变化。“最新 Sonnet”不是所有部署都已经接入同一个型号。**2026年10月3日核对的默认别名**如下；如果组织另设了模型映射或别名环境变量，先看 `/model` 的实际结果。
+
+| 提供商 | `opus` 默认解析 | `sonnet` 默认解析 |
+|--------|-----------------|------------------|
+| Anthropic API | Opus 5.5 | Sonnet 5.5 |
+| Claude Platform on AWS | Opus 5.5 | Sonnet 4.6 |
+| Amazon Bedrock / Google Cloud Agent Platform（原 Vertex AI） | Opus 5.5 | Sonnet 4.5 |
+| Microsoft Foundry | Opus 4.6 | Sonnet 4.5 |
+
+Opus 5.5 需要 v2.1.280+，Sonnet 5.5 需要 v2.1.284+。要固定型号，可用完整模型名，例如 `claude-opus-5-5` 或 `claude-sonnet-5-5`；仍需确认该提供商和账号允许调用。`best` 在 Fable 可用时跟随 `fable`：当前通常为 Fable 5.1，Claude apps gateway 则为 Fable 5；不可用时才回到 `opus`。已有的旧型号示例不因此自动失效。完整对应关系见[官方模型配置](https://code.claude.com/docs/en/model-config#model-aliases)。
 
 #### `opusplan` 是什么
 
@@ -2722,6 +2736,21 @@ CLAUDE_CODE_DISABLE_1M_CONTEXT=1
 ---
 
 ### 8.5.5 团队治理：`availableModels`、默认模型、别名映射
+
+**只允许某个版本时，要再设精确匹配。** `availableModels` 的普通匹配可能允许后续扩展版本；v2.1.283 新增 `availableModelsMatch: "exact"` 和 `deniedModels`，分别用于只允许列出的版本、明确拒绝某些型号。它们只从托管设置读取，在用户、项目、本地设置或 `--settings` 中无效。
+
+例如，管理员希望只允许已确认可用的 Sonnet 4.5，并让 Default 也遵守白名单，可以把下面内容合并到实际生效的托管设置：
+
+```json
+{
+  "availableModels": ["claude-sonnet-4-5"],
+  "availableModelsMatch": "exact",
+  "enforceAvailableModels": true,
+  "requiredMinimumVersion": "2.1.283"
+}
+```
+
+若只想阻止某个新版本，可以另用 `"deniedModels": ["claude-opus-5-5"]`；即使白名单允许它，也会被拒绝。这不是改一个 `model` 默认值就能做到的。旧客户端可能忽略这些新字段，因此最低版本也要由托管设置约束；`requiredMinimumVersion` 只在启动时检查，不会结束已经运行的旧会话。不要把示例整份覆盖到既有策略上。完整范围见[官方模型治理](https://code.claude.com/docs/en/model-config#block-specific-models-or-versions)。
 
 #### `availableModels`
 

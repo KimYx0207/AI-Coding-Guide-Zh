@@ -4,6 +4,16 @@
 
 ---
 
+## [v5.5] - 2026-10-03
+
+- 纠正 v5.4 将 Mods 简介视为完整覆盖的记录；Claude Code 08 增加可照做的 Mods 工坊，05/11/导航同步概念与托管边界。修正 Ctrl+L 回滚、alwaysLoad 工具级例外、代码审查路由、后台停止、auto 分类器计费和云任务恢复；收尾同步托管读取/沙箱、IDE 上下文、自动记忆开关、插件依赖/评测与云任务错峰。
+- Codex 补 ChatGPT 共享插件界面、MCP Events、Security Cloud 的入口与适用范围，以及 provider 凭据、模型目录、Guardian、输入审批和 Remote 排障。收尾补 MCP OAuth / OIDC、Touch ID、摘要兼容、网络撤权、任务管理、工作树占用与附图入口。
+- OpenClaw 补 TOOLS.md 迁移、数据库升级/回滚、CLI 与服务运行时修复、ToolSearch/CodeMode、Room Teams、Swarms、Incognito、named roles 和停止/送达边界；收尾补统一技能搜索、自学习模式、只读配置与 include 备份、Ready workers 费用，以及 Sora / video-frames 退休路线。
+- WorkBuddy 补原生移动 App、文件浏览器、专家创建/管理、语音输入、消息引用、连接器和定时任务步骤；保留正确的资料库主线，历史版本注明日期。
+- 官方 Claude Code 2.1.288 隔离客户端的 Mods validate 与离线测试通过；未调用模型。核查清单区分逐章核查、功能简介、可操作练习和真实执行，不再由精选功能数量推断完整覆盖。真实账户、手机授权、付费服务和生产迁移仍未执行。
+
+---
+
 ## [v5.4] - 2026-10-03
 
 ### 正文、功能与练习的第二轮复核

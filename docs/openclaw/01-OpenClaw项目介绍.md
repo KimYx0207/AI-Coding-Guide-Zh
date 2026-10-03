@@ -364,7 +364,7 @@ Channel 的安全默认值很重要。OpenClaw 连接的是真实的消息平台
 | | `voice-call` | 语音通话（ElevenLabs） |
 | | `peekaboo` | 屏幕截图 |
 | | `camsnap` | 摄像头拍照 |
-| | `video-frames` | 视频帧提取 |
+| | 视频帧提取 | v2026.9.4 已移除内置 `video-frames`；需要时自行使用 ffmpeg，或审查后安装第三方技能 |
 | 实用工具 | `weather` | 天气查询 |
 | | `summarize` | 内容摘要 |
 | | `nano-pdf` | PDF 处理 |
