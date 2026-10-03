@@ -293,6 +293,16 @@ Environment variables
 
 如果你发现一个任务必须在 agent 阶段持续使用敏感生产凭据，先停下来重新设计。很多时候应该改成只读报告、测试环境 token、外部 CI、或人工批准的短期动作。
 
+### 6.3 个人值、共享环境和私有服务
+
+个人凭据可在 **Settings → Codex Cloud → Personal vault** 添加，选择 Environment variable 或 Network secret，并限定 All environments / Selected environments。只有环境请求的 key 才会交给任务；针对具体环境的值优先于通用默认值。Network secret 仍按允许目的地由代理替换，直接环境变量仍会进入程序进程。
+
+Enterprise 共享已准备环境时，在 **Privacy → Who can use** 选择工作区、保存并发布。共享的是环境 setup，每个任务仍有自己的文件；环境访问不等于能查看他人的任务或编辑环境。共享前核对准备文件、环境自有凭据、VPN 和 cloud identity 的服务权限。
+
+需要访问内网 HTTP / HTTPS 服务时，当前环境可在 **Advanced → VPN → Add** 配置 Tailscale，保存后发布或重新发布，再在新任务验证。Tailscale auth key 需要 Reusable 和 Ephemeral；私有 IPv4、split DNS / MagicDNS 及双方访问规则都要匹配，不能只放行域名就认为内网已连通。
+
+Enterprise 可申请 **Advanced → OIDC**，用配置的云端身份获取短期凭据。先在云服务端配置 Issuer / Audience / Subject 信任和资源权限，再保存关联、发布并从新任务验证；个人云账号的权限不会自动转给该身份。详情见 [当前 Cloud environments 指南](https://learn.chatgpt.com/docs/environments/cloud-environments)。
+
 ## 7. App 到 Cloud 的接力
 
 
@@ -971,7 +981,7 @@ export API_BASE_URL=https://staging.example.com
 
 ```text
 - `npm install` 可能不尊重 lockfile。
-- 全量 test 放 setup 阶段会拖慢每次任务。
+- 全量测试放进 Install script 会延长环境准备或重新发布；当前 Cloud 新任务复用已发布文件系统，不会每次重跑安装脚本。目标测试仍应在任务中按改动运行。
 - `export` 不会让 agent 阶段持久获得变量。
 ```
 

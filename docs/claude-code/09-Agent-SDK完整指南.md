@@ -217,7 +217,7 @@ npm install @anthropic-ai/claude-agent-sdk
 - 适合：Web应用、Node.js服务端、全栈开发
 ```
 
-> **建议**：两种SDK功能完全相同，选你最熟悉的语言就好。本教程会同时展示两种语言的代码示例。
+> **建议**：选你最熟悉的语言就好。本教程会同时展示两种语言的代码示例。两种 SDK 的核心工作流相近，但接口和部分功能支持不同；例如 `SessionStart`、`SessionEnd` hook 当前支持 TypeScript，Python SDK 尚不支持，复制参数时要查对应语言的参考。
 
 ### 1.4 版本演进说明
 
@@ -339,7 +339,7 @@ set ANTHROPIC_API_KEY=sk-ant-api03-...
 ANTHROPIC_API_KEY=sk-ant-api03-...
 ```
 
-在代码中加载：
+先在选用的环境中安装加载器：Python 使用 `pip install python-dotenv`，TypeScript 使用 `npm install dotenv`。创建的 `.env` 不要提交到仓库，再在代码中加载：
 
 ```python
 # Python
@@ -856,7 +856,7 @@ if __name__ == "__main__":
 2. **Memory 持久化**：子代理可拥有持久记忆目录，跨会话积累知识
 3. **工具访问控制**：通过 `tools` / `disallowedTools` 精细控制子代理能力
 
-> 💡 **提示**：子代理不能再创建子代理（只有一层嵌套），最多可同时运行 10 个并行子代理。
+> 💡 **提示**：从 Claude Code v2.1.219 起，子代理默认可以继续派出子代理，最多到主会话下方三层；`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` 可以限制为一层。并行数量仍受运行时、配置和资源影响，不能统一写成最多 10 个。SDK 中嵌套的后台子代理如果在派出它的子代理结束后才完成，结果会交回主会话，编排时要跟踪最终结果。
 
 ---
 
@@ -895,7 +895,8 @@ async def analyze_code(file_path: str) -> None:
     options = ClaudeAgentOptions(
         model='claude-sonnet-5',
         cwd=str(Path.cwd()),
-        allowed_tools=['Read', 'Glob', 'Grep'],  # 只给读取权限
+        tools=['Read', 'Glob', 'Grep'],  # 限定这个示例的内置工具集合
+        allowed_tools=['Read', 'Glob', 'Grep'],  # 预批准这些读取工具
         max_turns=5,
         system_prompt="""你是一位资深代码审查专家。
         请分析代码并提供：
@@ -964,6 +965,7 @@ from claude_agent_sdk import (
     query,
     ClaudeAgentOptions,
     AssistantMessage,
+    UserMessage,
     TextBlock,
     ToolUseBlock,
     ToolResultBlock
@@ -1005,8 +1007,10 @@ async def run_multi_tool_agent(task: str) -> None:
                 elif isinstance(block, ToolUseBlock):
                     print(f"\n[使用工具: {block.name}]")
 
-        elif isinstance(message, ToolResultBlock):
-            print(f"[工具执行完成]\n")
+        elif isinstance(message, UserMessage):
+            for block in message.content:
+                if isinstance(block, ToolResultBlock):
+                    print(f"[工具结果: {block.tool_use_id}; 错误: {bool(block.is_error)}]")
 
     print("\n" + "=" * 60)
     print("任务执行完成！")
@@ -1344,8 +1348,8 @@ Hooks（钩子）让你可以在Agent执行的特定时机插入自定义逻辑�
 | **PostToolUse** | 工具执行后 | 记录日志、自动测试 |
 | **Stop** | Agent停止时 | 清理、汇总报告 |
 | **UserPromptSubmit** | 用户提交提示时 | 处理和增强用户输入 |
-| **SessionStart** | 会话开始时 | 加载上次会话状态 |
-| **SessionEnd** | 会话结束时 | 保存会话状态 |
+| **SessionStart（TypeScript）** | 会话开始时 | 初始化日志和状态；Python SDK 当前不支持 |
+| **SessionEnd（TypeScript）** | 会话结束时 | 清理资源和保存应用状态；Python SDK 当前不支持 |
 | **PreCompact** | 上下文压缩前 | 保存关键信息 |
 
 **Python Hooks示例**：
@@ -1379,6 +1383,9 @@ async def block_dangerous_commands(input_data, tool_use_id, context):
             }
 
     return {}  # Hook 不作决定，继续走正常权限流程
+
+# 这里仅演示几个字面子串的匹配：rm -r -f 等写法不会命中。
+# 它不是完整的 shell 命令审计，实际部署还需权限规则和沙箱。
 
 async def log_tool_results(input_data, tool_use_id, context):
     """记录工具执行结果"""
@@ -1439,7 +1446,7 @@ edit_options = ClaudeAgentOptions(
 
 ### 5.4 沙箱模式
 
-保护你的系统免受意外损害：
+下面用 `sandbox.enabled` 启用 Bash 沙箱，并设置 `allowUnsandboxedCommands=False`，让模型不能通过 `dangerouslyDisableSandbox` 请求脱离沙箱。`can_use_tool` 只处理正常权限流程最终要求审批的调用，已经被规则或权限模式批准的调用不会进入它；若要检查每一次工具调用，应使用 `PreToolUse` hook。沙箱支持的平台、文件和网络范围仍须按[官方沙箱文档](https://code.claude.com/docs/en/sandboxing)配置。
 
 ```python
 from claude_agent_sdk import query, ClaudeAgentOptions
@@ -1454,7 +1461,7 @@ async def can_use_tool(
     if tool_name == "Bash" and tool_input.get("dangerouslyDisableSandbox"):
         print(f"警告：请求在沙箱外执行命令：{tool_input.get('command')}")
         # 返回Deny拒绝，Allow允许
-        return PermissionResultDeny(reason="禁止在沙箱外执行命令")
+        return PermissionResultDeny(message="禁止在沙箱外执行命令")
     return PermissionResultAllow()
 
 options = ClaudeAgentOptions(
@@ -1602,8 +1609,8 @@ import logging
 # 设置日志级别
 logging.basicConfig(level=logging.DEBUG)
 
-# 或者使用环境变量
-# export CLAUDE_SDK_LOG_LEVEL=DEBUG
+# 需要接收 CLI 子进程的标准错误时，可在选项中设置 stderr 回调：
+# ClaudeAgentOptions(stderr=lambda line: logging.debug("CLI: %s", line))
 ```
 
 **打印消息详情**：
@@ -1681,7 +1688,7 @@ options = ClaudeAgentOptions(
 
 ### Q5: 可以同时运行多少个子代理？
 
-**答**：最多10个并行。如果需要处理更多任务，会自动排队。
+**答**：没有可以套用到所有版本和环境的“最多10个”结论。并发受 Claude Code 版本、配置、权限、资源和任务类型影响；本课的 SDK 调用示例也没有创建固定大小的代理池。先按少量、职责清晰的子任务验证，再参照[官方子代理限制](https://code.claude.com/docs/en/sub-agents)调整。
 
 ---
 
@@ -1689,24 +1696,21 @@ options = ClaudeAgentOptions(
 
 **答**：几个建议：
 
-1. **使用权限控制**：设置allowed_tools白名单
+1. **使用权限控制**：用 `tools` 限定内置工具集合；`allowed_tools` 只预批准具体调用，MCP 与 hooks 另行检查
 2. **启用沙箱**：防止危险命令
 3. **添加Hooks**：记录日志、过滤危险操作
 4. **设置超时**：防止任务卡住
 5. **监控Token消耗**：控制成本
 
 ```python
-# 生产环境配置示例
+# 文件分析配置示例；未配置 MCP 和 hooks。
+# 整体部署还需要结合自己的数据范围、鉴权和隔离要求设计。
 production_options = ClaudeAgentOptions(
-    model='claude-sonnet-5',  # 推荐模型
-    allowed_tools=['Read', 'Glob', 'Grep'],  # 最小权限
-    permission_mode='default',  # 需要确认
+    model='sonnet',
+    tools=['Read', 'Glob', 'Grep'],
+    allowed_tools=['Read', 'Glob', 'Grep'],
+    permission_mode='dontAsk',
     max_turns=10,
-    sandbox={"enabled": True},
-    hooks={
-        "PreToolUse": [safety_hooks],
-        "PostToolUse": [logging_hooks]
-    }
 )
 ```
 
@@ -1730,7 +1734,7 @@ async for message in query(prompt="...", options=options):
 
 **答**：
 
-1. **使用后台运行的子代理**：在 `AgentDefinition` 中设置 `background=True`
+1. **使用后台运行的子代理**：在 `AgentDefinition` 中设置 `background=True`，并持续消费 SDK 的消息，直到取得任务的最终结果；后台执行仍依赖宿主进程与会话运行，不会自动变成跨进程的持久任务
 2. **设置合理的超时**
 3. **使用异步并行**
 
@@ -1746,7 +1750,7 @@ prompt = """请使用子代理并行处理：
 
 ### Q9: 自定义工具可以访问外部API吗？
 
-**答**：可以！自定义工具就是普通的Python/TypeScript函数：
+**答**：可以！自定义工具可以调用外部 API。下面只展示异步请求的写法，`https://api.weather.com/{city}` 是接口占位示意，不能当作可用的天气 API 直接运行；实际接入时要替换成服务商提供的端点，并补上认证、超时和响应状态检查。片段还需要本章的 `tool` 导入及 `httpx` 依赖：
 
 ```python
 import httpx
@@ -1765,7 +1769,7 @@ async def get_weather(args):
 
 ### Q10: 如何调试Agent的决策过程？
 
-**答**：打印所有消息类型：
+**答**：打印所有消息类型。下面片段需先导入 `UserMessage`；工具结果在它的 `content` 中，不能把内容块当成顶层消息判断。
 
 ```python
 async for message in query(prompt="...", options=options):
@@ -1779,15 +1783,17 @@ async for message in query(prompt="...", options=options):
             elif isinstance(block, ToolUseBlock):
                 print(f"  调用工具: {block.name}({block.input})")
 
-    elif isinstance(message, ToolResultBlock):
-        print(f"工具结果: {str(message.content)[:100]}...")
+    elif isinstance(message, UserMessage):
+        for block in message.content:
+            if isinstance(block, ToolResultBlock):
+                print(f"工具结果: {str(block.content)[:100]}...")
 ```
 
 ---
 
 ### Q11: SDK会自动重试失败的请求吗？
 
-**答**：SDK有基本的重试机制，但你可以自己加强：
+**答**：运行时会处理部分请求重试。下面的 `tenacity` 包装会重新执行整个 `query`，前一次已经完成的写文件、命令或外部 API 操作可能再次发生，所以只把它用于只读或已经设计成可重复执行的任务；其他任务应先确认执行状态，再决定如何继续。示例需安装 `tenacity`。
 
 ```python
 import asyncio
@@ -1863,7 +1869,7 @@ if __name__ == "__main__":
 
 ### Q15: 如何处理大文件？
 
-**答**：Agent会自动分块处理。如果文件太大，考虑：
+**答**：不要依赖 Agent 一定自动读完整个大文件。`Read` 支持用 `offset` 和 `limit` 选择行范围，输出超限时需要缩小范围再读；也可以：
 
 1. 只读取需要的部分
 2. 使用Grep搜索而不是Read全文
@@ -1980,7 +1986,7 @@ async def rate_limited_query(prompts, delay=1.0):
 |------|------|
 | 模型选择 | 日常用Sonnet，复杂推理用Opus，简单任务用Haiku |
 | 权限控制 | 生产环境用最小权限，开发可以放宽 |
-| 子代理 | 大任务拆分并行，注意最多10个同时运行 |
+| 子代理 | 按职责拆分，控制并发与成本；限制以当前版本和配置为准 |
 | 自定义工具 | 优先用SDK内置MCP服务器，简单高效 |
 | 错误处理 | 使用try/catch，添加重试机制 |
 

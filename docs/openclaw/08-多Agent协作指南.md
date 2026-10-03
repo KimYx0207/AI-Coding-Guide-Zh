@@ -135,7 +135,7 @@ OpenClaw 的多 Agent 架构基于 Pi agent runtime（RPC 模式）运行，采�
 
 **为什么是扁平路由而不是层级管理？**
 
-OpenClaw 官方明确表示不会合并"Agent 层级框架（管理者的管理者/嵌套规划树）"。原因很实际：
+消息 bindings 按配置直接选择 Agent，不必先让一个模型判断消息给谁。这是入口路由的设计；不代表 OpenClaw 禁止子 Agent、运行时委派或编程任务的编排。直接路由的优势包括：
 
 1. 层级管理增加延迟 -- 消息要先经过管理者 Agent 判断，再转发给工作 Agent
 2. 管理者 Agent 本身也消耗 token -- 每条消息多一次 AI 调用
@@ -306,8 +306,8 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `id` | `string` | 是 | Agent 唯一标识符，只能用字母、数字、连字符 |
-| `workspace` | `string` | 是 | 工作空间目录路径 |
+| `entries` 的对象键 | `string` | 是 | Agent ID，例如 `coding`；配置对象中不再单独写 `id` |
+| `workspace` | `string` | 否 | 工作空间目录路径；为清楚区分内容，示例显式指定独立目录 |
 | `model` | `string` 或 `object` | 否 | AI 模型，可以是字符串或 `{ primary, fallbacks }` 对象 |
 | `skills` | `string[]` | 否 | Agent 可用的技能列表（简单字符串数组） |
 | `sandbox` | `object` | 否 | 沙箱配置 |
@@ -430,7 +430,7 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
         // 编程需要最强的推理能力，用最好的模型
       },
       "social": {
-        "model": "openai/gpt-5.2-mini",
+        "model": "openai/gpt-5.6-luna",
         // 闲聊不需要太强的模型，用便宜的就行
       },
       "work": {
@@ -442,15 +442,15 @@ Agent 的核心配置在 `~/.openclaw/openclaw.json`（JSON5 格式）的 `agent
 }
 ```
 
-成本对比（假设每天处理 100 条消息）：
+比较成本时，用同一组有代表性的任务记录实际输入、输出、缓存用量和其他服务费用，再按账号或提供商的当前计费规则计算。每天 100 条消息不足以推算固定日费用：消息长度、工具结果、重试和上下文累积都会影响用量。
 
-| 方案 | 模型 | 估算日成本 |
-|------|------|-----------|
-| 全部用 Opus | claude-opus-4-8 | ~$5-10 |
-| 按需分配 | Opus + Sonnet + Mini | ~$2-4 |
-| 全部用 Mini | gpt-5.2-mini | ~$0.5-1 |
+| 方案 | 模型组合示例 | 需要核对的结果 |
+|------|--------------|----------------|
+| 全部用 Opus | claude-opus-4-8 | 任务质量与实际费用 |
+| 按需分配 | Opus + Sonnet + Luna | 各类任务的完成质量、重试次数与实际费用 |
+| 全部用 Luna | gpt-5.6-luna | 是否达到任务要求，以及是否因重试增加费用 |
 
-按需分配能在保证关键任务质量的同时，大幅降低成本。
+按需分配可以作为降低成本的候选方案，是否节省、能否保持关键任务质量，要以这组任务的实际结果判断。
 
 ## Agent 间通信机制
 
@@ -466,26 +466,18 @@ OpenClaw 提供了一组 Sessions 工具，让 Agent 之间可以直接通信。
 |------|------|------|
 | `sessions_list` | 发现活跃会话 | 列出当前所有活跃的 Agent 会话 |
 | `sessions_history` | 获取会话日志 | 查看指定会话的历史消息 |
-| `sessions_send` | 向另一个会话发消息 | 支持 reply-back ping-pong 和 announce step 模式 |
+| `sessions_send` | 向另一个会话发消息 | 向授权目标会话发送请求；返回与后续交付按安装版本处理 |
 | `sessions_spawn` | 生成新会话 | 动态创建一个新的 Agent 会话 |
 
-**sessions_send 的两种模式：**
+**sessions_send 的返回方式与版本差异：**
 
-- **reply-back ping-pong** -- 发送消息并等待对方回复，适合需要来回协商的场景
-- **announce step** -- 单向通知，不等待回复，适合流水线式的任务传递
+它向有权限访问的目标会话发送消息。先用 `sessions_list` 找到真实 session key，再传递原始问题和所需上下文；Agent ID 本身不是目标会话 key。普通跨 Agent 访问还受 `tools.sessions.visibility`、`tools.agentToAgent` 和当前身份控制。
 
-**使用示例：**
+本章固定参考的 v2026.9.4 曾有自动 reply-back ping-pong 与 announcement 轮次。v2026.9.8 已移除这套自动往返：结果可以在调用内返回，或者在原请求会话仍符合身份和生命周期条件时稍后送回一次。继续讨论要显式再次发送；向 Telegram、Discord 等渠道交付要显式使用消息工具，不能靠旧 announce 机制。`REPLY_SKIP` 和 `ANNOUNCE_SKIP` 也不再压制旧循环的返回文本。隔离 cron 调用不会建立脱离调用的后台回复等待器。
 
-```
-coding Agent 完成代码审查
-    │
-    ├── sessions_list → 发现 writer Agent 的活跃会话
-    │
-    ├── sessions_send → 向 writer Agent 发送审查结果
-    │   （announce step 模式，不等待回复）
-    │
-    └── writer Agent 收到消息，开始生成审查报告
-```
+因此研究→写作→审核应明确每次输入、结果、目标会话和交付动作。不要把 `sessions_send` 写成“单向通知模式”等参数承诺，也不要把两条定时任务的时间差当作上游成功的证明。
+
+参见 [v2026.9.8 委派变更](https://docs.openclaw.ai/releases/2026.9.8#messaging)。
 
 **Sessions CLI 命令：**
 
@@ -544,7 +536,7 @@ work Agent → 你：已创建 PROJ-101, PROJ-102, PROJ-103
 
 **方式三：通过定时任务串联**
 
-用 Cron 定时任务让 Agent 按顺序执行：
+Cron 可以分别安排执行时间，但不会因为两条任务相隔半小时就保证先后依赖。下游开始前应检查上游当天产物和成功状态；需要真正的串行依赖时，在一个受控工作流里等待上游结果再转交。下面先演示各任务的定时设置：
 
 ```json5
 {
@@ -608,7 +600,7 @@ Gateway 按绑定的匹配精度选择 Agent：具体 peer 规则比 guild/team�
 ```
 
 - `guildId` -- Discord 服务器 ID
-- `channelId` -- Discord 频道 ID
+- `peer.id` -- Discord 频道 ID，配合 `peer.kind: "channel"`
 - 可以只指定 `guildId`，这样整个服务器的消息都路由到这个 Agent
 
 **Telegram 绑定：**
@@ -630,7 +622,7 @@ Gateway 按绑定的匹配精度选择 Agent：具体 peer 规则比 guild/team�
 }
 ```
 
-- `chatId` -- Telegram 群组 ID（负数开头）
+- `peer.id` -- Telegram 群组 ID（通常为负数），配合 `peer.kind: "group"`
 - 未匹配私聊走所配置默认 Agent；需要按联系人区分时增加 kind 为 direct 的 peer 绑定。
 
 **Slack 绑定：**
@@ -779,7 +771,7 @@ openclaw agents list
       },
       "social": {
         "skills": ["weather", "goplaces", "summarize"],
-        "model": "openai/gpt-5.2-mini",
+        "model": "openai/gpt-5.6-luna",
       },
     },
   },
@@ -971,7 +963,7 @@ openclaw agents add tech-support
       },
       "community": {
         "workspace": "~/.openclaw/workspace-community",
-        "model": "openai/gpt-5.2-mini",
+        "model": "openai/gpt-5.6-luna",
         "skills": ["summarize"],
       },
       "tech-support": {
@@ -1224,15 +1216,15 @@ openclaw agents add reviewer
 ```bash
 openclaw cron add --tz Asia/Shanghai --name "weekly-research" --cron "0 9 * * 1" \
   --agent researcher \
-  --message "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
+  --message "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 ~/.openclaw/shared/research/"
 
 openclaw cron add --tz Asia/Shanghai --name "weekly-report" --cron "0 14 * * 1" \
   --agent report-writer \
-  --message "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
+  --message "基于 ~/.openclaw/shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 ~/.openclaw/shared/reports/"
 
 openclaw cron add --tz Asia/Shanghai --name "weekly-review" --cron "0 16 * * 1" \
   --agent reviewer \
-  --message "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
+  --message "审核 ~/.openclaw/shared/reports/ 中最新的报告草稿，生成审核报告保存到 ~/.openclaw/shared/reviews/"
 ```
 
 每周一的流程：
@@ -1480,7 +1472,7 @@ openclaw agents list
 }
 ```
 
-第三步，看顺序。多个规则都能匹配时，前面的规则通常更容易先命中。把更具体的规则放前面：
+第三步，比较匹配范围。具体 peer 比整个 guild 更优先，同等精度时才看 bindings 顺序。下面把具体规则写在前面便于阅读，但不能把“第一条”当成所有情况下的优先级：
 
 ```json5
 {
@@ -1655,7 +1647,7 @@ openclaw sessions cleanup
   "agents": {
     "entries": {
       "social": {
-        "model": "openai/gpt-5.2-mini",
+        "model": "openai/gpt-5.6-luna",
         // 闲聊用便宜模型
       },
     },
@@ -1695,7 +1687,7 @@ Agent 的 `model` 字段支持故障转移配置：
         "model": {
           "primary": "anthropic/claude-sonnet-5",
           "fallbacks": [
-            "openai/gpt-5.2-mini",
+            "openai/gpt-5.6-luna",
             "ollama/llama3.1",
           ],
         },
@@ -1777,22 +1769,7 @@ mkdir -p ~/.openclaw/workspace-devops/skills/server-monitor
 ````markdown
 ---
 name: server-monitor
-description: 服务器监控和运维操作
-triggers:
-  - 服务器状态
-  - 检查服务
-  - 磁盘空间
-  - 内存使用
-  - 重启服务
-tools:
-  - shell_exec
-  - file_write
-  - file_read
-permissions:
-  - shell_exec
-  - file_write
-  - file_read
-category: system
+description: 用户明确要求检查服务器资源、容器或服务状态时使用；重启服务前核对对象并确认授权。
 ---
 
 # 服务器监控技能
@@ -1920,7 +1897,7 @@ openclaw cron add --tz Asia/Shanghai --name "daily-report" --cron "0 18 * * *" \
 
 ```bash
 # 启动 Gateway 时开启 Agent 调试
-openclaw gateway --verbose --verbose
+openclaw gateway --verbose
 
 # 或者在配置中开启
 ```
@@ -1943,7 +1920,7 @@ openclaw gateway --verbose --verbose
 [AGENT] Loading MEMORY.md (tokens: 150)
 [AGENT] Loading skills: weather, goplaces, summarize
 [AGENT] Total system prompt tokens: 1,850
-[AGENT] Calling model: openai/gpt-5.2-mini
+[AGENT] Calling model: openai/gpt-5.6-luna
 [AGENT] Model response received (tokens: 120, time: 1.2s)
 [AGENT] Sending response to telegram:chat=-100123456789
 ```
@@ -2017,11 +1994,11 @@ WebChat 是调试 Agent 最方便的工具。你可以在浏览器中直接跟�
 openclaw gateway --port 18789
 
 # 打开浏览器访问
-# http://localhost:18789/chat?agent=coding
-# http://localhost:18789/chat?agent=social
+# http://localhost:18789/
+# 登录后在 New session 页面选择 coding 或 social
 ```
 
-通过 URL 参数 `?agent=<agentId>` 可以指定跟哪个 Agent 对话，方便逐个测试。
+在 Control UI 的新会话入口选择目标 Agent，并检查会话显示的 Agent 和工作区。不要只凭 URL 查询参数认定路由已经切换。
 
 ## 常见问题
 
@@ -2044,7 +2021,7 @@ openclaw gateway --port 18789
 可以。OpenClaw 提供了 Sessions 工具来实现 Agent 间的直接通信：
 
 - `sessions_list` -- 列出当前权限可见的会话；最近更新不证明会话正在执行
-- `sessions_send` -- 向另一个会话发消息（支持 reply-back ping-pong 和 announce step 模式）
+- `sessions_send` -- 向另一个会话发消息（向授权目标会话发送请求；返回与后续交付按安装版本处理）
 - `sessions_spawn` -- 生成新的 Agent 会话
 
 如果不需要实时通信，也可以使用定时任务 + 共享文件的方式（参见"Agent 间通信机制"章节）。

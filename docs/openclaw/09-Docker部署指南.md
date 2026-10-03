@@ -33,7 +33,7 @@
 
 **统一启动** — 使用预构建镜像时，无需在宿主机安装 Node.js。先准备持久化目录、完成 onboarding 和认证，再用 `docker compose up -d` 启动服务。
 
-**隔离性** — OpenClaw 跑在自己的容器里，不会污染宿主机环境。你可以在同一台机器上跑多个版本的 OpenClaw，互不干扰。
+**隔离性** — 容器分开了程序和依赖。多个实例还必须使用独立的状态、工作区、端口和通道账号；共享写入卷或挂载 Docker socket 时，仍可能影响宿主机及其他实例。
 
 **易于迁移** — 想换服务器？把 docker-compose.yml（Docker 的编排工具，用一个配置文件管理多个容器）和数据卷拷过去，几分钟就能恢复。
 
@@ -367,7 +367,7 @@ docker compose logs -f openclaw-gateway       # 只看 Gateway 日志
 docker compose down                           # 停止所有服务
 docker compose down -v                        # 停止并删除数据卷（谨慎！）
 docker compose restart openclaw-gateway       # 重启单个服务
-docker compose pull && docker compose up -d   # 更新镜像并重启
+docker compose pull && docker compose up -d   # 先备份并切到已验证目标 tag；这里才拉取并重建
 ```
 
 ---
@@ -384,7 +384,7 @@ docker compose pull && docker compose up -d   # 更新镜像并重启
 # Gateway 访问令牌（必填）
 OPENCLAW_GATEWAY_TOKEN=your-secure-token-here
 
-# Gateway 访问密码（可选，与 Token 二选一或同时使用）
+# Gateway 访问密码（使用 gateway.auth.mode: "password" 时配置；不是与 token 同时验证）
 OPENCLAW_GATEWAY_PASSWORD=your-secure-password-here
 
 # 运行环境
@@ -437,7 +437,7 @@ OPENCLAW_EXTRA_MOUNTS=/path/to/data:/data
 
 ### 环境变量优先级
 
-Docker Compose 中环境变量优先级（从高到低）：命令行 `-e` > `environment:` 直接设置 > `env_file:` > `.env` 文件 > 镜像默认值。
+Compose 的项目 `.env` 主要用于 `${VARIABLE}` 插值，不会自动把其中所有变量注入容器。运行时需在对应 service 使用 `environment:` 或 `env_file:`；本章基础版只显式传入 Gateway token，其他模型或通道凭据由 onboarding 保存，若改用环境变量则要另行传入。容器中同名变量的覆盖顺序以实际 `run -e`、插值来源、`environment`、`env_file` 和镜像 `ENV` 为准。参见 [Docker 官方变量优先级](https://docs.docker.com/compose/how-tos/environment-variables/envvars-precedence/)。
 
 ### 敏感信息处理
 
@@ -463,16 +463,16 @@ Docker 容器是临时的 — 容器删了，里面的数据就没了。Volumes 
 
 ### Named Volumes vs Bind Mounts
 
+下面是 service 下的 volumes 列表示意，同一个目标目录二选一。完整 Compose 仍按前面的三处持久化挂载填写，不能只保留这个状态目录：
+
 ```yaml
 volumes:
-  # Named Volume（推荐）— Docker 管理，性能好
-  openclaw-data:/home/node/.openclaw
-
-  # Bind Mount — 直接映射宿主机目录，方便查看文件
-  ./local-data:/home/node/.openclaw
+  - openclaw-data:/home/node/.openclaw
+  # 需要 bind mount 时，用下一行替换上面一行，并先准备宿主目录权限
+  # - ./local-data:/home/node/.openclaw
 ```
 
-Named Volume 性能更好（尤其 macOS/Windows），可移植性高，Docker 自动处理权限。Bind Mount 方便直接查看和编辑文件，但依赖宿主机路径。
+Named Volume 由 Docker 管理，可以减少对宿主机固定路径的依赖；Bind Mount 方便直接查看和编辑文件，但依赖宿主机路径。实际性能取决于环境。命名卷也要核对容器内运行用户的写权限，新建卷和恢复备份后不能假设 Docker 会自动修正所有权；按前文三卷初始化步骤准备，再按恢复流程验证。
 
 ### 查看和管理 Volumes
 
@@ -838,120 +838,33 @@ curl -i http://127.0.0.1:18789/health
 
 ## 云平台部署
 
-### AWS 部署
+### VM / VPS：沿用同一条初始化路径
 
-#### EC2 + Docker Compose
+AWS EC2、Google Compute Engine、阿里云 ECS 和普通 VPS 都可以先按平台文档创建 Linux 虚拟机，再通过 SSH 安装 Docker。不要把“git clone 后直接 compose up”当成首次配置：它仍需要持久化目录、onboarding、认证和 origin。
 
-```bash
-# 推荐 t3.medium: 2 vCPU, 4GB RAM
-ssh -i your-key.pem ubuntu@ec2-xx-xx-xx-xx.compute-1.amazonaws.com
-curl -fsSL https://get.docker.com | sh && sudo usermod -aG docker ubuntu
-git clone https://github.com/openclaw/openclaw.git && cd openclaw
-cp .env.example .env   # 编辑 .env 填入配置
-docker compose up -d
-```
-
-#### AWS ECS（容器服务）
-
-适合需要自动扩缩容的场景。在 AWS 控制台创建 ECS 任务定义，指定镜像 `openclaw/openclaw:latest`，端口映射 `18789:18789`，分配 2048MB 内存和 1024 CPU 单位。详细配置参考 [AWS ECS 文档](https://docs.aws.amazon.com/ecs/)。
-
-### GCP 部署
-
-#### Cloud Run（Serverless）
+以已经装好 Docker 的测试 VM 为例，在普通部署账号下执行本章固定版本的官方初始化：
 
 ```bash
-# 构建并推送镜像到 GCR
-gcloud builds submit --tag gcr.io/your-project/openclaw
-
-# 部署到 Cloud Run
-gcloud run deploy openclaw \
-  --image gcr.io/your-project/openclaw \
-  --port 18789 \
-  --memory 2Gi \
-  --cpu 2 \
-  --set-env-vars "NODE_ENV=production" \
-  --allow-unauthenticated
+git clone --branch v2026.9.4 --depth 1 https://github.com/openclaw/openclaw.git
+cd openclaw
+export OPENCLAW_IMAGE=openclaw/openclaw:2026.9.4
+./scripts/docker/setup.sh
 ```
 
-#### GCE（虚拟机）
-
-创建 `e2-medium` 实例，SSH 连接后安装 Docker 并部署（流程同 EC2）。
-
-### Azure 部署
-
-#### Azure Container Instances
+接着检查 `docker compose ps` 和 Gateway 日志。在本地机器建立 SSH 隧道：
 
 ```bash
-# 创建资源组
-az group create --name openclaw-rg --location eastus
-
-# 部署容器
-az container create \
-  --resource-group openclaw-rg \
-  --name openclaw \
-  --image openclaw/openclaw:latest \
-  --ports 18789 \
-  --cpu 2 \
-  --memory 4 \
-  --environment-variables NODE_ENV=production
+# 将示例账号与服务器地址替换为你自己的实际值
+ssh -L 18789:127.0.0.1:18789 deploy-user@server.example.com
 ```
 
-### 阿里云部署
+浏览器打开 `http://127.0.0.1:18789/`，按初始化提示输入 Gateway secret。长期域名入口再按前文配置 HTTPS 反代、允许的 origin 和代理信任；Tailscale 部署按 [官方 Tailscale 指南](https://docs.openclaw.ai/gateway/tailscale)使用 Serve，不是只安装 Tailscale 就能访问一个 loopback listener。
 
-#### ECS + Docker
+### ECS、Cloud Run、ACI：先解决状态与生命周期
 
-```bash
-# 1. 创建 ECS 实例（推荐 ecs.c6.large: 2 vCPU, 4GB）
-# 2. SSH 连接后安装 Docker
-ssh root@your-ecs-ip
-curl -fsSL https://get.docker.com | sh
+这些托管容器平台不是把镜像名和端口填上就能代替本章 Compose。先确认持久化的状态、workspace 和认证加密密钥能配套保存，只有一个 Gateway 写同一份数据库，onboarding 能在同一组持久化路径执行，入口有认证及 HTTPS，后台连接与重启行为符合平台限制。Cloud Run 的实例扩缩容和临时文件系统尤其不能直接当作本地单机 Gateway。没有解决这些条件前，使用 VM/VPS 路线；不要照抄一个 `--allow-unauthenticated` 的空状态部署当成完整生产方案。
 
-# 配置阿里云镜像加速器
-sudo tee /etc/docker/daemon.json <<-'EOF'
-{ "registry-mirrors": ["https://your-id.mirror.aliyuncs.com"] }
-EOF
-sudo systemctl daemon-reload && sudo systemctl restart docker
-
-# 部署
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw && docker compose up -d
-```
-
-### VPS 部署（Hetzner / Vultr / DigitalOcean）
-
-性价比最高的方案，适合个人和小团队（约 $5-10/月）：
-
-```bash
-ssh root@your-vps-ip
-curl -fsSL https://get.docker.com | sh
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw && ./docker-setup.sh
-```
-
-#### 远程访问方案
-
-Gateway 默认绑定 `127.0.0.1`，外部无法直接访问。三种方案：
-
-**方案一：SSH 隧道（最简单）**
-
-```bash
-# 在本地机器上
-ssh -L 18789:127.0.0.1:18789 root@your-vps-ip
-# 然后本地浏览器访问 http://127.0.0.1:18789/
-```
-
-**方案二：Tailscale（推荐长期使用）**
-
-```bash
-# VPS 和本地都安装 Tailscale
-curl -fsSL https://tailscale.com/install.sh | sh
-tailscale up
-# 通过 Tailscale IP 访问：http://100.x.x.x:18789/
-```
-
-**方案三：反向代理 + HTTPS（对外服务）**
-
-参考上面的 Nginx 或 Caddy 配置。
+部署或迁移到托管平台时，保留本章的备份、版本锁定和离线恢复约束，再按该平台官方文档设计。费用与实例规格会变化，应在平台确认实际套餐，本文不把旧估价当成报价。
 
 ---
 
@@ -962,7 +875,7 @@ Docker 在 OpenClaw 中扮演双重角色：一是容器化部署 Gateway 本身
 - **Gateway 容器化** — 整个 OpenClaw 跑在 Docker 里
 - **Agent 沙箱** — Gateway 跑在主机上（或容器里），但 Agent 的工具执行在独立的 Docker 容器中
 
-沙箱的核心价值：Agent 执行的代码（shell 命令、脚本等）被限制在隔离容器中，即使代码有破坏性操作也不会影响宿主机。
+沙箱可以把部分工具执行放到独立容器，缩小影响范围。可写挂载、网络权限、Docker socket 和宿主执行入口仍需核对；它不保证任何破坏性操作都影响不到宿主机。
 
 ### 沙箱模式
 
@@ -1014,11 +927,15 @@ docker build -t openclaw:sandbox-browser -f Dockerfile.sandbox-browser .
 **快速开始：**
 
 ```bash
-# 一键初始化（构建镜像 + 创建配置 + 启动 Gateway）
+# 先从 v2026.9.4 仓库根目录执行；宿主机须已安装 rootless Podman 和 OpenClaw CLI
 ./scripts/podman/setup.sh
 
-# 使用 CLI 管理容器化的 Gateway
-openclaw --container <容器名> gateway status
+# 默认 setup 准备镜像与配置，后续启动并进入容器内 onboarding
+./scripts/run-openclaw-podman.sh launch
+./scripts/run-openclaw-podman.sh launch setup
+
+# 容器启动后由宿主 CLI 管理；默认容器名为 openclaw
+openclaw --container openclaw gateway status
 ```
 
 **SELinux 环境：** Podman 启动脚本会自动检测 SELinux 状态，在 enforcing/permissive 模式下自动为挂载目录追加 `:Z` 选项，无需手动配置。
@@ -1033,57 +950,19 @@ openclaw --container <容器名> gateway status
 
 ## 自动更新和 CI/CD
 
-### Watchtower 自动更新
+### 自动检查，受控更新
 
-Watchtower 会自动检测镜像更新并重启容器：
+本章 Compose 固定 `openclaw/openclaw:2026.9.4`。对这个 tag 执行 `docker compose pull` 仍拉取 9.4，不会自动切到 9.8；要升级，先选择并验证目标版本，再修改 `image` 为目标 tag 或 digest。Watchtower 监测同一个 tag 的变化，也不会帮你选择新版、制作一致备份或撤销数据库迁移。
 
-```yaml
-# 添加到 docker-compose.yml
-services:
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=86400   # 每 24 小时检查一次
-      - WATCHTOWER_INCLUDE_STOPPED=false
-    restart: unless-stopped
-```
+生产实例建议自动检查 release 和健康状态，在维护窗口按下面的更新工坊操作。不要给 Watchtower 配置自动清旧镜像，也不要在 push 后直接 `pull → up → prune` 绕过备份和迁移检查。自动化脚本同样需要显式的目标版本、升级前备份、失败退出与人工恢复入口。
 
 ### GitHub Actions CI/CD
 
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy OpenClaw
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /opt/openclaw
-            docker compose pull && docker compose up -d
-            docker image prune -f
-```
+CI 可以检查待部署文件和目标版本，在审阅后调用服务器上已经验证的 `scripts/update.sh`。发布流程应先保存当前 Compose 与镜像记录，完成并验证备份，再切换到明确的目标 tag；验证 Gateway 和所用通道后才考虑清理旧镜像。SSH 凭据、备份路径和生产项目名由部署方管理，不能把一个未经准备的 `compose pull && compose up -d` 当成完整发布作业。
 
 ### 手动更新流程
 
-```bash
-docker compose pull                    # 拉取最新镜像
-docker compose up -d                   # 重启服务
-docker image prune -f                  # 清理旧镜像
-```
+按下一节依次记录当前镜像、备份、修改 `image`、拉取和重建，然后观察。固定 tag 和数据库恢复点要一起记录；CLI 的自动回滚不会替你回滚 Docker 镜像的数据。
 
 ### 更新与回滚工坊
 
@@ -1103,7 +982,9 @@ docker inspect openclaw-gateway --format '{{.Image}}'
 bash scripts/backup.sh
 ```
 
-拉取新镜像但先不清理旧镜像：
+先把 Compose 的 `image` 改成你已验证的目标 tag 或 digest，例如从本章参考 9.4 升到选定的稳定版。记录旧值；只 pull 不改固定 tag 不会升级。涉及状态迁移时停止所有写入者，按官方迁移要求处理。
+
+拉取目标镜像，但先不清理旧镜像：
 
 ```bash
 docker compose pull
@@ -1492,12 +1373,12 @@ services:
 
 这个配置没有持久化挂载。容器重建后，你可能丢失工作空间。
 
-稳妥做法：
+下面只示意状态目录的持久化挂载，不是一份完整启动配置。完整部署仍使用前文的三卷 Gateway 配置，保留工作空间和认证加密密钥的独立挂载：
 
 ```yaml
 services:
   openclaw-gateway:
-    image: openclaw/openclaw:latest
+    image: openclaw/openclaw:2026.9.4
     volumes:
       - openclaw-home:/home/node/.openclaw
 
@@ -1505,7 +1386,7 @@ volumes:
   openclaw-home:
 ```
 
-如果你选择 bind mount，也要明确宿主机路径和权限：
+使用 bind mount 时，下面也只示意状态目录；完整部署还要保留或另行准备工作空间、认证加密密钥的挂载及权限，不能只复制这一处：
 
 ```yaml
 services:
@@ -1514,7 +1395,7 @@ services:
       - ./data/openclaw:/home/node/.openclaw
 ```
 
-设置权限：
+以下只准备状态目录；其他绑定目录按实际宿主机路径核对 UID 1000 的可写权限：
 
 ```bash
 mkdir -p /opt/openclaw/data/openclaw
@@ -1564,7 +1445,8 @@ ss -tlnp | grep 18789   # 或者用 ss
 
 ```bash
 docker compose exec openclaw-gateway ls -la /home/node/.openclaw   # 检查权限
-docker compose exec openclaw-gateway chown -R node:node /home/node/.openclaw  # 修复
+# 先停止 Gateway 并核对实际挂载；修复属主需要 root，普通 node 进程不能改他人的文件
+# bind mount 在宿主修复，命名卷可用一次性受控工具容器修复；勿把运行中 Gateway 改成 root
 ```
 
 ### 内存不足（OOM Killed）
@@ -1629,7 +1511,7 @@ proxy_set_header X-Real-IP $remote_addr;
 ls -la /opt/openclaw/.env
 
 # 2. 容器是否拿到环境变量
-docker compose exec openclaw-gateway env | grep -E "OPENAI|ANTHROPIC|TELEGRAM|DISCORD"
+docker compose exec openclaw-gateway node -e 'for (const k of ["OPENAI_API_KEY","ANTHROPIC_API_KEY","TELEGRAM_BOT_TOKEN","DISCORD_BOT_TOKEN"]) console.log(k + "=" + (process.env[k] ? "set" : "unset"))'
 
 # 3. OpenClaw 自身状态
 docker compose logs --tail 200 openclaw-gateway
@@ -1678,7 +1560,7 @@ docker image prune
 | 查看状态 | `docker compose ps` |
 | 查看日志 | `docker compose logs -f` |
 | 重启服务 | `docker compose restart` |
-| 更新镜像 | `docker compose pull && docker compose up -d` |
+| 更新镜像 | 先完成“更新与回滚工坊”，再按选定 tag 拉取和重建 |
 | 进入容器 | `docker compose exec openclaw-gateway /bin/bash` |
 | 资源监控 | `docker stats` |
 | 清理空间 | `docker system prune -a` |

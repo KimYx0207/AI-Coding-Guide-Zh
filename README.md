@@ -3,10 +3,10 @@
 <div align="center">
 
 <p>
-  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Stars"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Stars" src="https://img.shields.io/github/stars/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Stars"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh/forks"><img alt="Forks" src="https://img.shields.io/github/forks/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;logo=github&amp;label=Forks"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/KimYx0207/AI-Coding-Guide-Zh?style=flat-square&amp;label=License"></a>
-  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.3-blueviolet.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Tutorial Version" src="https://img.shields.io/badge/教程版本-v5.4-blueviolet.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Claude Code 参考版本" src="https://img.shields.io/badge/Claude_Code-2.1.270-green.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="OpenClaw 参考版本" src="https://img.shields.io/badge/OpenClaw-v2026.9.4-blue.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Codex App 功能快照" src="https://img.shields.io/badge/Codex_App-26.908-orange.svg"></a>
@@ -48,18 +48,18 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 
 ## 📖 项目简介
 
-这是一套**系统化、适合循序学习、也能进入团队落地**的 AI Coding 与 Agent 工作流中文教程，覆盖四类代表性工具：
+这是一套可以循序学习，也能用于团队培训和项目实践的 **AI Coding 与 Agent 工作流中文教程**，覆盖四类代表性工具：
 
 | | Claude Code | OpenClaw | Codex | WorkBuddy |
 |--|-------------|----------|-------|---------|
-| **是什么** | Anthropic 官方 AI 编程 CLI 工具 | 开源 AI 私人助手框架 | OpenAI 编程 Agent 平台 | 腾讯 AI 办公助手桌面 App |
+| **是什么** | Anthropic 官方 AI 编程工具，提供 CLI、IDE、桌面和 Web 入口 | 开源 AI 私人助手框架 | OpenAI 编程 Agent 平台 | 腾讯 AI 办公助手桌面 App |
 | **干什么** | 终端里理解项目、改代码、排查错误 | 整理待办、查询资料，按需接入消息平台和定时任务 | 在 App 中安排任务、审阅改动，配合其他入口协作 | 整理文档和表格，用专家、资料库与连接器处理办公任务 |
 | **谁出的** | Anthropic 官方 | Peter Steinberger（原名 Clawdbot，因 Claude 商标被迫改名） | OpenAI 官方（CLI 开源 Apache-2.0） | 腾讯云（与 CodeBuddy 同根生） |
 | **教程数** | 13 篇 + 1 速查卡 | 12 篇完整教程 | 14 篇完整教程 | 11 篇完整教程 |
 
 ### 👤 作者定位
 
-老金是合伙创业游戏研发公司出身，15 余年一线项目经验：从策划到整体项目负责人，长期处理多部门协同、团队管理、研发里程碑、版本节奏、数据分析和交付风险。
+老金有合伙创办游戏研发公司的经历，也有 15 余年一线项目经验：从策划到整体项目负责人，长期处理多部门协同、团队管理、研发里程碑、版本节奏、数据分析和交付风险。
 
 这套教程从项目里常见的小问题开始：进度怎么算、周报该写哪些事实、旧资料还能不能引用。读者先完成一个任务，学会检查和修正结果，再接入自己的工作流与团队规范。
 
@@ -95,7 +95,7 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 | AI 改了一堆代码，看不懂是否可靠 | [Codex：Review 四层阅读法](docs/codex/CX-10-Codex-Review-GitHub-PR完整指南.md#15-review-的四层阅读法) | 从文件范围、行为变化、检查结果看改动 |
 | 周报写得漂亮，却漏了风险 | [WorkBuddy：周报练习](docs/workbuddy/WB-01-WorkBuddy项目介绍完整指南.md#13-把任务交给它) | 区分完成、未完成、改期和待确认 |
 | 表格里有重复、空值和退款 | [WorkBuddy：7 行订单练习](docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md#13-第一次实战让数据分析师帮你看表格) | 先定口径，再清洗、汇总和画图 |
-| 要把材料整理成 Word 或汇报演示 | [WorkBuddy：专家与专家团](docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md) | 给清受众、素材和结构，检查成稿再继续修改 |
+| 要把材料整理成 Word 或汇报演示 | [WorkBuddy：专家与专家团](docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md) | 说明受众，提供素材和结构，检查成稿再继续修改 |
 | 新旧资料冲突，答案没有出处 | [WorkBuddy：三份资料问答](docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md#第二步同一个问题查三份资料) | 看生效日期和适用范围，缺信息时保留待确认 |
 | 会开完了，还不知道谁该做什么 | [WorkBuddy：提取下一步](docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md#42-工作记录和会议纪要提取可执行的下一步) | 整理行动、负责人、时间和原文依据 |
 | 待办重复，做完的还在催 | [OpenClaw：待办简报](docs/openclaw/03-快速开始指南.md#先做一份今天的待办简报) | 去重、筛选、更新状态，不补造时间 |
@@ -117,7 +117,7 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 | 02 | [基础使用完整指南](docs/claude-code/02-基础使用完整指南.md) | 4-6h | ⭐ | ⭐⭐⭐ | 从小 Bug 跟练开始，继续学项目规则、使用模式与命令 |
 | 03 | [Commands系统完整指南](docs/claude-code/03-Commands系统完整指南.md) | 4-6h | ⭐⭐ | ⭐⭐ | Slash 命令、Skills 工作流与兼容层 |
 | 04 | [MCP集成完整指南](docs/claude-code/04-MCP集成完整指南.md) | 4-6h | ⭐⭐ | ⭐⭐⭐ | 10+核心服务器、自定义开发 |
-| 05 | [Hooks系统完整指南](docs/claude-code/05-Hooks系统完整指南.md) | 4-6h | ⭐⭐ | ⭐⭐⭐ | 多事件 Hook、4 类处理器、自动化工作流 |
+| 05 | [Hooks系统完整指南](docs/claude-code/05-Hooks系统完整指南.md) | 4-6h | ⭐⭐ | ⭐⭐⭐ | 多事件 Hook、command / http / mcp_tool / prompt / agent 处理器、自动化工作流 |
 | 06 | [Subagent子代理完整指南](docs/claude-code/06-Subagent子代理完整指南.md) | 1-2h | ⭐⭐ | ⭐⭐ | 官方 Subagents、Agent 委派、Agent Teams（实验性） |
 | 07 | [Skills定制完整指南](docs/claude-code/07-Skills定制完整指南.md) | 6-8h | ⭐⭐ | ⭐⭐ | 创建可复用功能包 |
 | 08 | [Plugins生态完整指南](docs/claude-code/08-Plugins生态完整指南.md) | 4-6h | ⭐⭐ | ⭐ | `/plugin`、市场、作用域与本地开发 |
@@ -173,12 +173,12 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 
 | 序号 | 教程名称 | 学时 | 难度 | 说明 |
 |------|---------|------|------|------|
-| WB-00 | [阅读指南](docs/workbuddy/WB-00-阅读指南.md) | 5 分钟 | 🟢 | 五大核心概念、文档地图、阅读路线 |
+| WB-00 | [阅读指南](docs/workbuddy/WB-00-阅读指南.md) | 5 分钟 | 🟢 | 核心能力、文档地图、阅读路线 |
 | WB-01 | [项目介绍](docs/workbuddy/WB-01-WorkBuddy项目介绍完整指南.md) | 30-60 分钟 | ⭐ | 用 5 条工作记录完成周报，检查事实，再保存 Word 草稿 |
 | WB-02 | [安装与登录](docs/workbuddy/WB-02-WorkBuddy安装与登录完整指南.md) | 20-40 分钟 | ⭐ | Win/Mac 双平台安装、微信扫码、跑通第一个任务 |
 | WB-03 | [专家与专家团](docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md) | 1-2h | ⭐⭐ | 7 行订单清洗、专家团与行业 Buddy 跟练 |
 | WB-04 | [技能与技能市场](docs/workbuddy/WB-04-WorkBuddy技能与技能市场完整指南.md) | 1-2h | ⭐⭐ | 一键装技能、发邮件查股价读写文件 |
-| WB-05 | [连接器与腾讯生态](docs/workbuddy/WB-05-WorkBuddy连接器与腾讯生态完整指南.md) | 1-2h | ⭐⭐ | 接 QQ 邮箱/腾讯文档/腾讯会议/企业微信 |
+| WB-05 | [连接器与腾讯生态](docs/workbuddy/WB-05-WorkBuddy连接器与腾讯生态完整指南.md) | 1-2h | ⭐⭐ | QQ 邮箱/腾讯文档/腾讯会议/腾讯网盘；区分企微助理 |
 | WB-06 | [资料库与知识问答](docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md) | 入门 15–20 分钟 | ⭐⭐ | 三份新旧资料练引用、版本判断和纠错，管理与组合用法按需学 |
 | WB-07 | [定时任务与远程执行](docs/workbuddy/WB-07-WorkBuddy自动化与计划任务完整指南.md) | 1-2h | ⭐⭐ | 手动跑通后再定时执行，检查在线前提、记录和失败处理 |
 | WB-08 | [多端协同](docs/workbuddy/WB-08-WorkBuddy多端协同完整指南.md) | 1h | ⭐⭐ | 桌面与手机任务核对、助理绑定及运行条件 |
@@ -214,7 +214,7 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 - **WorkBuddy 桌面 App**：腾讯云出品，账号与积分关系见当前套餐说明；Windows 使用官方支持的 x64 版本，macOS 按官网下载页提供的系统与芯片安装包选择。官方更新日志已列到 5.6.2（2026-09-21），安装从官网首页开始
 - **多端**：桌面与手机先核对同一账号和任务，微信/企业微信助理按官方流程绑定；各端可用材料和功能分别检查
 - **认证方式**：客户端打开官网登录页，可用微信、手机号、邮箱等方式；企业 SSO 按公司配置及当前页面使用
-- **网络**：国内服务器直连，正常办公网络不用代理
+- **网络**：按当前客户端与服务的可访问性核对；企业代理、VPN 和防火墙按团队配置
 
 ---
 
@@ -299,11 +299,13 @@ Meta_Kim 的介绍与开始入口放在首页前面。学习 Hook 与 Skill 时�
 | **教程总数** | 50 篇完整教程（Claude Code 13 / OpenClaw 12 / Codex 14 / WorkBuddy 11）+ 1 速查卡 |
 | **内容体量** | 120万+ Markdown 字符（含正文、命令、代码、配置、提示词和 FAQ） |
 | **中文核心内容** | 36万+ 中文字 |
-| **代码 / 命令 / 配置示例** | 3200+ 个代码块与实操片段（核心示例按当前版本持续校验） |
+| **代码 / 命令 / 配置示例** | 3100+ 个代码块与实操片段（核心示例按当前版本持续校验） |
 | **FAQ / 问答条目** | 500+ 个 |
 | **覆盖AI模型** | OpenClaw 支持多个主流模型提供商，具体目录以当前安装版本和官方 Models / Onboarding 为准 |
 | **覆盖消息平台** | WhatsApp、Telegram、Slack、Discord、Signal、Google Chat、iMessage、Microsoft Teams、Matrix、飞书、LINE、Mattermost、Nextcloud Talk、Nostr、Synology Chat、Twitch、Zalo、WeChat、QQ 等 |
 | **参考版本与测试范围** | 各章保留适用版本和功能引入日期；最新发布记录与本机核查范围见下表及[核查清单](docs/2026-10-03-核查清单.md) |
+
+统计范围是四个教程目录内的 50 篇教程和 1 张速查卡。字符数包含正文与示例，中文数量按汉字计，代码块按 Markdown 围栏计；FAQ 同时统计标题和粗体编号问答，按显示条目计数，跨章重复问题未去重。
 
 ---
 
@@ -323,13 +325,15 @@ Meta_Kim 的介绍与开始入口放在首页前面。学习 Hook 与 Skill 时�
 
 ### 这次具体修了什么
 
-Claude Code 的 npm 安装仍受支持，现行要求是 Node.js 22+；交互、打印模式、工具预批准和实际访问权限也要分清。SDK 示例改成 Python 的真实消息类型，并修正计算器、通知与 Action 示例。
+这次先修正安装、认证和配套练习，再重新核对四条主线的正文、重复 FAQ 与当前功能。原来有明确日期的历史说明继续保留；新入口放回对应章节，读者不用只看更新日志猜该怎么操作。
 
-Codex 的桌面安装入口已经迁到 ChatGPT，新 Cloud 环境要先准备、保存并发布；旧 Cloud 的阶段网络与 Secret 规则不能直接搬过来。后台任务结果入口同步为 Scheduled，CLI 参数与权限配置也按实际 help 和源码修正。
+Claude Code 把安装、认证和排障中的重复旧说明一起修正，区分订阅、Console 和 API Key；修正不存在的 CLI 参数、MCP 配置、插件安装与 SDK 工具限制；Hooks 通知保留可选标题，格式化与 Git 检查正确处理文件名和检查失败。Skills 的跨平台示例保留完整文件头，脚本输出和教材相符，创建时会检查路径和已有文件。AGENTS.md、指令审计、新增 Hook、Mods、账号资源同步和当前治理字段也接回了正文。
 
-OpenClaw 保留明确的参考版本，修正模型、技能、消息平台、路由、记忆和 Docker 备份恢复说明。WorkBuddy 修正登录、菜单、助理及连接器流程，补可对照的练习数据；没有取得依据的固定耗时、费用倍率与权限保证不继续当作产品事实。
+Codex 的 Rules 示例改成真正注册规则，并用离线匹配确认效果；CLI 区分 JSONL 事件和最终回答，结构化练习补齐 schema。App 工作树、手机接续、Browser、Computer Use、录制技能、Memories、Computer History、当前 PR 插件、安全审查、事件任务和新 Cloud 的准备、发布与凭据入口，都说明了具体操作和适用条件。
 
-旧轮次的详细记录统一放在 [CHANGELOG.md](CHANGELOG.md)。完整范围见[逐章核查清单](docs/2026-10-03-核查清单.md)，其中也列了无需修改的章节与未能核实的内容。安装和界面以当前官方说明与本机版本为准；参考答案表示核对方法，不表示当天在 AI 客户端实跑。
+OpenClaw 保留 9.4 的固定部署参考，同时讲清 9.8 的 Windows 状态迁移和会话返回变化；修正后台服务重复启动、消息平台命令、技能与记忆入口，以及 Docker 初始化、更新和恢复中的矛盾。WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤，定时摘要使用明确日期的虚构日志；真实报价仍保留待核，不把旧价改成最新价。
+
+详细记录统一放在 [CHANGELOG.md](CHANGELOG.md)。[逐章核查清单](docs/2026-10-03-核查清单.md)列出了全部章节和四工具的功能覆盖矩阵，也说明了保留内容、进阶专题与未能核实的范围。参考答案用于对照事实，离线检查不表示当天已经在 AI 客户端跑过所有流程。
 
 ---
 
@@ -456,7 +460,7 @@ OpenClaw 保留明确的参考版本，修正模型、技能、消息平台、�
 ## ⚠️ 免责声明
 
 - 本次核查日期为 2026-10-03，教程参考版本、实际测试与未能核实的范围见[核查清单](docs/2026-10-03-核查清单.md)。WorkBuddy 价格与活动保留注明日期的快照，采购前查看当前订单和官方说明。
-- **预发布与 `latest` 以各项目 [Releases](https://github.com/openclaw/openclaw/releases) 与本机版本为准**（持续更新中）
+- 选择预发布版本或使用 `latest` 前，先按上方版本表打开对应项目的官方发布记录，再核对本机版本。
 - 部分功能可能随版本更新而变化，请以官方文档为准
 - 本教程是学习和实践参考，重要项目请先在测试仓库 / 测试环境验证，再进入生产流程
 

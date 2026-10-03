@@ -592,6 +592,12 @@ CLI v0.150.0 新增 `Interrupt`：只在顶层活动回合被中断时触发，�
 
 Hook 是企业治理的强工具，但不适合用来弥补项目说明不清。先把 `AGENTS.md` 写清，再决定是否需要 Hook。
 
+### 8.4 Memories 是回忆层，项目规则仍放 AGENTS.md
+
+本地 Codex Memories 默认关闭；桌面 App 可在 **Settings → Personalization → Enable memories** 开启，并用 `/memories` 分别控制当前聊天是否使用旧记忆、是否成为后续记忆的输入。当前聊天选择不会改全局设置。CLI/IDE 使用对应 Codex host 的本地记忆，网页 ChatGPT Work 使用 ChatGPT 的 memory 设置；它们不是同一个存储。团队必须始终适用的规则仍放 `AGENTS.md` 或版本管理的文档。
+
+例如临时分析一个外部PR时，先用 `/memories` 检查这次聊天的读取和生成选项，再引用明确的仓库文档。记忆不是每次聊天结束就立即生成，也不能作为团队强制规则唯一来源。详见 [官方 Memories 指南](https://learn.chatgpt.com/docs/customization/memories)。
+
 ## 9. 改完配置后怎么核对
 
 
@@ -1124,34 +1130,38 @@ Rules 适合约束命令执行边界。它比 `AGENTS.md` 更硬，因为它参�
 ```python
 # .codex/rules/default.rules
 
-def prefix_rule(argv):
-    if len(argv) >= 2 and argv[0] == "git" and argv[1] == "push":
-        return "prompt"
-    if len(argv) >= 3 and argv[0] == "git" and argv[1] == "push" and "--force" in argv:
-        return "deny"
-    return None
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "推送前确认仓库、分支、参数和影响范围。",
+    match = ["git push origin main", "git push origin main --force"],
+    not_match = ["git status"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "--force-with-lease", "-f"]],
+    decision = "forbidden",
+    justification = "禁止此处列出的强制推送前缀；先查看差异并与分支维护者确认。",
+    match = ["git push --force origin main", "git push -f origin main"],
+    not_match = ["git push origin main --force"],
+)
 ```
 
-课程里不要把 Rules 写成 TOML 表。它使用 rules 文件和 Starlark 风格函数来表达命令策略。
+把上面代码保存到受信任项目的 `.codex/rules/default.rules`，再用 `codex execpolicy check` 分别检查普通推送和强制推送。Rules 用内置 `prefix_rule(...)` 注册规则，不是定义一个返回字符串的 Python 函数。上面第二条只匹配强制选项紧接在 `git push` 后的前缀；`git push origin main --force` 由第一条要求审批，不会被第二条自动禁止。要阻止所有推送，可把第一条改成 `forbidden`；需要按任意参数位置判断时，使用经过审查的同步 Hook。
 
 ### 16.4 允许只读命令
 
 ```python
-def prefix_rule(argv):
-    readonly = [
-        ["git", "status"],
-        ["git", "diff"],
-        ["git", "log"],
-        ["rg"],
-        ["ls"],
-    ]
-    for prefix in readonly:
-        if argv[:len(prefix)] == prefix:
-            return "allow"
-    return None
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log"]],
+    decision = "allow",
+    justification = "允许常见的 Git 查看命令前缀。",
+    match = ["git status --short", "git diff --stat", "git log --oneline -5"],
+    not_match = ["git push origin main"],
+)
 ```
 
-这类规则适合教学：先让新人安全探索，再逐步开放写操作。
+这段规则演示怎样注册常见查看命令。`allow` 允许匹配命令在沙盒外运行，并不保证该前缀后面的所有参数都只读；例如 Git 的输出到文件参数需要另行评估。先检查实际命令和匹配结果，再决定是否接受这样的前缀。
 
 ## 17. Hooks 深入：事件脚本不是万能自动化
 
@@ -1426,6 +1436,8 @@ AGENTS.md 写 `npm test`，但项目实际使用 `pnpm test`。
 
 ### 22.2 Rules 太宽导致误拦
 
+先找到匹配整个 `git` 前缀的宽泛规则，把它删除或收窄。多个规则匹配时，Codex 采用更严格的结果；额外添加 `allow` 不能覆盖已有的 `prompt` 或 `forbidden`。再采用下方按子命令区分的注册写法。
+
 现象：
 
 ```text
@@ -1435,12 +1447,21 @@ AGENTS.md 写 `npm test`，但项目实际使用 `pnpm test`。
 修复思路：
 
 ```python
-def prefix_rule(argv):
-    if argv[:2] in [["git", "status"], ["git", "diff"], ["git", "log"]]:
-        return "allow"
-    if len(argv) >= 2 and argv[0] == "git" and argv[1] == "push":
-        return "prompt"
-    return None
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log"]],
+    decision = "allow",
+    justification = "允许常见的 Git 查看命令前缀。",
+    match = ["git status --short", "git diff --stat", "git log --oneline -5"],
+    not_match = ["git push origin main"],
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "推送前确认仓库、分支、参数和影响范围。",
+    match = ["git push origin main", "git push origin main --force"],
+    not_match = ["git status"],
+)
 ```
 
 ### 22.3 Hooks 太慢
@@ -1534,7 +1555,7 @@ Rules 不影响推理能力，它影响命令执行策略。好的 Rules 会减�
 
 ### Q3：Hooks 和 Automations 有什么区别？
 
-Hooks 是 Codex 执行过程中的事件脚本。Automations 是按时间运行的后台任务。一个是事件触发，一个是时间触发。
+Hooks 在 Codex 执行过程的生命周期事件上运行处理器，例如工具执行前检查。桌面 App 的定时任务按时间启动或继续工作；ChatGPT 网页端和移动端另支持 Gmail、Slack、GitHub 的外部事件触发任务。外部 App 事件任务不等于工具生命周期 Hook，配置位置和可用客户端也不同。
 
 ### Q4：配置改了为什么没生效？
 

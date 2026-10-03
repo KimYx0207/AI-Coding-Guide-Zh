@@ -309,11 +309,11 @@ claude --dangerously-load-development-channels plugin:my-channel@my-marketplace
 
 ### 7.4 Permission Relay：远端审批权限请求
 
-从 v2.1.81 起（v2.1.100 完全实现），Channels 支持**权限中继**（Permission Relay）：
+Channels 支持**权限中继**（Permission Relay），但需要所用 channel server 实现并声明 `claude/channel/permission` capability，而且该服务器已通过 `--channels`（开发时可用开发参数）加入本次会话，并通过组织的 Channels 策略。
 
-当 Claude 需要执行需要审批的操作时（如写文件、执行命令），权限确认请求会被转发到你的 Channel（如 Telegram / Discord），你可以直接在手机上批准或拒绝。
+当工具调用需要审批时，本地终端仍会打开审批框，支持中继的 Channel 可以同时把请求发到手机。按插件提供的请求 ID 和回复格式批准或拒绝；先到达的有效答复会生效，另一侧的审批框随后关闭。只说“同意”或使用错误的请求 ID 不会完成审批。
 
-这意味着你不需要守在终端前也能让 Claude 继续有权限地工作。
+中继覆盖 Bash、Write、Edit 等工具审批，不覆盖工作区信任或 MCP 服务器同意对话框；后两类仍需在本地终端处理。如果插件没有权限中继能力，会话就会停在终端审批处，不能保证手机消息能解锁它。具体能力与格式见[官方权限中继参考](https://code.claude.com/docs/en/channels-reference#relay-permission-prompts)。
 
 ### 7.5 事件只在会话打开时到达
 
@@ -377,7 +377,7 @@ Channel 只在 Claude Code 会话运行时把事件送进会话。关闭会话�
 
 ### 8.6 取消正在等待的 `/loop`
 
-在 `/loop` 等待下一次迭代时，按 **Esc** 即可取消（v2.1.111+）。
+动态间隔的 `/loop` 等待下一次迭代时，按 **Esc** 可以清除待执行的唤醒。固定间隔或直接创建的 cron 任务不受 Esc 影响；让 Claude 列出任务并删除对应 ID，例如“取消部署检查任务”。
 
 ### 8.7 `/proactive` 别名
 
@@ -524,7 +524,7 @@ CLAUDE_CODE_DISABLE_CRON=1 claude
 官方建议：
 
 - 要可靠、无需你机器在线：用 **Cloud scheduled tasks**
-- 要跑在你本机且跨重启：用 **Desktop scheduled tasks**
+- 要跑在本机且跨重启保留任务：用 **Desktop scheduled tasks**；执行时仍需电脑醒着、Desktop 打开且对应环境可用，错过的运行按官方补跑规则处理
 - 只是在当前 session 临时盯一件事：用 **`/loop`**
 
 ---
@@ -571,7 +571,7 @@ claude --channels plugin:telegram@claude-plugins-official plugin:discord@claude-
 ```
 
 ```text
-# 按 Esc 取消正在等待的 /loop
+# 动态间隔 /loop 等待时按 Esc；固定间隔任务请让 Claude 删除对应任务
 ```
 
 ```text

@@ -431,6 +431,18 @@ Plugin 可以携带 Skills，但 Skill 不等于 Plugin。
 
 Skill 是团队知识资产，不是一次性 prompt 草稿。
 
+### 10.3 在 Mac 上录制一个工作流生成 Skill
+
+除了手写 `SKILL.md`，macOS 上还可用 **Record & Replay** 演示重复工作，再生成可复用 Skill。它要求 Computer Use 已可用并启用，不能把同一步骤套到 Windows 或 Linux。
+
+1. 在桌面 App 进入 ChatGPT Work 或 Codex，打开 **Plugins → + → Record a skill**。
+2. 检查建议 prompt，说明目标、每次会变化的输入和完成标准；准备好后授权录制。
+3. 演示一遍完整流程，完成后从菜单栏/overlay 停止，或告诉聊天已完成。录制会持续到你主动停止，只演示这项任务所需的步骤。
+4. 审查生成的 Skill：触发条件、输入、步骤、验证是否准确，再修改隐藏的偏好和默认值。
+5. 开新聊天，选择该 Skill 并提供本次输入。重放使用当前可用的 Computer Use、Browser 或插件，仍要按真实结果验收；它不是保证每次环境都相同的宏。
+
+需要团队分发或打包多项能力时，再按 CX-07 创建 Plugin。详见 [Record & Replay](https://learn.chatgpt.com/docs/extend/record-and-replay)。
+
 ## 11. 课堂工坊：把重复提示整理成 Skill
 
 ### 案例一：从一段 prompt 升级为 `SKILL.md`

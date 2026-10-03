@@ -7,7 +7,7 @@
 > - **公众号**：老金带你玩AI
 > - **X（Twitter）**：老金带你玩AI
 > - **个人博客**：https://aiking.dev
-> - **预计学时**：8-10小时
+> - **预计学时**：6-8小时
 > - **难度等级**：⭐⭐ 入门级（有Claude Code基础即可）
 > - **更新日期**：2026年9月14日
 > - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
@@ -24,13 +24,13 @@
 
 完成本课学习后，你将能够：
 
-1. **理解Skills的核心价值**：掌握Skills与Commands的本质区别和协作方式
+1. **理解Skills的核心价值**：理解 Skills 与旧 command 文件的关系，以及内置命令的区别
 2. **创建第一个Skill**：5分钟内完成最简单的Skill配置并看到效果
 3. **掌握SKILL.md结构**：理解YAML Frontmatter和Markdown Body的编写规范
 4. **掌握Skill目录结构**：理解scripts、templates等资源组织方式
 5. **掌握渐进式披露机制**：理解元数据→指令→资源的三层加载逻辑
-6. **利用Hot Reloading**：快速迭代Skill，修改后自动生效
-7. **配置Sandbox安全**：正确设置文件系统、网络、内存等权限边界
+6. **利用刷新入口**：修改 Skill 后重新扫描，并验证实际使用的是新指令
+7. **配置Sandbox安全**：了解 shell 命令的文件系统和网络边界，以及边界以外的工具
 8. **集成Python脚本**：实现自动化工具扩展Claude Code能力
 9. **上传自定义Skill**：通过Web界面或API上传和管理Skill
 10. **排查Skill故障**：解决大多数常见配置和执行问题
@@ -38,13 +38,13 @@
 
 ---
 
-> **v2.1.152→v2.1.158 Skills 更新**：Skill 和 slash command frontmatter 可以写 `disallowed-tools`，用于在特定工作流里移除高风险工具；`/reload-skills` 可以不重启会话重新扫描 Skill 目录；`SessionStart` Hook 可返回 `reloadSkills: true`，让启动 Hook 安装或生成的 Skill 在同一会话马上可用。教程里的“改完自动生效”要按这三个入口理解：编辑已有 Skill、手动 `/reload-skills`、或用 Hook 刷新。
+> **v2.1.152→v2.1.158 Skills 更新**：Skill 和 slash command frontmatter 可以写 `disallowed-tools`，用于在特定工作流里移除高风险工具；`/reload-skills` 可以不重启会话重新扫描 Skill 目录；`SessionStart` Hook 可返回 `reloadSkills: true`，让启动 Hook 安装或生成的 Skill 在同一会话马上可用。这些入口用于重新发现 Skill；已进入当前会话的正文会继续留在上下文里，不会因为发一条新消息就重新读取文件。修改后要重新调用并核对新指令，必要时用新会话排除旧正文的影响。
 
 ---
 
 ## 学习路径导航（先看这里！）
 
-**根据你的情况选择学习路径**：这是一篇4000+行的长教程，不用全看！根据你的目标选择路径。
+**根据你的情况选择学习路径**：这篇教程内容较多，可以先按目标选择路径，再补需要的章节。
 
 ### 路径A：快速上手（30分钟）
 
@@ -122,8 +122,8 @@
 | **scripts/** | - | 脚本文件夹，存放可执行的工具程序 | APP的功能模块代码 |
 | **templates/** | - | 模板文件夹，存放输出格式模板 | 文档模板库 |
 | **Progressive Disclosure** | 渐进式披露 | 按需加载：元数据常驻内存，指令和资源按需加载 | 微信：先看图标，点开看功能，用时加载详情 |
-| **Hot Reloading** | - | 修改SKILL.md后自动生效，无需重启 | APP热更新，改完立即生效 |
-| **Sandbox** | 沙箱 | 隔离执行环境，限制文件/网络访问，保证安全 | APP的权限管理（只能访问相册） |
+| **Hot Reloading** | - | 重新扫描 Skill；已加载正文需重新调用并验证 | 修改后先刷新，再检查是否读到新版 |
+| **Sandbox** | 沙箱 | 限制受沙箱覆盖的 shell 命令及子进程的文件和网络访问 | 为一类操作划定权限边界 |
 | **Commands** | 斜杠命令 | 显式触发的操作入口 | APP里的功能按钮 |
 | **YAML** | YAML Ain't Markup Language | 配置文件格式，易读易写 | 填写表格（有固定格式） |
 | **stdin/stdout** | Standard Input/Output | 脚本的数据输入输出通道 | 快递的收发窗口 |
@@ -179,79 +179,27 @@ Claude：[自动加载公众号写作Skill]
 | **效率** | 大量时间在沟通需求 | 直接进入核心任务 |
 | **可维护性** | 知识散落在聊天记录 | 集中管理，版本可控 |
 
-### 1.2 Skills vs Commands：深度对比
+### 1.2 Skills 与旧 Commands：同一机制的两种文件组织方式
 
-**这是最常被问到的问题**：Skill和Command有什么区别？什么时候用哪个？
+如果你看过旧教程，可能会以为 Commands 只能手动运行、Skills 才能自动触发。当前 Claude Code 已把自定义 command 文件合并进 Skills；旧 `.claude/commands/` 文件继续可用，同样可以通过 frontmatter 控制调用方式和工具预批准。
 
-#### 一句话区分
+| 对比维度 | 旧 command 文件 | 当前推荐的 Skill 目录 |
+|----------|----------------|----------------------|
+| 入口 | `.claude/commands/write.md` → `/write` | `.claude/skills/write/SKILL.md` → `/write`，也可用 `name` 指定名称 |
+| 文件组织 | 一个 Markdown 入口，可引用其他文件 | 一个 `SKILL.md` 入口，方便把脚本、模板、参考资料放在一起 |
+| 调用方式 | 默认可手动调用，也可由 Claude 根据描述调用 | 相同；用 `disable-model-invocation` 和 `user-invocable` 控制 |
+| 工具与状态 | 是否执行脚本、保存状态取决于指令、权限和实现 | 相同；目录本身不会自动实现状态管理或赋予工具权限 |
+| 迁移 | 已有简单 command 可以继续使用 | 新工作流优先用 Skill 目录，便于维护配套资源 |
 
-- **Commands**：**触发器**，是用户交互的入口点（"按钮"）
-- **Skills**：**能力包**，是知识和工具的集合（"APP"）
+同名 Skill 与 command 文件并存时，Skill 优先；不要把同名的两份入口当作两层协作架构。`/help` 等内置命令则是客户端功能，应与这些 Markdown 工作流区分。
 
-#### 详细对比表
+比如写作 Skill 可以在 `SKILL.md` 里说明先读 `references/style.md`，再按需运行 `scripts/processor.py`。这些文件需要你实际创建，工具调用仍遵守当前权限；仅写出文件名不会生成一个可运行的处理器。
 
-| 对比维度 | Commands（斜杠命令） | Skills（能力包） |
-|----------|---------------------|-----------------|
-| **定位** | 触发器/入口点 | 能力包/知识库 |
-| **复杂度** | 单个Markdown文件 | 多文件目录结构 |
-| **触发方式** | 显式调用 `/command` | 自动识别 + 显式调用 |
-| **状态管理** | 无状态 | 可以维护状态和配置 |
-| **工具集成** | 有限（直接写在md里） | 强大（可集成Python/JS脚本） |
-| **知识容量** | 几百到几千字 | 可达数万字 |
-| **可维护性** | 简单直接 | 模块化分层 |
-| **适用场景** | 单一任务 | 复杂工作流 |
+### 1.3 从使用到定制：四种参与程度
 
-#### 协作关系图
+下面讲的是用户如何逐步参与一个工作流，并不是 Claude Code 的四层加载机制。真正的渐进式披露是元数据、正文、配套资源按需进入上下文，第三部分会具体解释。
 
-```
-                    用户输入
-                       │
-                       ▼
-           ┌────────────────────────┐
-           │      CLAUDE.md         │ ← 全局上下文
-           └────────────────────────┘
-                       │
-        ┌──────────────┴──────────────┐
-        │                             │
-        ▼                             ▼
-┌────────────────┐           ┌──────────────────┐
-│   Commands     │ ←───────→ │     Skills       │
-│  （触发层）     │   调用     │   （能力层）      │
-│  /write        │           │ gongzhonghao-    │
-│  /title-gen    │           │ writer/          │
-└────────────────┘           └──────────────────┘
-        │                             │
-        ▼                             ▼
-┌────────────────┐           ┌──────────────────┐
-│ 简单任务直接   │           │ prompts/         │
-│ 在Command里    │           │ scripts/         │
-│ 完成          │           │ config/          │
-└────────────────┘           │ templates/       │
-                            └──────────────────┘
-```
-
-**协作模式示例**：`/write` 命令与公众号写作Skill
-
-```markdown
-# 01-write.md (Command层)
-当用户输入 /write 时:
-1. 读取 `.claude/skills/gongzhonghao-writer/prompts/baokuan-rules.md`
-2. 调用 `scripts/title_generator.py` 生成标题
-3. 应用 `prompts/laojin-style.md` 风格规范
-4. 执行 `scripts/quality_detector.py` 质量检测
-```
-
-**最佳实践**：
-- **简单任务**：直接用Command（如`/help`显示帮助）
-- **复杂任务**：Command + Skill（Command是入口，Skill提供能力）
-
-### 1.3 渐进式披露原理（Progressive Disclosure）
-
-这是Skills系统的核心设计哲学，理解它能帮你更好地设计自己的Skill。
-
-**核心思想**：只在用户需要时才展示复杂功能，避免信息过载。
-
-#### 四层披露结构
+#### 从直接使用到修改代码
 
 **第一层：自动激活（用户无感）**
 ```
@@ -263,7 +211,7 @@ Claude Code：[检测到"公众号"关键词，自动加载gongzhonghao-writer S
 
 **第二层：显式调用（简单控制）**
 ```
-用户：/write Claude Code新功能解析
+用户：/gongzhonghao-writer Claude Code新功能解析
 Claude Code：[执行完整的写作工作流]
 ```
 用户通过Slash命令明确触发，获得更可控的流程。
@@ -327,13 +275,13 @@ description: 当用户提到"公众号"、"写文章"、"老金风格"等关键�
 - ✅ 最简单，只需要1个文件夹 + 1个SKILL.md
 - ✅ 效果直观，立即看到输出
 - ✅ 无依赖，不需要安装任何东西
-- ✅ 支持Hot Reloading（修改后自动生效）
+- ✅ 可在会话里重新扫描并调用，不必每次退出客户端
 
 **目标**：创建一个"代码注释生成器"Skill，自动为代码添加中文注释。
 
 #### 步骤1：创建Skill文件夹
 
-**这一步要做什么**：创建Skill的文件夹（文件夹名必须与skill名称一致）
+**这一步要做什么**：创建 Skill 文件夹。本例让目录名与 `name` 一致，方便定位；未填写 `name` 时会采用目录名。
 
 **Windows系统（PowerShell）：**
 ```powershell
@@ -354,7 +302,7 @@ mkdir -p .claude/skills/code-commenter
 ```
 
 💡 **命名规范**：
-- 文件夹名必须与YAML中的`name`字段一致
+- 建议目录名与 `name` 一致；`name` 也可以为 Claude Code 指定不同的调用名称
 - 只能使用小写字母、数字、连字符（-）
 - 不能有空格、下划线或特殊字符
 
@@ -392,8 +340,10 @@ description: 当用户要求"添加注释"、"代码注释"或"注释代码"时�
 for item in items:
     process(item)
 
-# ✅ 好的注释：过滤掉已过期的订单，避免重复发货
+# ✅ 好的注释：跳过已过期的订单，避免继续发货
 for item in items:
+    if item.is_expired:
+        continue
     process(item)
 
 ### 2. 注释格式规范
@@ -414,11 +364,53 @@ for item in items:
 **macOS/Linux：**
 ```bash
 cat > .claude/skills/code-commenter/SKILL.md <<'EOF'
-# 粘贴上方 Windows 示例中 @' 和 '@ 之间的完整 SKILL.md 内容
+---
+name: code-commenter
+description: 当用户要求"添加注释"、"代码注释"或"注释代码"时，自动为代码添加清晰的中文注释
+---
+
+# 代码注释生成器
+
+## 角色定义
+你是一位经验丰富的代码审查专家，擅长编写清晰、准确、有价值的代码注释。
+
+## 何时激活
+当用户说以下内容时激活本Skill：
+- "帮我添加注释"
+- "给这段代码加注释"
+- "代码注释"
+- "comment this code"
+
+## 注释原则
+
+### 1. 解释"为什么"而不是"是什么"
+（示例代码：Python注释对比）
+# ❌ 差的注释：循环遍历列表
+for item in items:
+    process(item)
+
+# ✅ 好的注释：跳过已过期的订单，避免继续发货
+for item in items:
+    if item.is_expired:
+        continue
+    process(item)
+
+### 2. 注释格式规范
+- **函数/方法**：说明功能、参数、返回值、异常
+- **复杂逻辑**：解释业务背景和设计决策
+- **魔法数字**：说明数值含义（如：86400秒 = 24小时）
+
+### 3. 语言要求
+- 使用简洁的中文
+- 避免废话和自明的注释
+- 专业术语保持英文（如API、JWT、JSON）
+
+## 输出格式
+直接输出添加注释后的完整代码，不要额外解释或对话。
 EOF
 ```
 
-这里不再把同一份 `SKILL.md` 重写一遍。跨平台差异只在“怎么把文本写入文件”，Skill 本体内容应该完全一致，否则后面排查时会分不清是平台问题还是内容问题。
+两段脚本写入相同的 Skill 正文。请选择对应系统的一段执行，避免把 PowerShell 的 here-string 标记写进文件。
 
 💡 **SKILL.md结构说明**：
 - **YAML Frontmatter**（`---`包裹）：
@@ -453,16 +445,30 @@ head -n 10 .claude/skills/code-commenter/SKILL.md
 # ---
 ```
 
-#### 步骤4：测试Skill（利用Hot Reloading）
+#### 步骤4：修改 Skill，保留完整文件头
+
+下面增加一条要求：不要编造代码里看不出的业务原因。替换文件时也要保留 YAML frontmatter。
 
 **Windows（PowerShell）：**
 
 ```powershell
 @'
-# 代码注释生成规范
+---
+name: code-commenter
+description: 当用户要求"添加注释"、"代码注释"或"注释代码"时，自动为代码添加清晰的中文注释
+---
+
+# 代码注释生成器
 
 ## 角色定义
 你是一位经验丰富的代码审查专家，擅长编写清晰、准确、有价值的代码注释。
+
+## 何时激活
+当用户说以下内容时激活本Skill：
+- "帮我添加注释"
+- "给这段代码加注释"
+- "代码注释"
+- "comment this code"
 
 ## 注释原则
 
@@ -470,30 +476,76 @@ head -n 10 .claude/skills/code-commenter/SKILL.md
 （示例代码：Python注释对比）
 # ❌ 差的注释：循环遍历列表
 for item in items:
+    process(item)
 
-# ✅ 好的注释：过滤掉已过期的订单，避免重复发货
+# ✅ 好的注释：跳过已过期的订单，避免继续发货
 for item in items:
+    if item.is_expired:
+        continue
+    process(item)
 
 ### 2. 注释格式规范
-- **函数/方法**：说明功能、参数、返回值
+- **函数/方法**：说明功能、参数、返回值、异常
 - **复杂逻辑**：解释业务背景和设计决策
-- **魔法数字**：说明数值含义
+- **魔法数字**：说明数值含义（如：86400秒 = 24小时）
 
 ### 3. 语言要求
 - 使用简洁的中文
-- 避免废话和重复
-- 专业术语保持英文（如API、JSON）
+- 避免废话和自明的注释
+- 专业术语保持英文（如API、JWT、JSON）
 
 ## 输出格式
-直接输出添加注释后的完整代码，不要额外解释。
+直接输出添加注释后的完整代码，不要额外解释或对话。业务原因无法从代码判断时，不要编造规则。
 '@ | Out-File -FilePath ".claude\skills\code-commenter\SKILL.md" -Encoding utf8
 ```
 
 **macOS/Linux：**
 
 ```bash
-cat > .claude/skills/code-commenter/SKILL.md << 'EOF'
-# 粘贴上方 Windows 示例中 @' 和 '@ 之间的完整 SKILL.md 内容
+cat > .claude/skills/code-commenter/SKILL.md <<'EOF'
+---
+name: code-commenter
+description: 当用户要求"添加注释"、"代码注释"或"注释代码"时，自动为代码添加清晰的中文注释
+---
+
+# 代码注释生成器
+
+## 角色定义
+你是一位经验丰富的代码审查专家，擅长编写清晰、准确、有价值的代码注释。
+
+## 何时激活
+当用户说以下内容时激活本Skill：
+- "帮我添加注释"
+- "给这段代码加注释"
+- "代码注释"
+- "comment this code"
+
+## 注释原则
+
+### 1. 解释"为什么"而不是"是什么"
+（示例代码：Python注释对比）
+# ❌ 差的注释：循环遍历列表
+for item in items:
+    process(item)
+
+# ✅ 好的注释：跳过已过期的订单，避免继续发货
+for item in items:
+    if item.is_expired:
+        continue
+    process(item)
+
+### 2. 注释格式规范
+- **函数/方法**：说明功能、参数、返回值、异常
+- **复杂逻辑**：解释业务背景和设计决策
+- **魔法数字**：说明数值含义（如：86400秒 = 24小时）
+
+### 3. 语言要求
+- 使用简洁的中文
+- 避免废话和自明的注释
+- 专业术语保持英文（如API、JWT、JSON）
+
+## 输出格式
+直接输出添加注释后的完整代码，不要额外解释或对话。业务原因无法从代码判断时，不要编造规则。
 EOF
 ```
 
@@ -550,7 +602,7 @@ def calculate_discount(price, user_level):
         return price
 ```
 
-🎯 **Hot Reloading体验**：修改SKILL.md后，无需重启Claude Code，下次对话时修改会自动生效！
+🎯 **刷新验证**：在会话中运行 `/reload-skills`，再明确调用 `/code-commenter` 并检查新增要求。若这个 Skill 已在当前会话加载过，可用新会话验证，避免旧正文影响结果。
 
 ### 2.2 验证Skill工作正常
 
@@ -560,7 +612,7 @@ def calculate_discount(price, user_level):
 - [ ] `SKILL.md` 文件格式正确（YAML Frontmatter + Markdown Body）
 - [ ] 说"添加注释"等关键词时Claude能识别
 - [ ] 生成的注释符合规范
-- [ ] 修改SKILL.md后自动生效（Hot Reloading）
+- [ ] 修改后重新扫描、调用，输出确实遵守新版要求
 
 ### 2.3 恭喜完成！
 
@@ -610,7 +662,7 @@ Skills采用**约定优于配置**的目录结构，每个Skill都是 `.claude/s
 | `docs/` | 可选 | 开发者内部文档 | 开发手册 |
 | `data/` | 可选 | 静态数据文件 | 离线数据包 |
 
-🎯 **重要说明**：当前版本不再使用`skill.yaml`和`prompts/`文件夹，所有内容统一到`SKILL.md`文件中！
+🎯 **入口与配套文件**：Claude Code 识别的是 `SKILL.md`。`prompts/`、`references/` 等配套目录可以保留，在正文中说明何时读取；它们不是被禁用的旧版格式。单独的 `skill.yaml` 不会代替这个入口。
 
 ### 3.2 SKILL.md配置详解
 
@@ -621,7 +673,7 @@ Skills采用**约定优于配置**的目录结构，每个Skill都是 `.claude/s
 | 字段名 | 类型 | 是否必填 | 默认值 | 说明 |
 |--------|------|---------|--------|------|
 | `name` | string | 推荐 | 目录名 | Skill名称，同时作为`/`斜杠命令（小写、连字符分隔，最多64字符） |
-| `description` | string | 推荐 | - | 简短描述（最多1024字符），Claude用此判断是否自动激活 |
+| `description` | string | 推荐 | 从正文首段推导 | 描述用途和适用场景，供 Claude 判断是否调用；列入上下文的描述受 listing 预算限制 |
 | `context` | string | 可选 | - | 设为`fork`时在独立子代理上下文中运行（Forked Context） |
 | `model` | string | 可选 | 继承 | 指定运行模型（如`opus`、`sonnet`、`haiku`） |
 | `agent` | string | 可选 | - | 指定代理类型（如`Explore`） |
@@ -678,7 +730,7 @@ description: 当用户提到"公众号"、"写文章"、"老金风格"等关键�
 💡 **关键变化**：
 - **YAML Frontmatter**：`name`和`description`为核心字段，还支持`context`、`model`、`allowed-tools`等可选字段
 - **Markdown Body**：所有详细指令、规则、流程都在这里编写
-- **不再需要**：`version`、`author`、`triggers`、`prompt_files`等旧版配置
+- **不要混用其他系统的配置**：`triggers`、`prompt_files` 等不是本教程采用的 Claude Code 调用字段；项目版本与作者信息可以写进正文
 
 ### 3.3 Markdown Body编写规范
 
@@ -745,93 +797,35 @@ Markdown Body是SKILL.md的核心部分，包含所有详细指令。推荐遵�
 
 #### Hot Reloading（热重载）
 
-**功能说明**：修改SKILL.md后，无需重启Claude Code，下次对话时修改会自动生效。
+**功能说明**：重新扫描可让新建或修改的 Skill 被发现，但已经调用的正文会留在当前会话上下文中，不会在下一轮自动重读文件。
 
-**工作原理**：
-```
-用户修改SKILL.md
-    ↓
-Claude Code检测到文件变化
-    ↓
-自动重新加载Skill定义
-    ↓
-下次对话时应用新规则
-```
-
-**使用体验**：
-
-```bash
-# 传统方式（2.10之前）
-1. 修改skill.yaml或prompts/*.md
-2. 退出Claude Code
-3. 重新启动claude
-4. 测试修改
-
-# Hot Reloading方式
-1. 修改SKILL.md
-2. 直接测试，立即生效 ✨
-```
-
-**注意事项**：
-- YAML Frontmatter的修改会立即生效
-- Markdown Body的修改会在下次对话时生效
-- 如果修改未生效，可以尝试开始新对话或使用`/compact`压缩上下文后重试
+**验证顺序**：
+1. 修改并保存 `SKILL.md`，检查 frontmatter 仍完整。
+2. 在 Claude Code 会话中运行 `/reload-skills`。
+3. 明确调用该 Skill，检查新版要求是否得到执行。
+4. 如果同一会话已经加载旧正文，用新会话验证。`/compact` 压缩上下文不等于重新读入 Skill 文件。
 
 #### Sandbox安全机制
 
-**功能说明**：Claude Code提供OS级别的沙箱隔离，限制文件系统写入和网络访问。
+**功能说明**：OS 沙箱限制 shell 命令及其子进程的文件和网络访问，不是 Skill 的 frontmatter 字段。默认未开启；在会话中运行 `/sandbox` 打开面板，选择模式并确认。
 
-> **重要**：Sandbox是Claude Code的全局安全功能（通过`/sandbox`命令启用），不是SKILL.md的frontmatter字段。它对所有Bash工具调用生效，包括Skill中的脚本执行。
+| 维度 | 默认边界与配置 |
+|------|----------------|
+| 文件系统 | 写入启动目录和指定临时目录；可增加允许路径。通常可读机器上的多数文件，需要用 `denyRead` 保护敏感路径 |
+| 网络 | 受允许域名和相应审批规则限制 |
+| 系统 | 支持 macOS、Linux、WSL2；原生 Windows shell 不在此 OS 沙箱支持范围内 |
 
-**启用方式**：
-
-```bash
-# 在Claude Code会话中启用沙箱
-/sandbox
-```
-
-**隔离能力**：
-
-| 维度 | 说明 |
-|------|------|
-| **文件系统** | 只能写入启动目录及子目录，读取不受限 |
-| **网络** | 只能连接已批准的服务器，阻止未授权的外部连接 |
-| **OS级执行** | 基于Linux bubblewrap / macOS seatbelt的内核级隔离 |
-
-**对Skill脚本的影响**：
-- 当Sandbox启用时，Skill中`scripts/`目录的脚本也受沙箱限制
-- 脚本无法写入项目目录之外的路径
-- 脚本无法访问未批准的网络地址
+Skill 的脚本通过受沙箱覆盖的 shell 执行时也受这些限制。文件工具、MCP、Hook 不受这层保护；排除命令和获准的沙箱外重试也可能绕开这层边界，要分别检查权限与执行方式。
 
 #### 渐进式披露机制（详解）
 
 **三层披露结构**：
 
-```
-第一层：元数据常驻
-├─ YAML Frontmatter的name和description
-├─ 始终在内存中，用于自动激活判断
-└─ 极小的内存占用（<100字节）
+1. **发现信息**：名称和描述帮助 Claude 判断是否调用。列表受上下文预算及可见性设置影响，不是固定小于 100 字节，也不是全部始终可见。
+2. **Skill 正文**：调用时加载 `SKILL.md` 的指令。已加载正文会留在会话上下文中，后续轮次不自动重新读取文件。
+3. **配套资源**：按正文要求读取参考资料、模板或配置，并按需执行脚本。读取内容和脚本输出也可能进入上下文。
 
-第二层：指令按需加载
-├─ Markdown Body在Skill激活时才加载
-├─ 可以包含数千行的详细指令
-└─ 用完即释放，不占用常驻内存
-
-第三层：资源按需调用
-├─ scripts/中的脚本只在调用时执行
-├─ templates/中的模板只在渲染时读取
-└─ config/中的配置只在需要时加载
-```
-
-**性能优势对比**：
-
-| 方式 | 旧版本（skill.yaml+prompts/） | 新版本（SKILL.md） |
-|------|---------------------------|------------------|
-| **内存占用** | 所有prompts常驻 | 只加载元数据 |
-| **激活速度** | 需要读取多个文件 | 读取单个文件 |
-| **修改生效** | 需要重启 | Hot Reloading |
-| **维护成本** | 多文件同步 | 单文件管理 |
+把长参考资料放进独立文件，并在正文中说明何时读取，可以减少一开始就载入无关内容。官方建议 `SKILL.md` 控制在 500 行以内，这是一项组织建议，并不是文件大小的硬上限。
 
 ---
 
@@ -839,7 +833,7 @@ Claude Code检测到文件变化
 
 **本节目的**：掌握在SKILL.md中组织提示词的技巧和最佳实践。
 
-🎯 **重要说明**：不再使用独立的`prompts/`文件夹，所有提示词内容统一写在SKILL.md的Markdown Body中！
+🎯 **组织原则**：把入口和关键步骤写进 `SKILL.md`；长提示词或参考资料也可以放在配套文件里，并明确说明读取时机。
 
 ### 4.1 提示词组织方式
 
@@ -981,8 +975,8 @@ description: 当用户需要生成公众号标题时，自动应用5大爆款公
 ## 五、示例展示
 
 **✅ 好的标题**：
-- "Claude Code 3个隐藏技巧，让你的开发效率翻倍"（工具推荐型）
-- "手把手教你用Cursor，从入门到精通只需2小时"（教程型）
+- "Claude Code 的 3 个工作流技巧：减少重复输入和检查"（工具推荐型）
+- "用 Cursor 完成第一个小项目：安装、修改与验证"（教程型）
 
 **❌ 差的标题**：
 - "这个工具太厉害了！"（没有具体信息）
@@ -999,7 +993,7 @@ description: 当用户需要生成公众号标题时，自动应用5大爆款公
 
 ### 4.4 提示词版本管理
 
-**在SKILL.md中记录版本历史**：
+**在 SKILL.md 中记录你自己的版本历史**（下面日期和版本号仅作示例，不代表 Claude Code 发布历史）：
 
 ```markdown
 ---
@@ -1011,15 +1005,11 @@ description: 公众号写作助手V9.0
 
 ## 版本历史
 
-### V9.0.0 (2025-01-18) - 当前版本适配
-**重大变更**：
-- 不再使用skill.yaml，改为SKILL.md
-- 删除prompts/文件夹，所有提示词统一到Markdown Body
-- 新增Hot Reloading支持
-
-**新增**：
-- Sandbox安全机制
-- 渐进式披露机制
+### V9.0.0 (2026-01-18) - 工作流整理
+**变更**：
+- 用 SKILL.md 作为工作流入口
+- 将长参考资料移到 references/，在正文中注明读取时机
+- 补充修改后的刷新与验证步骤
 
 ### V8.1.0 (2025-12-15) - 数据驱动升级
 **新增**：
@@ -1099,15 +1089,15 @@ description: 公众号写作助手V9.0
 
 | 任务类型 | Claude Code原生 | 脚本增强 |
 |----------|----------------|---------|
-| 文本分析 | ❌ 只能模糊判断 | ✅ 精确的NLP分析 |
-| 数据计算 | ⚠️ 可能出错 | ✅ 100%准确计算 |
+| 文本分析 | 适合语义判断和解释 | 可接入明确算法与数据处理流程，准确性取决于实现和数据 |
+| 数据计算 | 需要核对推理结果 | 可复用计算逻辑；仍要验证公式、输入和精度 |
 | 文件批处理 | ⚠️ 效率低 | ✅ 高效批量处理 |
 | API调用 | ⚠️ 格式不确定 | ✅ 标准化输出 |
 | 复杂校验 | ❌ 难以保证一致 | ✅ 确定性校验 |
 
 ### 5.2 脚本模板
 
-**标准Python脚本模板**：
+**标准 Python 脚本模板**：先创建 `.claude/skills/gongzhonghao-writer/scripts/`，把下方完整代码保存为其中的 `processor.py`。示例只返回处理后的输入，不包含文章质量评分算法。
 
 ```python
 #!/usr/bin/env python3
@@ -1270,39 +1260,41 @@ if __name__ == "__main__":
     main()
 ```
 
-### 5.3 在Command中调用脚本
+### 5.3 在 Skill 中调用脚本
 
-**调用方式**：
+先在项目根目录手动试跑上一节保存的脚本：
 
-````markdown
-# 在Command中调用脚本示例
-
-### 步骤X：执行质量检测
-
-**调用脚本**：
 ```bash
-cd ".claude/skills/gongzhonghao-writer/scripts" && python quality_detector.py "文章内容" --json
+python .claude/skills/gongzhonghao-writer/scripts/processor.py "文章内容" --json
 ```
 
-**脚本参数说明**：
-- 第一个参数：要检测的内容
-- `--json`：输出JSON格式（便于解析）
+预期结果：
 
-**预期输出**：
 ```json
 {
   "success": true,
-  "data": {
-    "ai_score": 15,
-    "natural_score": 85,
-    "passed": true
-  },
-  "message": "检测通过"
+  "data": {"processed": "文章内容"},
+  "message": "处理成功",
+  "errors": []
 }
 ```
+
+确认脚本可以运行后，在该 Skill 的 `SKILL.md` 正文里写：
+
+````markdown
+## 调用处理脚本
+需要处理输入时，通过 shell 执行：
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/processor.py" "文章内容" --json
+```
+检查退出码和 JSON 的 `success` 字段，失败时报告错误，不把失败输出当作成功结果。
 ````
 
+`${CLAUDE_SKILL_DIR}` 在 Skill 正文被加载时替换；不要把这段模板变量当作普通终端里已经设置好的环境变量。若以后增加质量检测器，需要另行实现评分逻辑，不能把这个基础模板的输出解释为 AI 腔分数。
+
 ### 5.4 参数传递方式
+
+下表是编写脚本时可选择的接口。上一节模板只实现位置参数和 `--json`；标准输入、`--input` 与环境变量读取需要在脚本中另行实现后才能使用。
 
 | 方式 | 适用场景 | 示例 |
 |------|---------|------|
@@ -1525,6 +1517,7 @@ description: 当用户提到"公众号"、"写文章"、"老金风格"等关键�
 [爆款规律、质量标准...]
 
 ## 五、工具调用
+以下是架构设计示例；这三个脚本需要另行实现。实际调用时使用相对于 `${CLAUDE_SKILL_DIR}` 的路径，并检查运行依赖和退出码。
 - 质量检测：`python scripts/core/quality_detector.py`
 - 标题生成：`python scripts/core/title_generator.py`
 - 选题过滤：`python scripts/core/topic_filter.py`
@@ -1537,8 +1530,8 @@ description: 当用户提到"公众号"、"写文章"、"老金风格"等关键�
 
 **关键设计点（V9.0更新）**：
 
-1. **单文件入口**：SKILL.md替代skill.yaml+prompts/，简化管理
-2. **Hot Reloading**：修改SKILL.md后立即生效
+1. **单文件入口**：SKILL.md 组织关键步骤，长资料仍可放在配套文件中
+2. **刷新验证**：修改后重新扫描、调用，并检查新版要求
 3. **脚本分类**：core（核心）、collectors（收集）、utils（工具）
 4. **配置驱动**：所有可变参数放在config/目录
 5. **渐进式披露**：YAML Frontmatter常驻，Markdown Body按需加载
@@ -1619,9 +1612,9 @@ cat .claude/skills/你的skill/SKILL.md
 # ## 二、工作流程
 # ## 三、规则约束
 
-# 3. 测试Hot Reloading
-# 修改SKILL.md后，发送新消息测试
-# 如果未生效，尝试开始新对话或使用 /compact 压缩上下文
+# 3. 测试刷新（下述 / 命令在 Claude Code 会话中运行）
+# 保存后用 /reload-skills 重新扫描，再明确调用 Skill
+# 如果该会话已加载旧正文，用新会话验证；/compact 不保证重读文件
 
 # 4. 检查指令明确性
 # 在SKILL.md中使用明确的指令：
@@ -1696,7 +1689,7 @@ description: 当用户需要时激活
 # 访问 https://www.yamllint.com/
 # 复制YAML Frontmatter部分（不包括---分隔符）进行验证
 
-# 方法2：使用Python验证
+# 方法2：使用Python验证（需要 PyYAML；未安装时可先运行 python3 -m pip install PyYAML）
 python3 -c "
 import yaml
 import sys
@@ -1736,21 +1729,9 @@ cat .claude/skills/你的skill/SKILL.md | head -n 20
 # 内容...
 ```
 
-**技巧2：测试Hot Reloading**
+**技巧2：验证新版指令**
 
-```bash
-# 1. 修改SKILL.md
-# 添加或修改一些指令
-
-# 2. 在Claude Code中发送新消息
-# 不需要重启，修改会自动生效
-
-# 3. 验证修改是否生效
-# 检查AI是否应用了新的指令
-
-# 如果未生效，尝试开始新对话或：
-/compact
-```
+保存文件后，在 Claude Code 会话中运行 `/reload-skills`，再明确调用该 Skill。拿一条容易判断的新要求检查输出；若该会话已加载旧正文，用新会话重复验证。不要把 `/compact` 当作重读文件的保证。
 
 **技巧3：手动测试脚本**
 
@@ -1771,14 +1752,9 @@ file .claude/skills/你的skill/SKILL.md
 # 应显示：UTF-8 Unicode text
 ```
 
-**技巧5：查看Skill加载日志**
+**技巧5：检查真实诊断信息**
 
-在Claude Code中输入：
-```
-请列出当前已加载的所有Skills
-```
-
-这会显示所有被识别的Skills及其基本信息。
+在 Claude Code 会话中用 `/skills` 确认发现的入口，再用 `/skill-doctor` 检查 Skill 使用情况和上下文成本。`/context` 可辅助观察当前上下文。让模型回答“列出所有已加载 Skills”只能得到文字回答，不能代替客户端的诊断结果。
 
 ---
 
@@ -1792,7 +1768,7 @@ file .claude/skills/你的skill/SKILL.md
 |---|---|
 | `off` | 完全隐藏该 Skill（等同于不存在） |
 | `user-invocable-only` | 只保留 `/` 手动调用，禁止 Claude 自动激活 |
-| `name-only` | 只在 `/skills` 列表中显示名称，不加载任何指令 |
+| `name-only` | 提供名称而省略描述，减少列表上下文；仍允许调用，调用时加载正文 |
 
 #### 配置位置
 
@@ -1828,16 +1804,16 @@ file .claude/skills/你的skill/SKILL.md
 ## 第八部分：FAQ（20个常见问题）
 
 ### Q1：Skill和Command有什么区别？
-**A**：Command是"按钮"（触发器），Skill是"APP"（能力包）。Command用于显式触发，Skill用于封装知识和工具。两者通常配合使用：Command作为入口，Skill提供能力。
+**A**：旧 `.claude/commands/` 文件已合并进 Skills，仍可继续使用；两者不是“只能手动”和“可以自动”的区别。Skill 目录更便于组织配套文件。`/help` 等内置命令属于客户端功能，另行区分。
 
 ### Q2：必须要SKILL.md吗？
 **A**：是的，`SKILL.md` 是Skill的唯一必需文件。没有它Claude Code无法识别这是一个Skill。
 
 ### Q3：SKILL.md可以是任意大小吗？
-**A**：理论上可以，但建议控制在1000行以内。太大的SKILL.md会影响加载速度和AI理解。如果内容很多，考虑使用scripts/、config/等资源文件夹。
+**A**：不要把文件大小当作能力上限。官方建议 `SKILL.md` 保持在 500 行以内，把长参考资料放到独立文件并注明何时读取；这是组织建议，不是硬性行数限制。
 
 ### Q4：scripts支持哪些语言？
-**A**：主要支持Python和Bash。推荐Python，因为生态好、跨平台、易维护。JavaScript也可以，但不如Python常用。
+**A**：Skill 目录不限制脚本语言。Python、Bash、JavaScript 等都可以，前提是执行环境安装了相应解释器和依赖，并且工具权限允许执行。本教程用 Python 展示跨平台处理。
 
 ### Q5：如何让Skill自动激活？
 **A**：在SKILL.md的YAML Frontmatter中配置`description`字段。Claude Code会根据description判断何时激活。例如：
@@ -1866,22 +1842,22 @@ description: 当用户要求"添加注释"或"代码注释"时激活
 - 初始版本
 ```
 
-### Q9：SKILL.md多大合适？
-**A**：建议单个SKILL.md不超过1000行。太长会影响加载速度和AI理解。大的Skill应该考虑拆分成多个子Skill或使用scripts/。
+### Q9：拆出的参考文件会自动全部加载吗？
+**A**：不会因为放进目录就自动全部读入。在 `SKILL.md` 中说明文件的用途和读取条件，比如“需要检查格式时再读 references/style.md”。关键步骤留在入口里，长资料按需读取。
 
 ### Q10：如何调试Skill？
 **A**：
 1. 验证YAML Frontmatter格式
 2. 手动运行scripts/中的脚本测试
 3. 检查description是否清晰
-4. 查看Claude Code的Skill加载日志
+4. 用 `/skills`、`/skill-doctor` 核对入口和诊断信息
 
 ### Q11：Hot Reloading不生效怎么办？
 **A**：
-1. 确认修改的是SKILL.md而不是其他文件
-2. 检查YAML Frontmatter格式是否正确
-3. 尝试使用`/compact`压缩上下文后重试
-4. 最后手段：重启Claude Code
+1. 确认保存的是实际 Skill 目录里的 `SKILL.md`，并检查 frontmatter
+2. 用 `/reload-skills` 重新扫描，再明确调用该 Skill
+3. 若当前会话已加载旧正文，用新会话验证新版要求
+4. 仍未发现入口时检查目录、可见性设置及 `/skill-doctor`
 
 ### Q12：如何处理中文路径问题？
 **A**：Windows上尽量避免中文路径。如果必须使用，确保SKILL.md文件编码为UTF-8（带BOM或不带BOM都可以，但要一致）。
@@ -1896,7 +1872,7 @@ description: 当用户要求"添加注释"或"代码注释"时激活
 **A**：可以。将Skill放在全局配置目录（~/.claude/skills/）即可在所有项目中使用。
 
 ### Q16：如何回退到旧版本Skill？
-**A**：使用Git回退到旧版本的提交，或者在SKILL.md的版本历史中查看旧版本的内容。
+**A**：从已核对的 Git 提交或备份恢复该 Skill 的具体文件，再重新扫描、调用并验证。正文中的版本历史只记录变更，不一定保存旧版完整内容；不必为回退一个 Skill 重置整个项目。
 
 ### Q17：SKILL.md中可以使用变量吗？
 **A**：支持参数占位符和若干内置路径 / 会话变量，例如 `$ARGUMENTS`、`$ARGUMENTS[N]`、`$0`、`${CLAUDE_SESSION_ID}`、`${CLAUDE_PROJECT_DIR}` 和 `${CLAUDE_SKILL_DIR}`。还可以通过 frontmatter 的 `arguments` 声明命名参数。插件 Skill 另有 `${CLAUDE_PLUGIN_ROOT}`、`${CLAUDE_PLUGIN_DATA}`；任意环境变量不能直接当成通用模板变量使用。下面保留 `${CLAUDE_SKILL_DIR}` 的常用示例，完整清单以官方说明为准。
@@ -1948,14 +1924,20 @@ description: 当用户要求"添加注释"或"代码注释"时激活
 # create-skill.sh - Skill目录结构一键创建
 # 用法: ./create-skill.sh <skill-name>
 
-SKILL_NAME=$1
+set -e
+SKILL_NAME=${1:-}
 
-if [ -z "$SKILL_NAME" ]; then
-    echo "用法: $0 <skill-name>"
+if [[ ! "$SKILL_NAME" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || [ "${#SKILL_NAME}" -gt 64 ]; then
+    echo "用法: $0 <skill-name>；使用最多64字符的小写字母、数字和连字符"
     exit 1
 fi
 
 SKILL_DIR=".claude/skills/${SKILL_NAME}"
+mkdir -p .claude/skills
+if ! mkdir "$SKILL_DIR"; then
+    echo "未创建新目录；请检查路径是否已经存在，不会覆盖现有 Skill"
+    exit 1
+fi
 
 echo "创建Skill目录: ${SKILL_NAME}"
 
@@ -2102,8 +2084,8 @@ description: 当用户提到[关键词1]、[关键词2]或[关键词3]时，自�
 
 | 字段 | 类型 | 必填 | 说明 | 示例 |
 |------|------|------|------|------|
-| `name` | string | ✅ | Skill名称（小写、连字符） | `code-commenter` |
-| `description` | string | ✅ | 触发场景描述 | `当用户要求"添加注释"时激活` |
+| `name` | string | 推荐，非必填 | Skill名称；省略时采用目录名 | `code-commenter` |
+| `description` | string | 推荐，非必填 | 用途与适用场景 | `当用户要求"添加注释"时激活` |
 
 **最佳实践**：
 - name使用kebab-case（小写+连字符）

@@ -4,6 +4,27 @@
 
 ---
 
+## [v5.4] - 2026-10-03
+
+### 正文、功能与练习的第二轮复核
+
+- 重新核对全部 50 篇教程和速查卡的当前入口、功能变化、重复 FAQ 与练习衔接，在既有核查清单加入四工具的功能覆盖矩阵；正确原文和注明日期的历史说明保留。
+- Claude Code 修正不存在的 CLI 参数、日常 bypass 建议、MCP 本地配置及归档服务入口；补 AGENTS.md、mcp_tool、omitClaudeMd、Mods、账号资源同步、插件配置和企业供应商/遥测说明。语音步骤按当前录音、转写、提交和按键配置重写。
+- Claude Code Notification 保留可选 title，无标题时使用默认值；格式化器采用参数列表，Git 检查使用 NUL 分隔文件名、拒绝把检查失败当通过，并返回合法的 PreToolUse ask 结构。SDK 区分可用工具池与免审批工具，删除无依据的固定并发上限。
+- Codex Rules 改用内置 prefix_rule 注册并说明前缀和严格决策优先级；CLI 区分事件流与最终回答，补完整 JSON Schema。补当前模型与登录方式迁移、Worktree 创建/回流、手机接续、Browser/Computer Use、录制技能、Memories、Computer History、事件任务、Team Tasks、PR 插件及 Security Review；新 Cloud 补 Personal vault、共享、Tailscale 和申请式 OIDC。
+- OpenClaw 修正初始化后重复启动 Gateway、通道命令和配对、旧 BlueBubbles 路径、技能元数据/加载作用域、记忆与路由残留；补当前技能库、Workshop、Active Memory、Standing Intent 和导入说明。9.4 部署示例继续锁定版本，9.8 的 Windows 迁移和会话返回机制单列；Docker 更新先选目标版本并备份，托管平台不再照抄缺少状态和认证的部署。
+- WorkBuddy 按这轮取得的官方正文补技能三种添加方式、管理与开关、套餐与积分、网页注销及后果、定时通知和项目配置。连接器读写与 AI 用量分开说明；新定时摘要明确最近记录日、实际文件与可选通知的检查，Python 练习先进入目录再建立虚拟环境。
+
+- Claude Code 逐段复核各章重复旁支：订阅/Console/API 认证、用量与快捷键、Skills 的完整文件头与刷新、合法 Hook 拒绝字段和日志输出、SDK 内容块与权限返回、App/Action 的安装关系、托管宿主策略和稀疏目录；没有把缺失成本数据、部署占位或合规草图写成已完成结果。
+
+### 验证与未执行范围
+
+- 对实际修改后的源文件执行本地链接、锚点、围栏、编码与公开合成练习检查；权限规则、结构化输出和通知/文件名/Git 失败路径使用离线解析器或 mock 验证。
+- Skills 跨平台合成夹具 24/24、成本缺数据/有效数据检查 8/8；独立虚拟环境中的 pandas/openpyxl 参考 CSV→Excel 校验通过（420、3 行），不是 WorkBuddy App 实测。
+- 官方功能核查与真实客户端执行分开记录。没有调用收费模型、使用真实账号授权、发布 Cloud 环境或启动生产容器；WorkBuddy 仍无法取得的价格、积分和部分页面保留具体原因。
+
+---
+
 ## [v5.3] - 2026-10-03
 
 ### 安装、认证与命令

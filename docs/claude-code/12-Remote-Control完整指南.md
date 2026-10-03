@@ -127,9 +127,17 @@ claude remote-control --name "My Project"
 claude remote-control --verbose
 ```
 
-```bash
-claude remote-control --sandbox
+需要让服务器创建的会话使用 Bash 沙箱时，先在适用的设置文件中启用它，例如将下面字段合并到项目 `.claude/settings.json`，再运行 `claude remote-control`：
+
+```json
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
 ```
+
+按[官方沙箱说明](https://code.claude.com/docs/en/sandboxing)确认平台、文件和网络配置。当前服务器参数不提供 `--sandbox` / `--no-sandbox` 开关；不要把全局 `--settings` 参数放在 `remote-control` 前面当作替代，服务器会拒绝无法传入所创建会话的参数。
 
 ```bash
 claude remote-control --spawn worktree
@@ -139,7 +147,7 @@ claude remote-control --spawn worktree
 
 - `--name`：远端会话标题
 - `--spawn same-dir|worktree|session`：并发会话如何创建（默认 `same-dir`）
-- `--sandbox / --no-sandbox`：是否启用沙箱
+- `sandbox.enabled` 设置：控制服务器创建的会话是否启用 Bash 沙箱；按上方说明写入设置文件
 - `--capacity <N>`：最多允许多少个并发会话
 
 在 server mode 运行时，可以按 `w` 键在 `same-dir` 和 `worktree` 之间实时切换。
@@ -260,9 +268,16 @@ Remote Control 启动后，官方支持三种常见连接方式：
 
 不是所有 Claude Code 命令都能在远端界面执行。官方当前清单：
 
-**远端可用**（手机 / 浏览器都能执行）：
+**远端可用**（手机 / 浏览器可用，部分要带参数）：
 
-`/compact`、`/clear`、`/context`、`/usage`、`/exit`、`/usage-credits`、`/recap`、`/reload-plugins`、`/autocompact`
+- 文本与上下文：`/compact`、`/clear`、`/context`、`/usage`、`/exit`、`/usage-credits`、`/recap`、`/autocompact`。
+- 模型与显示：`/model sonnet`、`/effort high`、`/fast off`、`/color <值>`、`/rename <名字>`。
+- `/advisor <模型|off>` 只改本次会话；`/output-style [name]` 可列出并选择内置风格，自定义风格先在本地选择。
+- `/focus [on|off]` 从 v2.1.281 起远程可用，只改当前会话。
+- `/reload-plugins` 需要会话由交互终端托管；没有交互终端的会话会拒绝。
+- `/config` 在手机端可列出可设置的键，或用 `key=value` 设置；网页端打开 Claude Code 设置页，并忽略命令后的文本。
+
+`/usage-credits` 在远端会返回账单入口；Team / Enterprise 向管理员请求额度的确认仍需本地交互终端。功能清单以[官方 Remote Control 限制](https://code.claude.com/docs/en/remote-control#limitations)为准。
 
 **仅本地**（必须在终端操作）：
 
@@ -319,7 +334,7 @@ Team 和 Enterprise 下，Remote Control 默认可能是关闭的。
 1. 先确认你不是 API key 登录
 2. 再确认管理员已经打开 Claude Code 后台里的 Remote Control 开关
 3. 确认当前项目已接受 workspace trust
-4. 检查是否设置了 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 或 `DISABLE_TELEMETRY` 环境变量（会干扰 RC 连接）
+4. 检查 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 或 `DISABLE_GROWTHBOOK`，它们会关闭远控所需的功能开关评估。v2.1.283 起，仅设置 `DISABLE_TELEMETRY` 或 `DO_NOT_TRACK` 通常仍可使用远控；要求 Trusted Devices 的组织例外。旧版 v2.1.154–282 会受这两个变量影响，先结合版本与组织策略判断
 5. 用 `/status` 确认当前登录方式和订阅状态
 
 ### 9.2 托管策略：`forceRemoteSettingsRefresh`（v2.1.92）

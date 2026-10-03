@@ -78,7 +78,7 @@ Automations 是很多人第一次真正让 Codex “不在眼前也运行”的�
 | Skill-driven automation | Automation 负责时间，Skill 负责做法 | 团队最推荐的可维护组合 |
 | Finding | 自动化运行发现的问题或报告 | 要能让人判断下一步 |
 
-一句话：Automation 管“什么时候醒来”，Skill 管“醒来后怎么做”，Rules / sandbox 管“能做多大动作”，Triage 管“结果在哪里看”。
+一句话：Automation 管“什么时候运行”，Skill 管“运行时怎么做”，Rules / sandbox 管“能做多大动作”，Scheduled 提供任务与运行记录，Triage 则是你整理结果的方法。
 
 ## 0. Automations 的工作机制
 
@@ -101,7 +101,7 @@ Automations 是很多人第一次真正让 Codex “不在眼前也运行”的�
 
 | 需求 | 推荐 | 原因 |
 |---|---|---|
-| 每天检查某项目测试是否失败 | Standalone | 每次运行相互独立，结果进 Triage |
+| 每天检查某项目测试是否失败 | Standalone | 每次运行相互独立，在 Scheduled 查看结果后分诊 |
 | 每周总结多个项目文档漂移 | Standalone | 可跨项目，报告独立 |
 | 30 分钟后继续看部署是否完成 | Thread automation | 需要保留当前线程上下文 |
 | 持续跟进一个 PR review loop | Thread automation | 评论、修复、状态都在同一线程 |
@@ -170,6 +170,17 @@ App 主线里可以直接自然语言创建：
 4. 是否只读或写入范围受限。
 5. 输出会回到当前线程、通知、PR 评论还是其他地方。
 6. 有没有暂停、删除或修改入口。
+
+### 2.1 网页端的事件触发任务
+
+符合账号与工作区条件时，ChatGPT 网页端和移动端还能在收到 Gmail、Slack 或 GitHub 事件后运行任务。这种入口不在桌面 App、CLI 或 IDE 中；一个任务可以使用多个事件触发器，但不能同时再配时间计划。
+
+1. 先连接并授权对应 App。GitHub 连接必须能访问目标仓库；Slack 需要把 `@ChatGPT` 加入每个要监控的频道。
+2. 在网页对话里说明事件和动作，例如：“当 owner/repo 的 PR 123 收到新的 review comment 时，汇总新评论和需要我决定的事项，不修改代码，也不发表评论。”
+3. 核对触发范围和输出。Gmail 可按发件人或主题过滤；Slack 可按频道、作者和是否包含线程回复过滤，但不支持 DM、reaction、消息编辑或删除；GitHub 可限定仓库、PR、作者、标题、标签及活动类型。
+4. 创建后在 **Scheduled** 查看等待事件和运行记录；需要立刻处理时使用 **Run now**。相近时间的多个事件可能合并为一次运行，因此检查输出是否覆盖了全部待处理事件。
+
+企业管理员可以通过 **Allow event-triggered scheduled tasks** 控制此功能。无法使用时先核对账号和工作区设置，不把每小时轮询写成同一种事件触发机制。依据：[官方任务文档](https://learn.chatgpt.com/docs/automations#trigger-tasks-from-app-events)。
 
 ## 3. Automations 的三类常见任务
 
@@ -241,6 +252,10 @@ Automation 管“什么时候运行”，Skill 管“怎么做”。
 | Automation | 按时间规则运行 | 重复任务 |
 
 不要用 Automation 做本来一次就能完成的事。
+
+### 6.1 定期检查保存的模型
+
+定时任务可能保存创建时选择的模型。用 ChatGPT 登录 Codex 的用户，应在 2026-10-14 前检查任务是否仍指定 `gpt-5.5`，并改成该账号、客户端与工作区实际可用的模型；本次 GPT-5.5 退役不适用于 OpenAI API。模型迁移还要检查配置、受管默认值和自定义 agents，详见 CX-12 第 2.2 节。
 
 ## 7. 安全基线
 
@@ -448,7 +463,7 @@ Automation 上线后要运营。没人维护的后台任务会慢慢变成噪音
 
 ### Q1：电脑关机时 App Automations 还会运行吗？
 
-取决于当前 App 和环境能力。需要可靠持续运行时，优先考虑云端 runner、GitHub Action 或 Codex Cloud。
+涉及本机项目目录的任务需要电脑开机、ChatGPT 桌面 App 运行，关机时不能按计划访问该目录。受支持的网页任务和 Team Tasks 在云端运行，不能直接使用你的本机目录。要持续运行项目测试，可考虑配置云端 runner、GitHub Action 或合适的 Codex Cloud 环境。
 
 ### Q2：Automation 能自动修 bug 吗？
 
@@ -528,10 +543,10 @@ Automations 最容易被误解成“让 Codex 自己每天把事情做完”。�
 每个工作日上午 9 点检查这个项目：
 1. 读取 Git 状态和测试配置
 2. 如果有失败的测试记录，生成摘要
-3. 如果没有发现问题，自动归档
+3. 如果没有明确发现，不通知；保留可供我在 Scheduled 核对的运行记录
 4. 不修改文件，不提交，不推送
 
-输出要适合我在 Triage 里快速阅读。
+输出要适合我在 Scheduled 查看后快速分诊。
 ```
 
 这个任务不需要保留前一次对话，所以适合 standalone automation。
@@ -581,7 +596,7 @@ Automations 最容易被误解成“让 Codex 自己每天把事情做完”。�
 
 输出：
 - 如果有问题，写成 Triage 摘要。
-- 如果没有问题，说明检查了哪些来源，然后归档。
+- 如果没有问题，不通知；我会在 Scheduled 核对本次运行和检查来源。
 ```
 
 ### 15.3 耐久 prompt 的五个要素
@@ -596,7 +611,7 @@ Automations 最容易被误解成“让 Codex 自己每天把事情做完”。�
 
 ## 16. Triage 工作法：把后台输出变成行动
 
-Automations 的结果会进入 Triage。Triage 不是垃圾箱，而是一个决策收件箱。
+在 **Scheduled** 查看任务的运行结果，再按下面的 Triage 方法分诊。Triage 在这里指把结果整理成待处理、待判断和可归档事项，不是当前界面的页面名称。
 
 ### 16.1 读 Triage 的顺序
 
@@ -665,7 +680,7 @@ Worktree 模式给自动化一个独立 checkout。优点是隔离，缺点是�
 ### 17.3 Worktree 清理习惯
 
 ```text
-每周查看 automations pane：
+每周查看 Scheduled：
 1. 归档已经处理的 runs。
 2. 不再需要的 worktree 不要长期保留。
 3. 对频率过高但价值低的任务降频或停用。
@@ -803,7 +818,7 @@ Automations 是后台运行，所以权限要比普通交互线程更保守。
 这条自动化产生了太多低价值提醒。
 请根据最近几次输出，帮我重写 prompt：
 1. 只报告有行动价值的发现
-2. 没有发现时自动归档
+2. 没有发现时不通知；我会在 Scheduled 核对运行记录
 3. 把重复信息合并
 4. 对不确定信息标注来源和不确定原因
 ```
@@ -910,7 +925,7 @@ Automations 是后台运行，所以权限要比普通交互线程更保守。
 - 不修改文件
 - 不提交
 - 不推送
-- 如果没有发现，自动归档
+- 如果没有发现，不通知；我会在 Scheduled 核对运行记录
 
 输出：
 - 文档路径
@@ -1008,9 +1023,9 @@ Automations 是后台运行，所以权限要比普通交互线程更保守。
 
 ## 25. Automation 进阶常见问题
 
-### Q1：没有发现时为什么会自动归档？
+### Q1：没有发现时应该怎样减少提醒？
 
-后台任务如果每次都提醒“没事”，会制造噪音。Triage 应该优先展示有行动价值的发现。
+在任务提示里说明“没有明确发现时不通知”，把提醒留给需要行动的结果。随后到 Scheduled 查看运行时间和记录，确认任务确实运行；没有收到消息不代表已执行或已自动归档。
 
 ### Q2：Automation 能不能跑测试？
 
@@ -1180,7 +1195,7 @@ Keep / reduce frequency / rewrite prompt / pause
 3. 新增配置没有文档说明的地方。
 
 最多输出 5 条。
-如果没有发现，自动归档，不要输出鼓励性总结。
+如果没有发现，不通知；我会在 Scheduled 核对运行记录。不要输出鼓励性总结。
 ```
 
 如果第一周每次都有 10 条以上提醒，优先减范围，而不是加更多分类。
@@ -1192,7 +1207,7 @@ Keep / reduce frequency / rewrite prompt / pause
 1. 保留真正需要本周处理的问题。
 2. 删除重复提醒。
 3. 限制每次最多输出 5 条。
-4. 明确没有发现时自动归档。
+4. 明确没有发现时不通知，并由我到 Scheduled 核对运行记录。
 5. 不修改 automation，只给新 prompt。
 ```
 
@@ -1217,7 +1232,7 @@ Automation 是后台同事，但不是不用管理的同事。第一周运营日
 3. reviewer 要求补测试但当前 diff 没有测试文件变化。
 4. PR 状态被阻塞但没有明确 owner。
 
-如果没有异常，自动归档。
+如果没有异常，不通知；我会在 Scheduled 核对运行记录。
 不要总结所有正常评论。
 ```
 
@@ -1291,7 +1306,7 @@ Archived if empty.
 - 提交、推送或发布。
 - 调用外部写入。
 
-完成后把结果放入 Triage，等待人工 Review。
+完成后提供适合分诊的结果，供我在 Scheduled 查看并进行人工 Review。
 ```
 
 如果这个任务第一次运行，不要直接允许写入。先跑只读版本：
@@ -1363,7 +1378,7 @@ Owner:
 
 同时收窄 prompt：
 1. 只报告 blocking 问题。
-2. 没有发现时自动归档。
+2. 没有明确发现时不通知，并在 Scheduled 保留可核对的运行记录。
 3. 每次最多 5 条。
 4. 不修改文件。
 ```
@@ -1393,7 +1408,7 @@ Owner:
 2. 需要我回复的评论。
 3. 昨天失败但今天仍未处理的测试。
 
-如果没有事项，自动归档。
+如果没有这些事项，不通知；我会在 Scheduled 核对本次运行。
 不要输出普通鼓励、泛泛总结或项目新闻。
 ```
 
@@ -1425,7 +1440,7 @@ Owner:
 
 ## No Action
 
-Archive if all sections are empty.
+If all sections are empty, do not notify. Review the run in Scheduled.
 ```
 
 这个练习把“提醒我”变成了“按条件报告异常”。这就是 Automation 课程应该训练的核心能力。

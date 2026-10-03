@@ -133,7 +133,7 @@ OpenClaw 的架构设计非常优雅。官方的自我定义是：**Multi-channe
 │                        消息平台层 (Channels)                      │
 │                                                                   │
 │  WhatsApp │ Telegram │ Discord │ Slack │ Signal │ iMessage       │
-│  BlueBubbles │ Google Chat │ Teams │ LINE │ Zalo │ WebChat │ ... │
+│  Google Chat │ Teams │ LINE │ Zalo │ WeChat │ WebChat │ ... │
 └──────────────────────────────┬────────────────────────────────────┘
                                │
 ┌──────────────────────────────▼────────────────────────────────────┐
@@ -260,8 +260,9 @@ Gateway 的安装方式是注册为系统服务：macOS 用 launchd，Linux 用 
 # 安装 Gateway 守护进程
 openclaw onboard --install-daemon
 
-# 手动启动（调试用）
-openclaw gateway --port 18789 --verbose
+# 核对后台 Gateway 并查看日志
+openclaw gateway status
+openclaw logs --follow
 
 # 检查 Gateway 健康状态
 openclaw doctor
@@ -293,9 +294,8 @@ Channel 是 OpenClaw 对消息平台的统一抽象。不管你用的是 WhatsAp
 | Discord | @buape/carbon | Bot Token |
 | Slack | Bolt | OAuth App |
 | Signal | signal-cli | 手机号注册 |
-| BlueBubbles | BlueBubbles API | iMessage（推荐） |
-| iMessage | imsg CLI | macOS 原生（旧版） |
-| WebChat | 内置 | 无需认证 |
+| iMessage | 官方 `@openclaw/imessage` + imsg CLI | 本机 Mac 或经 SSH 连接 Mac；旧 BlueBubbles 已移除 |
+| WebChat | 内置 | 需要 Gateway 认证；首次远程浏览器连接还可能需要设备配对 |
 
 **扩展 Channel（通过 extensions 加载）：**
 
@@ -339,7 +339,7 @@ Channel 的安全默认值很重要。OpenClaw 连接的是真实的消息平台
 | 层级 | 说明 | 来源 |
 |------|------|------|
 | Bundled Skills | 内置技能，随 OpenClaw 一起安装 | 核心仓库 |
-| Managed Skills | 通过 ClawHub 安装的社区技能 | clawhub.com |
+| Managed Skills | 通过 ClawHub 安装的社区技能 | clawhub.ai |
 | Workspace Skills | 你自己写的本地技能 | 工作空间目录 |
 
 内置技能一览（示意）：
@@ -433,7 +433,7 @@ OpenClaw 的核心保持精简，可选功能通过插件扩展。
 插件的分发方式：
 - **npm 包** — 通过 npm 安装，标准的 Node.js 包管理
 - **本地扩展** — 开发时直接加载本地目录
-- **社区插件** — 通过 ClawHub（clawhub.com）发现和安装
+- **社区插件** — 通过 ClawHub（clawhub.ai）发现和安装
 
 插件 API 提供了 SDK：
 
@@ -657,7 +657,7 @@ OpenClaw 支持配置多个模型的优先级和故障转移策略。主模型�
 openclaw agent --agent main --message "帮我查一下明天的天气"
 
 # 发送消息到指定平台
-openclaw message send --to +1234567890 --message "Hello"
+openclaw message send --channel whatsapp --target +1234567890 --message "Hello"
 
 # 交互式 TUI
 openclaw tui
@@ -702,7 +702,7 @@ openclaw tui
 
 ### ClawHub（技能市场）
 
-ClawHub（clawhub.com）是 OpenClaw 的技能和插件市场。社区开发者可以发布自己的技能，其他用户可以一键安装。
+ClawHub（clawhub.ai）是 OpenClaw 的技能和插件市场。社区开发者可以发布自己的技能，其他用户可以一键安装。
 
 官方鼓励新技能优先发布到 ClawHub，而不是提交到核心仓库。核心仓库的合并门槛很高。
 
@@ -778,9 +778,10 @@ OpenClaw 的设计哲学很明确：**它是一个个人助手，不是企业平
 - 全套文档翻译（计划用 AI 自动翻译）
 - 不明确属于模型提供商类别的商业服务集成
 - 已有 Channel 的包装器（除非有明确的能力或安全差距）
-- 核心中的一等 MCP 运行时（mcporter 已经提供了集成路径）
-- Agent 层级框架（管理者的管理者/嵌套规划树）
+- 没有说明实际能力缺口、重复已有 MCP、ACPX、插件或 ClawHub 路径的集成
 - 重复现有 Agent 和工具基础设施的重型编排层
+
+这里不能理解为“OpenClaw 不支持 MCP 或委派”。v2026.9.4 已有内建 MCP client、子 Agent 和可选择的运行时；消息 bindings 路由仍可按配置直接选择 Agent。
 
 官方说这是路线图护栏，不是铁律。强烈的用户需求和技术理由可以改变它。
 
@@ -866,8 +867,9 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 # 2. 运行安装向导（会引导你配置模型和平台）
 openclaw onboard --install-daemon
 
-# 3. 启动 Gateway（调试模式）
-openclaw gateway --port 18789 --verbose
+# 3. 核对后台 Gateway 并查看日志
+openclaw gateway status
+openclaw logs --follow
 
 # 4. 跑一次诊断，确认 Gateway 和配置已就绪
 openclaw doctor
@@ -1191,7 +1193,7 @@ OpenClaw 的配置不是孤立字段。每个字段背后都对应一个产品�
     "entries": {
       "docs-helper": {
         "workspace": "~/.openclaw/workspace-docs-helper",
-        "model": "openai/gpt-5.2-mini",
+        "model": "openai/gpt-5.6-luna",
         "skills": ["summarize"]
       }
     }

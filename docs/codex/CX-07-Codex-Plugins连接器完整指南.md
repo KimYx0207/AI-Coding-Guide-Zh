@@ -96,7 +96,7 @@
 |---|---|---|
 | 读取 GitHub PR / issue 上下文 | GitHub Connector / App | 账号上下文最直接 |
 | 使用浏览器、数据库、文档工具 | MCP | 工具协议更合适 |
-| 复用团队固定流程 | Skill | 不需要外部授权 |
+| 复用团队固定流程 | Skill | 复用指令与配套资源；是否需要授权取决于流程调用的外部工具 |
 | 一次安装一整套工作流 | Plugin | 能打包 Skills、MCP、Apps |
 | 定时读外部状态 | Automation + Connector / Skill | Connector 不负责调度 |
 
@@ -945,6 +945,8 @@ repo-root/
 
 ### 22.3 Plugin manifest
 
+先创建目录结构，把下方 JSON 保存为 `plugins/course-authoring-pack/.codex-plugin/plugin.json`。
+
 ```json
 {
   "name": "course-authoring-pack",
@@ -955,6 +957,8 @@ repo-root/
 ```
 
 ### 22.4 Marketplace
+
+把下方 JSON 保存为仓库根目录下的 `.agents/plugins/marketplace.json`。这里的本地插件路径相对于仓库根目录，不是 marketplace 文件所在的子目录。
 
 ```json
 {
@@ -976,15 +980,35 @@ repo-root/
 }
 ```
 
-### 22.5 安装和使用
+### 22.5 补齐 Skill 正文
 
-```text
-1. 重启 Codex。
-2. 打开 App Plugins 页面或 CLI `/plugins`。
-3. 找到 course-team marketplace。
-4. 安装 course-authoring-pack。
-5. 新开线程显式调用 bundled skill。
+目录树里的 `SKILL.md` 也必须实际创建。把下面内容保存为 `plugins/course-authoring-pack/skills/zh-course-review/SKILL.md`：
+
+```markdown
+---
+name: zh-course-review
+description: 只读审查中文技术教程的步骤完整性、事实依据和上下文边界。
+---
+
+# 中文课程审查
+
+先确定用户给出的文件和审查范围；没有文件或无法读取时先说明缺失信息。
+
+1. 阅读指定全文，核对每一步的前置条件、输入、操作和可观察结果。
+2. 对版本、配置和功能断言核对用户提供的一手来源；无法确认时标为待核实，不编造结论。
+3. 检查前后矛盾、缺主语或背景、以及容易误执行的示例。正确且清楚的段落保留。
+4. 只报告会影响理解或执行的问题，给出文件位置、依据与必要修订建议。
+5. 默认不修改文件；需要修改时先按用户授权范围继续，工具执行仍遵守当前权限与审批。
+
+输出按问题严重程度排序；没有确认问题时，说明实际读取范围及未核实的边界。
 ```
+
+### 22.6 安装和使用
+
+从仓库根目录进入 Codex，打开 App Plugins 页面或 CLI `/plugins`，确认发现 `course-team` marketplace，再安装 `course-authoring-pack` 并核对启用状态。若未发现本地来源，可先用当前 CLI 的 `codex plugin marketplace add .` 添加这个仓库根目录，再查看 `codex plugin marketplace list` 和 `codex plugin list`。
+
+安装后显式调用并检查是否识别这份 Skill；如果当前客户端没有刷新，再新开线程或重启排查。不要把“重启”当作缺少 `SKILL.md` 的修复方法。
+
 
 使用：
 

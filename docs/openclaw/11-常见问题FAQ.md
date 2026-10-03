@@ -351,7 +351,9 @@ xattr -d com.apple.quarantine $(which openclaw)
 # Linux / macOS
 lsof -i :18789
 # 记下 PID，然后 kill
-kill -9 <PID>
+# 先核对 PID 的程序、账号和实例；不要结束不认识的进程
+# 若是当前 OpenClaw 后台服务，先运行 openclaw gateway stop
+# 手动前台 Gateway 在原终端按 Ctrl+C；其他服务按自己的管理方式停止
 
 # Windows
 netstat -ano | findstr 18789
@@ -482,16 +484,16 @@ openclaw channels status --channel discord --probe
 openclaw logs --limit 20
 # 看日志中的时间戳，判断延迟发生在哪里
 
-# 第二步：测试模型 API 延迟
-openclaw health
-# 如果 API 延迟高，考虑换模型或换提供商
+# 第二步：观察实际模型调用的请求时间、首 token 和总耗时
+openclaw logs --follow
+# health 只用于 Gateway 健康检查；模型延迟要从已授权的实际请求或 provider 记录判断
 
 # 第三步：检查是否有消息积压
 openclaw sessions list
 
 # 第四步：优化措施
 # 使用更快的模型
-openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
+openclaw config set agents.defaults.model "openai/gpt-5.6-luna"
 # 减少系统提示词长度（Token 越少，响应越快）
 # 精简 ~/.openclaw/workspace/SOUL.md 的内容
 ```
@@ -603,9 +605,11 @@ openclaw channels list
 [ -n "${OPENAI_API_KEY:-}" ] && echo "OPENAI_API_KEY 已设置" || echo "OPENAI_API_KEY 未设置"
 # 确认 Key 没有多余的空格或换行
 
-# 第二步：测试 Key 是否有效
+# 第二步：区分 Gateway 健康与模型认证
 openclaw health
-# 如果报错，说明 Key 有问题
+openclaw models status
+# health 检查 Gateway/通道，status 展示模型与认证元数据；两者不证明模型请求成功
+# 核对 provider 日志；需要真实探测时按 models status --probe 文档操作，先停止运行中的 Gateway，探测会发出请求并可能计费
 
 # 第三步：去提供商后台检查
 # OpenAI: https://platform.openai.com/account/api-keys
@@ -633,7 +637,7 @@ export OPENAI_API_KEY="sk-proj-new-key-here"
 #     "defaults": {
 #       "model": {
 #         "primary": "openai/gpt-5.2",
-#         "fallbacks": ["anthropic/claude-sonnet-5", "openai/gpt-5.2-mini"]
+#         "fallbacks": ["anthropic/claude-sonnet-5", "openai/gpt-5.6-luna"]
 #       }
 #     }
 #   }
@@ -657,8 +661,8 @@ openclaw config set agents.defaults.model "openrouter/openai/gpt-5.2"
 
 ```bash
 # 方案一：换用更快的小模型
-openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
-# gpt-5.2-mini 速度是 gpt-5.2 的 3-5 倍，日常对话足够用
+openclaw config set agents.defaults.model "openai/gpt-5.6-luna"
+# 选择当前目录里可用的低成本模型；延迟以自己的代表性任务实测为准
 
 # 方案二：流式响应默认已启用
 # OpenClaw 默认使用流式输出（边生成边发送），无需额外配置
@@ -832,7 +836,7 @@ openclaw config set agents.defaults.model "openrouter/deepseek/deepseek-chat"
 #         "primary": "openai/gpt-5.2",
 #         "fallbacks": [
 #           "anthropic/claude-sonnet-5",
-#           "openai/gpt-5.2-mini"
+#           "openai/gpt-5.6-luna"
 #         ]
 #       }
 #     }
@@ -857,8 +861,8 @@ openclaw models status
 # OpenClaw 本身没有内置预算控制配置
 
 # 方案二：使用更便宜的模型
-# gpt-5.2-mini 价格是 gpt-5.2 的 1/10
-openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
+# 费用按所用账号、提供商当前价目与实际Token用量核算，不承诺固定比例
+openclaw config set agents.defaults.model "openai/gpt-5.6-luna"
 
 # 方案三：精简记忆文件减少 Token 消耗
 # MEMORY.md 建议控制在 500 行以内
@@ -882,18 +886,18 @@ openclaw config set agents.defaults.model "ollama/llama3.1:8b"
 # {
 #   "agents": {
 #     "defaults": {
-#       "model": "openai/gpt-5.2-mini"
+#       "model": "openai/gpt-5.6-luna"
 #     },
-#     "list": [
-#       { "id": "coding", "model": "anthropic/claude-sonnet-5" },
-#       { "id": "casual", "model": "openai/gpt-5.2-mini" }
-#     ]
+#     "entries": {
+#       "coding": { "default": true, "model": "anthropic/claude-sonnet-5" },
+#       "casual": { "model": "openai/gpt-5.6-luna" }
+#     }
 #   }
 # }
 
 # 方案二：使用模型别名快速切换
 openclaw models aliases add code-review "anthropic/claude-opus-4-8"
-openclaw models aliases add quick-chat "openai/gpt-5.2-mini"
+openclaw models aliases add quick-chat "openai/gpt-5.6-luna"
 
 # 方案三：通过 bindings 将不同 Channel 路由到不同 Agent
 # 每个 Agent 使用各自配置的模型
@@ -954,7 +958,7 @@ description: 用户要求整理一段记录为结构化草稿时使用。
 openclaw doctor
 # 诊断安全和配置问题
 
-# 第二步：测试单个工具
+# 第二步：检查技能依赖就绪状态（不执行工具）
 openclaw skills check
 
 # 第三步：检查工具依赖
@@ -963,8 +967,8 @@ openclaw skills info <skill-name>
 
 # 第四步：常见工具问题
 # web_search 需要网络连接
-# file_write 需要目标目录有写权限
-# shell_exec 需要在配置中启用（默认禁用，出于安全考虑）
+# write/edit 需要实际文件权限与 tools 策略允许
+# exec 能否执行取决于工具策略、审批和目标环境；sandbox 默认关闭，不等于 exec 默认禁用
 ```
 
 ### Q39: 怎么禁用某个工具？
@@ -1036,7 +1040,7 @@ openclaw skills info <skill-name>
 
 ### Q44: 技能之间会冲突吗？
 
-**说明：** 如果多个技能的触发条件重叠，可能会出现冲突。OpenClaw 会按优先级选择。
+**说明：** 同名技能按目录来源优先级覆盖；不同名字的技能由模型根据 description 和任务选择，描述重叠可能使选择不稳定，但不是引擎按关键词优先级抢占。先核查来源与可见性，再用显式 `$skill-name` 测试。
 
 ```bash
 # 查看技能列表
@@ -1078,7 +1082,7 @@ openclaw skills list
 
 ```bash
 # 第一步：查看容器退出日志
-docker compose logs openclaw
+docker compose logs openclaw-gateway
 
 # 第二步：常见原因排查
 # 原因 1：配置文件不存在
@@ -1090,7 +1094,7 @@ lsof -i :18789
 
 # 原因 3：环境变量缺失
 # 确认 .env 文件存在且包含必要变量
-cat .env
+ls -l .env  # 确认存在与权限；只在本地编辑，别把凭据打印到可分享输出
 
 # 第三步：用前台模式启动，方便看日志
 docker compose up  # 不加 -d
@@ -1108,7 +1112,7 @@ docker compose up  # 不加 -d
 
 ```bash
 # 查看容器资源使用
-docker stats openclaw
+docker stats openclaw-gateway
 
 # 方案一：限制容器内存
 # 在 docker-compose.yml 中添加：
@@ -1118,7 +1122,7 @@ docker stats openclaw
 #       memory: 1G
 
 # 方案二：清理会话数据
-docker exec openclaw openclaw sessions cleanup
+docker compose exec openclaw-gateway node dist/index.js sessions cleanup --dry-run --all-agents
 
 # 方案三：减少同时连接的平台数量
 
@@ -1143,7 +1147,8 @@ openclaw onboard --install-daemon
 # 这会创建 systemd service，崩溃后自动重启
 
 # 查看服务状态
-systemctl status openclaw-gateway
+openclaw gateway status
+# Linux 用户服务也可用 systemctl --user status openclaw-gateway
 
 # 方案二：Docker 自动重启
 # 在 docker-compose.yml 中设置：
@@ -1169,8 +1174,8 @@ openclaw gateway --port 18789 --verbose
 # openclaw gateway --port 18789 --verbose 2>&1 | grep "error"
 
 # Docker 环境
-docker compose logs -f openclaw
-docker compose logs --tail 100 openclaw
+docker compose logs -f openclaw-gateway
+docker compose logs --tail 100 openclaw-gateway
 
 # 日志文件位置（取决于 logging 配置）
 # 默认日志输出到 stdout/stderr
@@ -1267,25 +1272,14 @@ openclaw gateway --port 18789
 
 ### Q55: 怎么配置自动更新？
 
-**解决方案：**
+生产环境先自动检查更新，再按备份、版本选择和兼容检查决定何时升级：
 
 ```bash
-# npm 方式：用 crontab 定期跑内置升级（需有备份，回滚不保证每次都能执行）
-# 0 2 * * 0 openclaw update
-# 有 service manager 时升级后会自行重启 Gateway；没有的话加 --no-restart，再自己重启
-
-# Docker 方式：用 Watchtower 自动更新
-docker run -d \
-  --name watchtower \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  containrrr/watchtower \
-  --interval 86400 \
-   openclaw-gateway
-
-# 手动检查是否有新版本
+openclaw update status
 openclaw --version
-npm view openclaw version
 ```
+
+可以定时提醒自己检查 release；不要直接把无条件 `openclaw update` 或 Watchtower 重建放进生产 cron，绕过备份和状态迁移。Docker 固定 9.4 tag 时 pull 仍是 9.4，需要显式切到已验证的目标 tag。完整步骤见 [09 章更新与回滚工坊](09-Docker部署指南.md#更新与回滚工坊)。Windows 从 9.4 升到 9.8 的特殊恢复路径见 [02 章](02-安装部署指南.md)，新 updater 的重试不能替代停止旧数据库驱动。
 
 ---
 
@@ -1320,7 +1314,7 @@ nano ~/.openclaw/workspace/MEMORY.md
 # 把重要信息直接写进去
 
 # 第五步（v2026.4.10+）：启用 Active Memory 插件
-# Active Memory 插件可自动召回、提升和整理记忆
+# Active Memory 提供按条件的主动召回；记忆整理和提升要区分Dreaming与实际启用的流程
 # 通过 openclaw plugins 查看是否已启用
 ```
 
@@ -1539,7 +1533,7 @@ openclaw config set agents.defaults.model "ollama/qwen2.5:7b"
 **替代方案：**
 - Telegram（需要代理，但 Bot API 可以通过代理访问）
 - 飞书 / Lark（国内原生支持，OpenClaw 通过扩展支持飞书 Channel）
-- 注意：钉钉、微信公众号、个人微信均不受官方支持
+- 微信存在官方文档收录的腾讯外部插件路径 `@tencent-weixin/openclaw-weixin`，见 [05 章微信说明](05-消息平台接入指南.md)；它不等于微信群或微信公众号能力，也不能套用标准 pairing。钉钉等其他集成按各自插件文档核对。
 
 ```bash
 # 配置飞书（推荐中国用户）
@@ -1785,7 +1779,7 @@ Gateway 是基础设施层，Agent 是业务逻辑层。一个 Gateway 可以服
 2. **转发头安全检查（v2026.4.x+）**：如果你使用反向代理，Gateway 现在会检查转发头的一致性（详见 Q81）
 3. **环境变量过滤（v2026.4.7+）**：Gateway 会自动拦截危险的环境变量覆盖，如果你的部署脚本依赖特定的环境变量传递，建议测试确认
 4. **Hook 失败模式变更（v2026.4.5+）**：Hook 崩溃时从 fail-open 改为 fail-closed，如果你有自定义 Hook，升级后请确认它们运行正常
-5. **Cron 状态拆分（v2026.4.20+）**：定时任务运行时状态拆分到独立的 `jobs-state.json` 文件，升级后首次启动会自动迁移
+5. **自动化状态（9.4 参考）**：任务、运行状态和历史已存入共享 SQLite 状态数据库。旧 jobs.json、*-state.json 和 runs/*.jsonl 只作为一次性迁移来源；迁移后用 automations 命令管理，不直接编辑旧 JSON。
 
 **升级步骤：**
 
@@ -1841,7 +1835,7 @@ proxy_set_header X-Forwarded-For $remote_addr;
 # 2. 如果使用配对系统，确保你是已配对的 Owner 用户
 # 3. 通过 CLI 直接管理白名单
 openclaw approvals get
-openclaw approvals set <tool-name> --allow
+openclaw approvals set --file ./exec-approvals.json  # 先按官方格式准备并审查；命令allowlist也可用 approvals allowlist add
 ```
 
 ### Q83: 升级后启动变快了，是正常的吗？
