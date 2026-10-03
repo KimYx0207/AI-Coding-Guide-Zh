@@ -692,18 +692,18 @@ openclaw sessions list
 
 # 方案一：使用 /compact 命令手动压缩上下文
 # 在聊天界面中发送 /compact，OpenClaw 会自动压缩旧消息
-# 也可以配置自动压缩阈值：
+# 自动压缩默认启用。若要调整压缩时保留的近期对话预算：
 # 在 ~/.openclaw/openclaw.json 中设置：
 # {
 #   "agents": {
 #     "defaults": {
 #       "compaction": {
-#         "reserveTokensFloor": 20000
+#         "keepRecentTokens": 20000
 #       }
 #     }
 #   }
 # }
-# reserveTokensFloor 越大，压缩越激进
+# 这是近期对话保留预算，不是触发阈值；自动压缩还受输入、输出与工具预算约束。
 
 # 方案二：使用上下文窗口更大的模型
 # 不同 provider 的上下文窗口会随版本变化，先查当前 models 目录再设置
@@ -1357,12 +1357,11 @@ wc -l ~/.openclaw/workspace/MEMORY.md
 // ~/.openclaw/openclaw.json
 {
   "agents": {
-    "list": [
-      {
-        "id": "my-agent",
+    "entries": {
+      "my-agent": {
         "workspace": "~/.openclaw/workspace-my-agent"
       }
-    ]
+    }
   }
 }
 ```

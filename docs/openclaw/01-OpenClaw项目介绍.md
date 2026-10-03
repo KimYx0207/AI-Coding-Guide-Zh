@@ -1188,14 +1188,13 @@ OpenClaw 的配置不是孤立字段。每个字段背后都对应一个产品�
 ```json5
 {
   "agents": {
-    "list": [
-      {
-        "id": "docs-helper",
+    "entries": {
+      "docs-helper": {
         "workspace": "~/.openclaw/workspace-docs-helper",
         "model": "openai/gpt-5.2-mini",
         "skills": ["summarize"]
       }
-    ]
+    }
   },
   "bindings": [
     {

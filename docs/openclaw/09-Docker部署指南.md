@@ -214,7 +214,7 @@ services:
       - openclaw-workspace:/home/node/.openclaw/workspace
       - openclaw-auth-secrets:/home/node/.config/openclaw
     environment:
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:?Set OPENCLAW_GATEWAY_TOKEN in .env before initialization}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:18789/health').then(r => { if (!r.ok) process.exit(1) })"]
@@ -248,9 +248,9 @@ services:
       - openclaw-workspace:/home/node/.openclaw/workspace
       - openclaw-auth-secrets:/home/node/.config/openclaw
     environment:
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:?Set OPENCLAW_GATEWAY_TOKEN in .env before initialization}
       # 以下连接串仅供明确支持这些变量的自定义组件使用
-      - DATABASE_URL=postgresql://openclaw:${DB_PASSWORD}@postgres:5432/openclaw
+      - DATABASE_URL=postgresql://openclaw:${DB_PASSWORD:?Set DB_PASSWORD in .env for the advanced stack}@postgres:5432/openclaw
       - REDIS_URL=redis://redis:6379/0
       - NODE_ENV=production
       - LOG_LEVEL=info
@@ -275,7 +275,7 @@ services:
     container_name: openclaw-postgres
     environment:
       - POSTGRES_USER=openclaw
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:?Set DB_PASSWORD in .env for the advanced stack}
       - POSTGRES_DB=openclaw
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -318,11 +318,36 @@ networks:
 
 ### 启动和管理
 
-先在独立部署目录创建 `.env`，设置一个随机 Gateway token。已有 `.env` 时先保留并核对，下面的创建命令不要覆盖旧文件。基础示例只传入这个变量，模型认证由 onboarding 完成；按向导选择 token 认证。三个命名卷分别保存数据、workspace 和认证加密密钥。每份新部署只初始化一次；后续重建使用原来的卷。
+先在独立部署目录保存你选择的 `docker-compose.yml`，再准备同目录的 `.env`。已有 `.env` 时保留并核对，下面的命令不覆盖旧文件。两个版本都需要随机 Gateway token，模型认证由 onboarding 完成：
 
 ```bash
+set -eu
 umask 077
-[ -e .env ] || printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$(openssl rand -hex 32)" > .env
+if [ ! -e .env ]; then
+  gateway_token=$(openssl rand -hex 32)
+  printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$gateway_token" > .env
+  unset gateway_token
+fi
+```
+
+**选进阶版的读者，还要在首次启动前准备数据库密码。** PostgreSQL 空数据卷初始化要求 `POSTGRES_PASSWORD` 非空，本例通过 `DB_PASSWORD` 传入。基础版没有数据库，跳过这一小步即可。
+
+```bash
+set -eu
+umask 077
+if ! grep -Eq '^[[:space:]]*(export[[:space:]]+)?DB_PASSWORD[[:space:]]*[:=]' .env; then
+  db_password=$(openssl rand -hex 32)
+  printf '\nDB_PASSWORD=%s\n' "$db_password" >> .env
+  unset db_password
+fi
+```
+
+生成的十六进制密码可以直接放进本例的连接串。已有 `DB_PASSWORD` 不会被替换；已有数据库也不会因改 `.env` 自动改密码。若现有值为空，按原部署的凭据补齐，不要为了通过检查给已有数据库随意换密码。[官方 PostgreSQL 镜像说明](https://github.com/docker-library/docs/blob/master/postgres/README.md)解释了空卷初始化与已有数据的区别。
+
+两个版本准备好变量后，再按下面顺序检查、初始化。`config --quiet` 不输出配置内容；缺少或空的 token，或进阶版缺少或空的数据库密码，会在拉取和启动前报错。检查失败时先修 `.env`，不要继续 `up`。三个命名卷分别保存数据、workspace 和认证加密密钥，新部署只初始化一次，后续重建使用原来的卷。
+
+```bash
+docker compose config --quiet
 docker compose pull openclaw-gateway
 docker compose run --rm --no-deps --entrypoint node openclaw-gateway \
   dist/index.js onboard --mode local --no-install-daemon --gateway-auth token --gateway-token-ref-env OPENCLAW_GATEWAY_TOKEN
@@ -352,7 +377,7 @@ docker compose pull && docker compose up -d   # 更新镜像并重启
 
 ### .env 文件模板
 
-在 `docker-compose.yml` 同目录下创建 `.env` 文件：
+下面是字段说明模板。首次部署先按上文“启动和管理”准备并检查 `.env`；进阶版的 `DB_PASSWORD` 必须在第一次启动前就存在。不要用这份示例模板覆盖已有凭据：
 
 ```bash
 # ========== 核心配置 ==========
@@ -368,7 +393,7 @@ NODE_ENV=production
 # 日志级别：silent, fatal, error, warn, info, debug, trace
 LOG_LEVEL=info
 
-# ========== 可选 PostgreSQL 示例 ==========
+# ========== 仅进阶版必填：PostgreSQL 初始化密码 ==========
 DB_PASSWORD=your-strong-db-password
 
 # ========== 模型提供商 API Keys ==========
