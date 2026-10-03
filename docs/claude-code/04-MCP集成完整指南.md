@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级（有Claude Code基础即可）
-> - **更新日期**：2026年9月14日
-> - **适用版本**：MCP规范 2026-07-28 / Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：MCP规范 2026-07-28 / Claude Code v2.1.270 为 2026-09-14 的历史参考；截至 2026-10-03 的新增行为按正文标注版本与官方文档
 > - **前置要求**：已完成Claude Code安装和基础使用
 
 ---
@@ -827,7 +827,7 @@ Claude Code：
 
 **v2.1.121+ 新增：`alwaysLoad` 跳过懒加载**
 
-如果你的某个 MCP 服务器提供的工具几乎每次会话都会用到（比如 GitHub MCP），你可以在配置中设 `alwaysLoad: true`，让它的工具跳过 ToolSearch 延迟，始终立即可用：
+如果某个 MCP 服务器的工具几乎每次会话都会用到，可以设 `alwaysLoad: true`，通常让工具定义提前进入上下文，省去搜索发现的步骤。服务器仍需成功连接；从 v2.1.285 起，单个工具声明 `_meta["anthropic/alwaysLoad"]: false` 时，该工具仍会延迟加载：
 
 ```json
 {
@@ -842,7 +842,7 @@ Claude Code：
 }
 ```
 
-- `alwaysLoad: true`：工具定义直接注入上下文，无需 ToolSearch 搜索
+- `alwaysLoad: true`：通常提前加载该服务器的工具定义；单个工具显式声明 `_meta["anthropic/alwaysLoad"]: false` 时，仍通过工具搜索发现
 - 不设：沿用当前工具搜索策略
 - `alwaysLoad: false`：从 v2.1.287 起，让该服务器的全部工具通过工具搜索发现
 
@@ -874,6 +874,16 @@ Elicitation 是 MCP 协议的一项扩展能力——当 MCP 工具在执行过�
 - API 集成需要用户选择账户或填写缺失的必要参数
 
 > ⚠️ **版本要求**：需要 Claude Code v2.1.69+ 支持。Elicitation 请求可在 Hooks 系统中通过 `Elicitation` / `ElicitationResult` 事件进行拦截和自定义处理。
+
+**需要到浏览器完成时，用 URL 模式。** 服务器也可以请求你打开链接，在网页里完成登录或其他流程：
+
+1. 查看 Claude Code 显示的网址和用途，再决定是否打开。
+2. 在浏览器里完成操作；这一步不是在终端表单中输入答案。
+3. 如果服务器不能自动通知完成，回到 Claude Code，选择 **I'm done, continue**，工具调用才继续。v2.1.288 增加这段等待，避免网页还没完成就往下跑。
+
+v2.1.281 先支持 MCP 2026-07-28 连接的 URL 请求，v2.1.287 又补了2025-11-25协议。若服务器在此次升级后无法连接，官方发布记录给出了在该服务器配置项中设置 `"bareElicitationCapability": true` 的兼容办法；只在确认对应协议问题时使用，不要给全部服务器盲目加开关。
+
+普通OAuth认证也可能在一次工具调用中要求更多权限。看到重新认证提示时先检查新增 scope，再在 `/mcp` 中完成认证后重试；不要把所有这种情况当成 token 过期。表单与URL两种流程见[官方MCP交互请求](https://code.claude.com/docs/en/mcp#respond-to-elicitation-requests)，最近的等待/兼容变化见[官方2.1.287–288记录](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md#21288)。
 
 #### 远程 MCP 服务器
 
@@ -1308,6 +1318,8 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
 ---
 
 ## 第五部分：自定义MCP开发（进阶可选）
+
+先区分两种服务器：这里开发的是普通 MCP 服务器，用 stdio 或 HTTP 等传输连接；[Agent SDK章节](./09-Agent-SDK完整指南.md)的内置工具服务器则由宿主程序注册。从 v2.1.274 起，在 `.mcp.json`、settings、插件或agent定义文件里写 `"type": "sdk"` 会被跳过并给警告，不能用它代替宿主注册。
 
 > **本节目的**：学会开发自己的MCP服务器
 >
@@ -2322,7 +2334,7 @@ npm publish --access public
 > - [Claude Code文档](https://code.claude.com/docs/en/mcp) | 验证日期：2026-05-30
 
 **作者**：老金
-**更新日期**：2026年9月14日
+**更新日期**：2026年10月3日
 **版本**：V1.6（v2.1.270 release 摘录入差量）
 **字数统计**：约3,500行 / 28,000字
 **适用版本**：MCP规范 2026-07-28 / Claude Code v2.1.270

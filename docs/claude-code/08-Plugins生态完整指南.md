@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年9月14日
-> - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量和 v2.1.90+ 插件市场 env 说明保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：既有插件说明保留 v2.1.270 历史基线；Mods 练习需 v2.1.287+，代码的离线验证使用 v2.1.288。旧差量与插件市场 env 说明保留适用日期。
 
 ---
 
@@ -87,6 +87,8 @@
 
 > **2026-09-14 插件更新（v2.1.270 基线）**：v2.1.224 起支持通过 HTTPS zip 安装 archive 插件，并可选 SHA-256 固定校验；v2.1.232 起市场支持 GitLab 仓库，`/plugin install plugin@marketplace` 会先刷新市场。v2.1.233 起，`claude plugin validate` 还能检查 `.claude/skills` 目录。v2.1.269 新增 `claude plugin eval`，用于运行插件评测集并生成 JSON 和 HTML 报告；它会运行评测，先用 `claude plugin eval --help` 确认参数与所需环境，再按评测集说明执行。来源：[官方 changelog](https://code.claude.com/docs/en/changelog)。
 
+运行 `claude plugin eval` 前还要检查 `git --version`：v2.1.283 起，如果机器上安装了 Git，就需要 2.31 或更高版本；旧 Git 会使评测拒绝启动。这里讲的是 `plugin eval`，不能据此把所有插件安装都写成必须 Git 2.31。
+
 > **v2.1.139→v2.1.158 插件更新**：插件依赖会被强制检查；Marketplace / Browse / Details 会展示 commands、agents、skills、hooks、MCP/LSP servers、更新时间和 projected context cost；插件启用、禁用、安装、HTTPS clone 以及 root-level `SKILL.md` 暴露都有修复。v2.1.153 起 `github` / `git` marketplace source 可用 `skipLfs` 跳过 Git LFS 下载；无 GitHub SSH key 的环境可用 `CLAUDE_CODE_PLUGIN_PREFER_HTTPS` 优先 HTTPS clone。v2.1.154 起插件可在 `plugin.json` 或 marketplace entry 声明 `defaultEnabled: false`，由用户通过 `/plugin` 或 `claude plugin enable` 显式开启；Discover tab 也会根据当前目录给出 “suggested for this directory” 推荐。v2.1.157 起 `.claude/skills` 目录里的插件会自动加载，无需 marketplace；`claude plugin init <name>` 可直接脚手架新插件，`/plugin` 参数也会补全子命令、已安装插件和已知 marketplace 插件。企业环境还要看 `pluginSuggestionMarketplaces` allowlist，避免把未经允许的组织市场推荐给用户。教程中遇到插件清单差异时，以 `/plugin` 当前界面为准。
 
 ### 1.1 什么是Claude Code Plugin？
@@ -115,7 +117,13 @@ APP更新          | 市场插件用 /plugin 更新；开发目录才用 git pul
 
 ### 插件的新扩展方式：Mods
 
-v2.1.287（2026-10-01）新增 Claude Mods：插件可以用 mods 注册事件处理、界面面板、命令和工具调用规则。它适合需要更深行为或界面扩展的插件，普通 Markdown Skill 仍按原方式使用。先看[官方 Mods 概览](https://code.claude.com/docs/en/plugins/mods/overview)，核对客户端版本、运行环境和组织策略；本课的 Hello World 不依赖 Mods。
+Mods 是插件里的一种进程内扩展：它用 JavaScript 或 TypeScript 函数接住 Claude Code 的事件，可以计数、添加命令，也可以修改界面。比如，你想让工具调用次数一直显示在等待动画旁，就能用它实现。普通 Skill 仍然负责给 Claude 提供 Markdown 操作说明，现有插件和 settings hooks 也没有被替代。
+
+Mods 从 **v2.1.287** 起默认开启。官方 GitHub release 发布于北京时间 **2026年10月2日 02:00:22**，对应 UTC 10月1日 18:00:22；文档的10月1日与北京时间不是同一天。想自己做一个，可以直接跳到[4.5 工具计数练习](#45-做一个-mods让工具调用次数显示出来)。
+
+安装别人写的 Mod 前要看来源和代码：它以你的本机权限运行，没有被 Bash 沙箱隔离。它也可能在权限提示前批准工具调用，所以不能因为插件来自一个已添加的市场就直接信任。具体控制范围见[11 的 Mods 治理说明](11-企业实战完整指南.md#mods-的信任与组织控制)与[官方概览](https://code.claude.com/docs/en/plugins/mods/overview)。
+
+**想先看一个内置例子？** 官方同版新增了 `You should know`：它让旁路 Agent 在较长任务中观察有没有值得提醒你的遗漏，并在提示框上方给出说明。它默认关闭；官方发布时要求第一方会话且遥测开启，还要看组织是否提供。到 `/plugin` 的 Installed 页选择 Show disabled，找到 `cc-plugin-you-should-know` 后按需启用，也可以在会话里运行 `/plugin enable cc-plugin-you-should-know@builtin`。使用前确认是否接受其额外 Agent 活动和用量；不想继续用时回同一页禁用。没有列出该项，先查账号、组织和运行环境，不要为了出现入口就盲目改遥测设置。
 
 此外，v2.1.275 起，claude.ai 账号启用的 skills 和 plugins 可以同步到已登录的终端。需要关闭对应同步时，使用 `syncClaudeAiSkills: false` 或 `syncClaudeAiPlugins: false`。遇到“本地没有装却出现了资源”，先检查账号同步和 `/plugin`，再排查项目目录。
 
@@ -290,6 +298,8 @@ claude --plugin-dir .
 ### 3.3 管理已安装Plugins
 
 通过 marketplace 安装的插件，用 `/plugin` 或 CLI 管理，并注意安装作用域；不要直接修改其缓存目录。先在终端执行 `claude plugin list` 查看，再按需用 `claude plugin update <name>@<marketplace>` 或 `claude plugin uninstall <name>@<marketplace>` 操作。
+
+列表提示依赖没有安装完成时，先确认插件的来源与安装作用域，再运行 `claude plugin update <name>@<marketplace>` 重试未完成的安装。卸载后如果界面或 `--json` 结果提示数据被保留，先读原因：目录可能仍被其他已安装插件共用，也可能是安装记录无法读取。不要为了清理而直接删除共享缓存目录。
 
 下面的文件 / git 操作只适用于你自己克隆并通过 `--plugin-dir` 加载的开发目录：
 
@@ -502,6 +512,189 @@ You: /code-review-plugin:review
 | **版本管理** | 使用语义化版本号（SemVer），打git tag |
 | **最小依赖** | 尽量减少外部依赖，保持Plugin轻量 |
 | **安全第一** | 不在Plugin中硬编码密钥，使用环境变量 |
+
+### 4.5 做一个 Mods：让工具调用次数显示出来
+
+前面的 Hello World 是让 Claude 读一份 Markdown，按里面的说明回答。Mods 走的是另一条路：你写的 JavaScript 或 TypeScript 函数会在 Claude Code 内部运行，接住工具调用、命令执行或界面绘制等事件。比如，你想在 Claude 工作时看到它用了多少次工具，就可以让一个函数负责计数，另一个函数把数字画到界面上。
+
+这节做一个小型本地练习，不连接外部服务，也不调用额外模型。文件和输出都是教学用例；交互会话里真正让 Claude 读取文件，仍会使用你正常的模型额度。步骤参考[官方创建教程](https://code.claude.com/docs/en/plugins/mods/create)，先做出效果，再看每个函数负责什么。
+
+**先确认版本和运行位置。** 在终端运行 `claude --version`，这节需要 **v2.1.287 或更新版本**。Mods 默认开启，下面会使用自己写的插件目录。第一次做练习，建议使用普通终端里的 Claude Code，这样能同时看到命令和界面效果。
+
+| 运行位置 | Mods 的函数能否运行 | 能否看到 Mods 画的界面 |
+| --- | --- | --- |
+| 终端，包括编辑器集成终端和 JetBrains 插件 | 可以 | 可以 |
+| Claude Desktop 的 Code 页，非 WSL 会话 | 可以 | 可以，部分元素只支持终端 |
+| Desktop 的 WSL 会话 | 当前不可以，该环境不提供插件 | 不可以 |
+| VS Code 扩展的聊天面板 | 可以 | 不可以 |
+| `claude -p`、Agent SDK | 可以 | 不可以 |
+| Remote Control | 函数在本机会话运行 | 显示在本机终端，不搬到手机界面 |
+
+云会话还要看插件是否实际进入了该会话，不能看到本地安装成功，就假定云端也能加载。完整范围见[官方运行位置表](https://code.claude.com/docs/en/plugins/mods/overview#where-mods-run)。
+
+#### 如果想让 Claude 代写，先走这条短路线
+
+在允许 Mods 的交互会话里，你可以直接说“做一个 Mod，在提示框上方显示当前 Git 分支”，或先输入 `/plugin-authoring` 调用内置创建 Skill。Claude 会把文件放到 `~/.claude/dev-mods/<会话ID>/` 下的独立目录。在 `default`、`acceptEdits` 等需要批准受保护路径写入的模式中，逐个确认文件创建；第一次保存还会询问是否允许本会话热重载。
+
+选择 **Enable for this session** 后，Mod 在本轮结束时加载，以后每次修改也在轮次结束时重载；恢复同一会话时，这个选择仍有效。选择 **Not now** 只是不在当前加载，文件仍在，下次启动同一会话仍可能加载，不能把它当成永久禁用。用 `/plugin` 的 Installed 页核对加载状态并按需禁用；确认不再需要的练习文件，再删除对应 Mod 目录。
+
+这类 Mod 默认只跟随创建它的会话，还受 `cleanupPeriodDays` 清理期限影响。想保留或用于其他会话，先把它的目录复制到自己的固定位置，再用 `claude --plugin-dir <保存的Mod目录>` 启动。未受信任的工作目录、无法显示批准提示的 `-p` 或 `dontAsk` 会话，以及禁用 Mods 的会话，不会加载这条路线生成的 Mod。以上流程依据官方创建教程，本轮未执行模型生成；下面的手写工坊才是已做离线代码验证的例子。
+
+#### 第一步：准备三个文件
+
+在一个空的练习目录里，新建下面的结构。`guide-tool-counter` 是我们的插件名字，别放到你的真实业务项目里边改边试。
+
+```text
+guide-tool-counter/
+├── .claude-plugin/
+│   └── plugin.json
+└── hooks/
+    ├── hooks.json
+    └── register.js
+```
+
+macOS / Linux 的 Bash 或 Zsh：
+
+```bash
+mkdir -p guide-tool-counter/.claude-plugin guide-tool-counter/hooks
+```
+
+Windows PowerShell：
+
+```powershell
+New-Item -ItemType Directory -Force guide-tool-counter\.claude-plugin, guide-tool-counter\hooks
+```
+
+将下面内容分别保存为对应文件。文件名和目录要对上，尤其不要把 `hooks.json` 放进 `.claude-plugin`。
+
+**`guide-tool-counter/.claude-plugin/plugin.json`**：
+
+```json
+{
+  "name": "guide-tool-counter",
+  "version": "0.1.0",
+  "description": "本地练习：统计工具调用，并提供计数命令",
+  "author": { "name": "AI Coding Guide 教学示例" }
+}
+```
+
+**`guide-tool-counter/hooks/hooks.json`**：
+
+```json
+{
+  "description": "工具计数练习的函数入口",
+  "modules": ["./register.js"]
+}
+```
+
+`modules` 告诉 Claude Code 去哪里找函数文件，路径相对于这个 `hooks.json`。它是插件含有 Mod 的入口；不需要另装一个 npm SDK，也不需要构建项目，Claude Code 可以直接加载 `.js` 和 `.ts`。
+
+**`guide-tool-counter/hooks/register.js`**：
+
+```javascript
+let toolCount = 0
+
+export function register(on) {
+  on('session.start', async ($, event, next) => {
+    await $.command.register({
+      name: 'count-tools',
+      description: '查看本次加载以来的工具调用次数',
+    })
+    return next(event)
+  })
+
+  on('tool.call', async ($, event, next) => {
+    toolCount += 1
+    $.ui.invalidate('ui.render')
+    return next(event)
+  })
+
+  on('command.run', { command: 'count-tools' }, async () => {
+    return { text: '本次加载以来，工具调用次数：' + toolCount }
+  })
+
+  on('ui.render', { component: 'Spinner' }, async ($, event, next) => {
+    return next({
+      ...event,
+      props: { ...event.props, suffix: ' · 工具调用：' + toolCount },
+    })
+  })
+}
+```
+
+`register` 在 Mod 加载时运行，里面的 `on` 为四种事件登记函数。`session.start` 注册 `/count-tools`；`tool.call` 计数；`command.run` 回答我们自己的命令；`ui.render` 把数字加到等待动画旁边。`next(event)` 的意思是“继续原来的流程”，所以计数不会代替 Claude 的工具调用。只有自己的命令直接返回文本，不再交给 Claude 回答。
+
+#### 第二步：先检查，再加载
+
+回到 `guide-tool-counter` 的上一级目录，运行：
+
+```bash
+claude plugin validate ./guide-tool-counter
+```
+
+成功时会出现 `Validation passed`，并列出 `session.start`、`tool.call`、带 `count-tools` 筛选的 `command.run`、带 `Spinner` 筛选的 `ui.render`，以及 `$.command.register` 和 `$.ui.invalidate`。这些是**预期检查内容**，实际排版以你的版本为准。如果漏了某个事件，先改代码再加载。这个检查做静态分析，不运行 Mod，也不证明作者可信。
+
+然后启动交互会话：
+
+```bash
+claude --plugin-dir ./guide-tool-counter
+```
+
+接受练习目录的信任提示后，输入 `/plugin`，在 Installed 页确认插件加载。终端的 `mods active` 行应包含 `guide-tool-counter`；这行不计内置 Mods，因此不要拿它推断所有内置能力是否运行。
+
+先输入 `/count-tools`，它会直接打印当前次数。接着让 Claude “列出这个练习目录里的文件，并读取 plugin.json”，按普通会话的权限提示处理。它使用工具时，等待动画旁会出现“工具调用：1”等计数；结束后再输入 `/count-tools`，看到的数字取决于实际调用次数，不保证每次都一样。
+
+#### 第三步：改一处，观察热重载
+
+保持会话打开，用编辑器把 `register.js` 里的 ` · 工具调用：` 改成 ` · 已调用工具：`，保存文件。通过 `--plugin-dir` 加载的目录会被监听，转录里会提示插件已重载，之后的等待动画会使用新文字。
+
+重载会重新运行文件，`toolCount` 回到 `0`。这不是丢了会话历史，而是这个练习的数字只存在于当前代码的变量里。想跨重载保存状态，再看官方 `$.state` 的说明，不要为了保留一个练习计数就去读写真实业务文件。
+
+#### 第四步：不用登录，也能测试计数
+
+如果你想先验证函数，再进入真实会话，可以给它写一个离线测试。新建 `guide-tool-counter/tests/counter.test.ts`，内容如下：
+
+```typescript
+import { expect, test } from 'claude-code/testing'
+
+test('两次工具事件后，命令返回次数2', async ($, on) => {
+  on('tool.call', () => ({ result: '练习返回值' }))
+
+  await $.tool.call({ tool: 'Bash', command: 'echo demo' })
+  await $.tool.call({ tool: 'Read', file_path: 'README.md' })
+
+  const reply = await $.command.run({ command: 'count-tools', args: '' })
+  expect(reply.text).toBe('本次加载以来，工具调用次数：2')
+})
+```
+
+在插件目录里运行：
+
+```bash
+cd guide-tool-counter
+claude plugin test
+```
+
+这里用测试函数接住了工具调用，返回固定练习值，**不会执行 `echo demo`，也不会读取 README**。预期是 `1 pass`、`0 fail`。官方测试工具无需会话、登录或网络；它验证这两个事件经过计数函数后的结果，不等于真实模型或界面已经实测。更多测试方式见[官方测试教程](https://code.claude.com/docs/en/plugins/mods/test)。
+
+#### 第五步：停用并清理
+
+这个练习通过 `--plugin-dir` 只加载到本次会话。退出后，不带这个参数启动新会话，就不会再加载它。确认里面只有自己的练习文件，再删除 `guide-tool-counter` 目录即可。
+
+通过市场安装的 Mod 则到 `/plugin` 的 Installed 页禁用或卸载。如果你在终端安装或更新了市场插件，而会话还开着，用 `/reload-plugins` 加载更新；开发目录的热重载和市场插件更新不是同一步操作。
+
+#### 没显示效果，先查哪儿？
+
+| 现象 | 先检查什么 |
+| --- | --- |
+| 没有 `/count-tools` | 版本是否至少287；`--plugin-dir`是否指向插件根；`modules`路径及validate输出是否正确 |
+| 命令有结果，界面没有计数 | 是否运行在VS Code聊天面板、`-p`或SDK；这些环境不显示Mods界面 |
+| 改代码后数字回到0 | 本练习的变量在重载时重置，属于预期行为 |
+| 插件在列表里，Mod却没有加载 | 是否用了`--bare`、`--safe-mode`、`disableAllHooks`，或组织限制；不要通过跳过权限来解决 |
+
+Mods 的事件和 API 可能随版本变化。通过 `--plugin-dir` 加载或重载时，Claude Code 会把本版类型写入插件的 `.claude-plugin/types/`；这些类型比跨版本复制的代码更可靠。v2.1.288 又增加了 `$.ui.selection()`，用于读取全屏中最近选中的文本，这个增量不是本练习的前置要求。继续排障看[官方故障说明](https://code.claude.com/docs/en/plugins/mods/troubleshoot)。
+
+本节代码已使用官方 Claude Code v2.1.288 完成离线 `plugin validate` 和 `plugin test`，测试结果为 `1 pass、0 fail`。交互会话中的界面、权限提示和热重载流程依据官方文档说明，本轮未进行登录后的实跑。
 
 ---
 

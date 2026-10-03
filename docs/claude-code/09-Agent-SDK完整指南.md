@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：6-8小时
 > - **难度等级**：⭐⭐⭐ 中级进阶
-> - **更新日期**：2026年9月14日
-> - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：Claude Code v2.1.270 为 2026-09-14 的历史参考；截至 2026-10-03 的新增行为按正文标注版本与官方文档
 > - **信息来源**：[官方概览](https://platform.claude.com/docs/zh-CN/agent-sdk/overview)、[GitHub Python SDK](https://github.com/anthropics/claude-agent-sdk-python)、[GitHub TypeScript SDK](https://github.com/anthropics/claude-agent-sdk-typescript)
 
 > **版本说明**：Claude Agent SDK（原名Claude Code SDK）是2025年Anthropic官方发布的开发工具包。本教程基于最新官方文档编写，如有更新请以官方为准。
@@ -1409,7 +1409,7 @@ options = ClaudeAgentOptions(
 
 ### 5.3 权限控制
 
-Agent SDK提供多种权限控制方式，确保安全。
+Agent SDK提供多种权限控制方式，需要按任务明确选择。不要只根据交互终端的默认模式推断SDK：会拉取功能开关的SDK会话通常从 Manual 开始；第三方提供商或关闭遥测等不拉取功能开关的会话，从 v2.1.285 起通常从 auto 开始，组织策略可能改变结果。希望本章练习遵守正常权限规则时，显式设 `permission_mode="default"`，并用权限回调处理需要确认的操作。具体条件见[官方启动权限模式](https://code.claude.com/docs/en/permission-modes#which-mode-a-session-starts-in)。
 
 **权限模式**：
 
@@ -1735,7 +1735,9 @@ async for message in query(prompt="...", options=options):
 **答**：
 
 1. **使用后台运行的子代理**：在 `AgentDefinition` 中设置 `background=True`，并持续消费 SDK 的消息，直到取得任务的最终结果；后台执行仍依赖宿主进程与会话运行，不会自动变成跨进程的持久任务
-2. **设置合理的超时**
+2. **区分命令超时与后台时限**：v2.1.288 的 `-p`、SDK、CI、cloud等无人值守会话中，后台 Bash/PowerShell 默认30分钟；Claude在 `run_in_background` 中传入的 `timeout` 可以指定时限，通常最大2小时。前台命令超时后转后台时，从转移那刻再计时。终端、桌面与VS Code里的交互会话不受这个后台时限约束；v2.1.285–287曾对所有会话应用时限。
+
+   `--bare` 不运行后台任务，命令超时后停止。普通 `-p` 也会在最终结果后不久结束后台命令，不能收到一条结果就把宿主退出，再期待子任务继续完成。长任务要持续消费消息、拿到最终结果并负责停止/清理。完整规则见[官方后台命令时限](https://code.claude.com/docs/en/tools#time-limit-for-background-commands)。
 3. **使用异步并行**
 
 ```python

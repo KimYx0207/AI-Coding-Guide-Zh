@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐⭐⭐ 进阶
-> - **更新日期**：2026年9月14日
-> - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：Claude Code v2.1.270 为 2026-09-14 的历史参考；截至 2026-10-03 的新增行为按正文标注版本与官方文档
 > - **信息来源**：
 >   - [Claude Code 官方文档 - Channels](https://code.claude.com/docs/en/channels)
 >   - [Claude Code 官方文档 - Scheduled tasks](https://code.claude.com/docs/en/scheduled-tasks)
@@ -416,6 +416,14 @@ Channel 只在 Claude Code 会话运行时把事件送进会话。关闭会话�
 ### 9.3 `/schedule` 是什么
 
 `/schedule` 是当前用户入口，用来创建、更新、列出和运行 **Cloud scheduled tasks**。
+
+云 routine 的运行时间不等于精确计时器。新建计划默认会放在整点后几分钟；例如希望接近早上9点执行，可以选9:07，整点9:00的任务可能晚几分钟启动。保存后在详情中核对时区、下次运行时间和实际运行记录。这是云 routine 的排队行为，不改变前面本地 `CronCreate` 表达式的含义。
+
+Team / Enterprise 中，如果组织关闭 routines，成员不能新建，已有任务也停止运行。管理员开关在 **Admin settings → Capabilities → Remote sessions**；成员看到被组织禁用时，请管理员核对这个入口。详见[官方 routines 指南](https://code.claude.com/docs/en/routines)及[管理员入口变更](https://github.com/anthropics/claude-code/releases/tag/v2.1.280)。
+
+**云任务暂停后怎么恢复**：先在网页中打开对应 routine 的详情，查看提示和运行记录，再按原因处理。从 v2.1.274 起，GitHub 连接缺失或过期时会跳过运行，并保留最多 72 小时的恢复窗口；在窗口内重新连接 GitHub，任务会自行恢复。超过 72 小时仍未恢复连接，任务会关闭，需要重新连接后再打开详情页顶部的开关。
+
+订阅暂停是另一种情况：routine 会处于 on hold，订阅恢复后仍需要你到详情页把任务重新打开。不能把 GitHub 的恢复窗口套到订阅暂停上，也不要把云 routine 的恢复行为套到本地 `/loop`。恢复后打开运行记录读实际执行结果；绿色状态只说明会话没有基础设施错误，不保证提示词中的任务已经完成。详见[官方仓库连接说明](https://code.claude.com/docs/en/routines#repositories-and-branch-permissions)和[用量与订阅限制](https://code.claude.com/docs/en/routines#usage-and-limits)。
 
 但在**本地 session 里**，Claude 也会借助 `CronCreate / CronList / CronDelete` 做 session-scoped 的计划任务和提醒。
 

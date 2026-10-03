@@ -2,7 +2,7 @@
 
 本篇只解决一件事：把 **Codex App** 正确装好、登上号、打开本地项目，并跑通第一个安全任务。
 
-官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-09-13 可查官方文档、Codex App 26.908 与 Codex CLI 0.154.0 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。
+官方来源：OpenAI Codex App 文档、Codex changelog、[Codex App Windows](https://developers.openai.com/codex/app/windows)、[Codex Quickstart](https://developers.openai.com/codex/quickstart)、Codex CLI 文档。本篇按 2026-09-13 可查官方文档、Codex App 26.908 与 Codex CLI 0.154.0 修订；CLI 只用于辅助安装、自动化和排查，入口、包名和版本会变化，以官方页面和当前 App 为准。 2026-10-03 又核对了当前官方安装、认证与迁移入口；下面注明 9 月日期的版本说明保留为历史快照，不代表当前最新版本。
 
 > **2026-09-13 安装口径**：自 **App 26.707（2026-07-09）** 起，**Codex 已并入 ChatGPT 桌面 App**——安装 ChatGPT 桌面后即可在其中使用 Codex，并可把 Codex 设为默认视图；原有项目、设置、线程保留。26.727 补强了内置浏览器、Chrome 扩展（提及打开标签页 / 高亮文本）、多仓库 diff 审查和 Activity view。**App 26.908（2026-09-11）** 又加了悬浮 Pets 控件上的快速对话（`@` 带上下文、`$` 选 skill）、Windows 上同时按下两个 Alt 键截 Appshot、从会话的 Sources 面板直接打开文件、Codex Micro 的 Insert text、宠物一键恢复默认尺寸、听写遵循已保存的主语言，以及关闭浏览器标签时宽度和滚动位置的稳定性修复。登录方面，设备码登录现在会显示防钓鱼提示，macOS 助手已签名+公证，企业版支持管理员通过 managed policies 控制 in-app 更新。社区有报告 App 更新后偶发线程/项目数据丢失，**更新前建议手动备份本地线程和项目目录**，以本机版本和官方公告为准。
 
@@ -17,7 +17,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：2-3小时
 > - **难度等级**：⭐ 零基础入门
-> - **更新日期**：2026年9月13日
+> - **更新日期**：2026年10月3日
 > - **信息来源**：[Codex App Windows](https://developers.openai.com/codex/app/windows) | [Codex Quickstart](https://developers.openai.com/codex/quickstart) | Codex changelog | Codex CLI 文档（辅助）
 > - **前置要求**：无（本系列第一篇）
 
@@ -685,6 +685,16 @@ App 学习主线是使用 Codex App 登录与桌面工作流。API Key 更常见
 请先帮我区分是浏览器登录态、账号选择、网络访问还是企业策略问题。
 不要让我粘贴任何密钥。
 ```
+
+### 16.3 CLI 自定义 provider 的认证和凭据存放
+
+如果组织让 CLI 连接模型网关，先确认 `model_provider` 选中了正确的 provider，再按网关说明设置认证。`env_key = "COMPANY_MODEL_API_KEY"` 中写的是保存 API Key 的环境变量名称，不是密钥本身；该变量要在启动 CLI 的环境中可用。不要把真实密钥放进示例配置、聊天或仓库。
+
+CLI v0.160.0 明确说明：`requires_openai_auth = true` 的 provider 使用 OpenAI 登录流程，缓存凭据按 `cli_auth_credentials_store` 选择后端，不一定写入 `auth.json`。`file` 使用 `CODEX_HOME/auth.json`，`keyring` 使用系统凭据库且不可用时失败，`auto` 在凭据库不可用时回退到文件，`ephemeral` 仅在当前进程内保存。排障时核对配置和认证方式，不因找不到 `auth.json` 就断定没有登录，也不要打印或分享缓存内容；管理员下发的认证要求仍然生效。依据：[认证与凭据存放](https://learn.chatgpt.com/docs/auth)、[v0.160.0 说明修正](https://github.com/openai/codex/pull/49118)。
+
+### 16.4 看到账号安全设置提醒时
+
+CLI v0.159.3 起，使用 OpenAI provider、以 ChatGPT 登录的符合条件的本地会话可能显示可关闭的账号安全设置横幅。需要处理时，通过横幅的浏览器动作打开 `https://chatgpt.com` 上的官方设置页面；也可以关闭提醒。是否出现由服务端资格和 rollout 决定，它不是 API Key 登录的必经步骤，没有横幅也不代表登录失败或安全设置已全部完成。依据：[v0.159.3](https://github.com/openai/codex/releases/tag/rust-v0.159.3)、[提醒的账号与链接校验](https://github.com/openai/codex/pull/49744)。
 
 ## 17. 第一个项目应该怎么选
 

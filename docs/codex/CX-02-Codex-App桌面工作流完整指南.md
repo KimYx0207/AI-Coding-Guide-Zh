@@ -15,7 +15,7 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：3-4小时
 > - **难度等级**：⭐ 零基础入门
-> - **更新日期**：2026年9月14日
+> - **更新日期**：2026年10月3日
 > - **信息来源**：OpenAI Codex App Features、Settings、Review、Automations、MCP、Skills、Plugins 官方文档
 > - **前置要求**：已完成 [CX-01 Codex App 安装与认证](./CX-01-Codex-App安装与认证完整指南.md)
 
@@ -599,6 +599,12 @@ Windows Computer Use 在当前活动桌面前台运行，任务会控制鼠标�
 连接后可以从手机选项目、发任务、补充指令、查看 diff 和处理审批。主机必须保持开机、联网、App 运行；睡眠或关闭 App 会中断访问。任务使用主机的文件、工具、连接和权限，不会因为从手机发起就变成 Codex Cloud。Windows Computer Use 还需要主机会话解锁，并为任务保留前台桌面。
 
 项目已在 SSH 主机时，先确认普通 SSH 能连上、远程登录 shell 的 PATH 中有已安装并认证的 Codex，再从 App **Settings → Connections** 添加主机和项目。跨主机 **Hand off** 要求目标保存同一个 Git 仓库项目；该操作不能把聊天直接 Hand off 到 Codex Cloud 环境。详见 [Remote connections](https://learn.chatgpt.com/docs/remote-connections)。
+
+#### Remote 的 iPad 查看方式与连接排障
+
+2026 年 9 月 23 日的 iOS 1.2026.258 公告加入了 iPad 横屏分栏：从 **Codex** 打开已连接主机上的任务时，任务列表可留在旁边，便于切换和查看当前任务。该版还支持浏览嵌套 Git 仓库中的改动。打开任务的更改文件和 diff 后，先确认文件属于父仓库还是嵌套仓库，再决定提交范围；查看支持不代表两层仓库会自动合成一次提交。
+
+配对失败时，先更新手机与主机 App，核对两端账号和 workspace，并检查设备的日期、时间与时区是否准确；设备时钟错误是该公告明确修复的一类原因。SSH 项目连不上时，先在运行 App 的主机确认普通 SSH 可以连接，再检查远程用户的登录 shell 是否能找到已安装并认证的 `codex`；Mac / Linux 的 SSH 连接问题也是该版修复范围。回到 **Settings → Connections** 重新连接并查看错误，仍失败时按具体错误排障，不通过关闭认证或公开 app-server 端口绕过。依据：[9 月 23 日移动端发布记录](https://learn.chatgpt.com/docs/changelog#codex-2026-09-23-mobile)、[Remote connections](https://learn.chatgpt.com/docs/remote-connections)。
 
 ### 13.7 需要使用日常浏览器的登录状态时
 

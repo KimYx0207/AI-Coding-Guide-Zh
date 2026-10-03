@@ -9,8 +9,8 @@
 > - **个人博客**：https://aiking.dev
 > - **预计学时**：4-6小时
 > - **难度等级**：⭐⭐ 入门级
-> - **更新日期**：2026年9月14日
-> - **适用版本**：Claude Code v2.1.270（验证于 2026-09-14；旧差量保留为历史基线）
+> - **更新日期**：2026年10月3日
+> - **适用版本**：Claude Code v2.1.270 为 2026-09-14 的历史参考；截至 2026-10-03 的新增行为按正文标注版本与官方文档
 > - **信息来源**：[内置命令参考](https://code.claude.com/docs/en/commands) | [Skills 官方文档](https://code.claude.com/docs/en/slash-commands) | [Claude Command Suite](https://github.com/qdhenry/Claude-Command-Suite) | [最佳实践](https://www.anthropic.com/engineering/claude-code-best-practices)
 > - **前置要求**：已完成Claude Code安装和基础使用
 
@@ -458,7 +458,7 @@ You: /hello
 
 > **2026-05-30 版本差异速览（v2.1.158）**：当前稳定版新增 Opus 4.8 与 `/effort xhigh`，`/workflows` 可查看 dynamic workflows 后台编排，`claude agents` 支持用 `! <command>` 或 `claude --bg --exec '<command>'` 启动可附着/可分离的后台 shell 会话。v2.1.157 还补了 `/plugin` 参数补全、`/terminal-setup` 对 IDE 终端 GPU 加速的处理，以及 workflow 关键词触发开关；`/simplify` 现在是清理型 review，不再等同于完整 `/code-review --fix`，代码缺陷审查仍以 `/code-review` 为主路径。
 
-> **2026-09-14 当前基线（v2.1.270）**：`/diff` 在 v2.1.260 增强了全屏侧栏；新增的 `/skill-doctor` 用于查看 Skill 使用情况与上下文占用。`/output-style [name]` 可以列出和切换输出风格，`/advisor` 支持文本形式 `/advisor`、`/advisor <model>`、`/advisor off`。在 `/effort` 选择器里按 `s` 可只改当前会话。`/review` 自 v2.1.223 起是 `/code-review` 的别名；`/ultrareview --post` 会直接发送 PR 评论，使用前要确认允许对外发布。插件作者还可使用 `claude plugin eval` 跑评测集并生成 JSON 与 HTML 报告，具体参数先查 `claude plugin eval --help`。来源：[官方 changelog](https://code.claude.com/docs/en/changelog)。
+> **2026-09-14 当前基线（v2.1.270）**：`/diff` 在 v2.1.260 增强了全屏侧栏；新增的 `/skill-doctor` 用于查看 Skill 使用情况与上下文占用。`/output-style [name]` 可以列出和切换输出风格，`/advisor` 支持文本形式 `/advisor`、`/advisor <model>`、`/advisor off`。在 `/effort` 选择器里按 `s` 可只改当前会话。`/review` 自 v2.1.223 起是 `/code-review` 的别名；交互运行 `/ultrareview <PR编号> --post` 会预选把完成的发现发送为 PR 评论，仍需启动确认；默认不发布，只对 `github.com` PR 目标支持这项发布。插件作者还可使用 `claude plugin eval` 跑评测集并生成 JSON 与 HTML 报告，具体参数先查 `claude plugin eval --help`。来源：[官方 changelog](https://code.claude.com/docs/en/changelog)。
 
 > **本节说明**：这一节是参考表，不建议第一次学习时逐行阅读。你已经在第二部分创建过一个能运行的命令；如果目标是继续实操，可以直接跳到「第四部分：自定义命令开发」。需要查命令时再回来看这张表。
 >
@@ -504,7 +504,7 @@ You: /hello
 |                      | `/code-review`      | 代码审查与正确性问题报告，可指定 effort | 审 PR / 提交前检查 |      |
 |                      | `/batch`         | 大规模并行改造  | 多 worktree/多 agent |      |
 |                      | `/autofix-pr`    | 远程盯 PR 并修 CI/评论 | PR 修复循环 |      |
-|                      | `/ultrareview`   | 云端多 Agent 深度审查（v2.1.222 起 ultraplan 已移除，深度审查走 `/code-review`） | 高风险 PR |      |
+|                      | `/ultrareview`   | 云端多 Agent 深度审查；主入口 `/code-review ultra`，账号支持时 `/ultrareview` 为别名 | 高风险 PR |      |
 |                      | `/ultraplan`     | ~~云端深度计划~~（v2.1.222 已移除，改用 `/plan`）  | ~~复杂方案设计~~   |      |
 |                      | `/diff`          | 全屏实时查看未提交改动（v2.1.260+） | 边聊边看 diff |      |
 |                      | `/skill-doctor`  | 查没被用到的 Skill 和上下文占用（v2.1.261+） | Skill 排障 |      |
@@ -666,7 +666,9 @@ You: /powerup
 }
 ```
 
-它不会把整个机器变成只读，也不会限制读取仅发生在某个目录内。`allowRead` 用来重新开放较宽拒绝区域中的具体路径；`allowWrite` 可以扩大默认写入范围。还要核对额外工作目录、排除命令和允许脱离沙箱重试的设置，详见 [官方沙箱说明](https://code.claude.com/docs/en/sandboxing)。
+它不会把整个机器变成只读，也不会限制读取仅发生在某个目录内。`allowRead` 可以在普通路径规则中重新开放较宽拒绝区域里的具体路径；`allowWrite` 可以扩大默认写入范围。组织托管规则另有边界：项目设置不能关闭管理员强制启用的沙箱，也不能重新开放管理员拒绝读取的路径、扩大严格的允许名单，或替换受管拒绝名单背后的代理。
+
+排除命令也要检查设置来源。v2.1.282 起，托管设置或显式 `--settings` 把 `allowUnsandboxedCommands` 设为 `false` 时，项目和本地设置里的 `sandbox.excludedCommands` 不会作为绕过入口；管理员启用 `allowManagedDomainsOnly` 时也有相同限制。看到命令被阻止，先检查 `/sandbox` 的实际状态和组织配置，再请管理员调整需要的例外。详见 [官方沙箱说明](https://code.claude.com/docs/en/sandboxing)及[2.1.282/285 的策略变化](https://github.com/anthropics/claude-code/releases/tag/v2.1.285)。
 
 #### /color - 会话颜色设置
 
@@ -693,6 +695,44 @@ You: /powerup
 **一句话理解**：就像Git分支——在当前对话点"分叉"，探索不同方案而不影响原对话。
 
 > 💡 **提示**：这是原 `/fork` 命令的重命名版本。适合在关键决策点创建分支，分别尝试方案A和方案B。
+
+---
+
+### 本地代码审查：控制报告数量
+
+先检查 `git diff`，再运行本地审查。v2.1.288 起可以调整报告数量：
+
+```text
+/code-review --max-findings 5
+/code-review --max-findings all
+/code-review --max-findings default
+```
+
+`5` 设定数量，`all` 请求不按通常上限截断，`default` 恢复默认；选择会在后续审查中复用，直到你重设。它控制报告数量，不保证找到所有错误。需要更多背景时还可以明确 PR、分支或路径；只有要实际修复、发送评论时才另选 `--fix` 或 `--comment`。`/review` 是同一入口的别名，详见[官方命令参考](https://code.claude.com/docs/en/commands)。
+
+### 云端深度审查：启动前先确认上传范围
+
+官方推荐用 `/code-review ultra` 启动云端深度审查；账号支持时，`/ultrareview` 是别名。云端运行需要用 claude.ai 账号登录，仅用 API Key 时先通过 `/login` 登录；Bedrock、Google Cloud Agent Platform、Foundry 和启用 Zero Data Retention 的组织不能使用云端 Ultrareview。不可用时，`/code-review ultra` 会改为本地审查，不能只凭命令已运行判断云端启动成功。准备启动云端审查时，先按下面几步检查：
+
+1. **先看本地改动**：用 `git status --short`、`git diff`、`git diff --cached` 查看工作区和暂存区。审查本地分支会上传仓库状态，可能包含未提交、已暂存的已跟踪文件改动；完整克隆还会带上各分支的仓库历史。普通未跟踪文件不随 bundle 上传，但这不是适合保存私人资料的隔离机制。审查明确的 PR 目标时，官方说明不会上传本机内容。
+2. **核对平台条件**：macOS、Linux 和 WSL 的本地上传需要 Git 2.31+，可先用 `git --version` 查看；不支持的检出布局会直接拒绝上传。这些平台不会上传部分凭据类文件的未提交改动，但已提交版本仍可能进入云端。原生 Windows 的已跟踪文件未提交改动会按原样上传，不因文件名像 `.env` 或密钥而自动排除。只在确认上传内容符合你的项目与组织要求后继续。
+3. **读启动确认框**：交互启动会显示审查范围、剩余免费次数和预计费用；分支审查还有文件数与行数。这个摘要不是完整文件预览。不确定范围或费用时取消启动，确认后审查在后台运行。
+4. **查看和停止**：输入 `/tasks`，打开该审查的详情查看状态，必要时停止。停止后不会返回部分发现；云会话已开始时，提前停止仍会消耗免费次数，付费运行按已经执行的部分收费。
+
+上传范围的提示在 v2.1.283 增补，macOS/Linux 的 Git 2.31 门槛在 v2.1.285 明确。详细例外与检出布局见[官方本地仓库上传规则](https://code.claude.com/docs/en/claude-code-on-the-web#send-local-repositories-without-github)；确认、费用和停止流程见[官方 Ultrareview 指南](https://code.claude.com/docs/en/ultrareview)。
+
+### 后台观察：Monitor 是工具，不是 `/monitor` 命令
+
+当你想继续聊天，同时观察日志、CI状态或文件变化，可以让 Claude 使用 Monitor。先准备项目里的 `logs/dev.log`，然后提出明确的观察任务：
+
+```text
+请用 Monitor 观察 logs/dev.log，持续5分钟。
+每次出现 ERROR，只报告新日志内容，先不要修改代码。
+```
+
+确认工具调用后，在编辑器里给这个文件追加一行 `ERROR: 这是观察测试` 并保存，检查 Claude 是否收到新事件。停止时直接说“停止刚才的日志观察”。能否使用取决于当前环境：Windows需要 Git Bash；Bedrock、Google Cloud Agent Platform、Foundry及关闭相应遥测/非必要流量时不可用。
+
+每个观察都有期限，默认5分钟、最长30分钟；单提示的 `-p` 调用最长10分钟。到期会结束并通知 Claude，需要时重新开始，不是一个永久运行的 `persistent` 任务。运行命令时遵守 Bash 权限规则，也可以观察受支持的 WebSocket；它和 `/loop`、`/schedule` 的定时检查用途不同。详见[官方 Monitor 工具](https://code.claude.com/docs/en/tools#monitor-tool)。
 
 ---
 
