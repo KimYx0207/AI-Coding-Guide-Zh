@@ -3010,7 +3010,7 @@ exit 0
 ### 社区资源
 
 - [ClaudeLog Hooks教程](https://claudelog.com/mechanics/hooks/)
-- [GitButler Claude Code Hooks集成](https://docs.gitbutler.com/features/ai-integration/claude-code-hooks)
+- [GitButler Agent 集成](https://docs.gitbutler.com/ai-agents/getting-started)：按当前官方支持配置 Agent 集成，旧 Hooks 专页已移除。
 - [Awesome Claude Code](https://github.com/hesreallyhim/awesome-claude-code)
 
 ### 相关课程
