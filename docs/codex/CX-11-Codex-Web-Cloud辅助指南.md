@@ -827,7 +827,7 @@ Cloud 的安全重点是区分程序可读的环境变量与代理替换的 Netw
 不要在 agent prompt 里粘贴 secret。
 不要在 setup script 里 echo secret。
 不要让测试把 secret 打到失败日志。
-agent 阶段如果需要长期配置，用 environment variable，而不是 setup export。
+程序需要直接读取的普通配置用 Environment variables，不靠安装 shell 的临时 export。发给指定 HTTPS 服务的敏感凭据用 Network secrets，并核对允许域名。
 ```
 
 ### 20.2 外部 API 测试

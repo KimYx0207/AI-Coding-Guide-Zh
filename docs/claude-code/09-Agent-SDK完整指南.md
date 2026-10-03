@@ -1829,21 +1829,26 @@ asyncio.run(run())
 **答**：支持。运行时会保存会话，你可以取得 `session_id`，再通过 `resume` 接着运行。
 
 ```python
+import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions, ResultMessage
 
-session_id = None
-async for message in query(prompt="先概括当前项目", options=ClaudeAgentOptions()):
-    if isinstance(message, ResultMessage):
-        session_id = message.session_id
+async def main():
+    session_id = None
+    async for message in query(prompt="先概括当前项目", options=ClaudeAgentOptions()):
+        if isinstance(message, ResultMessage):
+            session_id = message.session_id
 
-if session_id is None:
-    raise RuntimeError("没有取得会话 ID，请先检查上一轮结果")
+    if session_id is None:
+        raise RuntimeError("没有取得会话 ID，请先检查上一轮结果")
 
-async for message in query(
-    prompt="继续，列出最值得优先检查的模块",
-    options=ClaudeAgentOptions(resume=session_id),
-):
-    print(message)
+    async for message in query(
+        prompt="继续，列出最值得优先检查的模块",
+        options=ClaudeAgentOptions(resume=session_id),
+    ):
+        print(message)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 保存 ID 方便再次恢复，但会话文件还须存在。把消息转成 `str` 存进 JSON 可以做日志，不能替代运行时的会话状态。保存范围、继续 / 分叉行为和存储位置请看官方会话文档。
@@ -1886,22 +1891,30 @@ options = ClaudeAgentOptions(model='claude-sonnet-5')
 
 ### Q17: 如何测试自定义工具？
 
-**答**：单独测试工具函数：
+**答**：先沿用本章 3.3 节定义的 `calculate` 和 `my_tools`，再把下面的测试入口放在它们之后。直接调用 handler 只测试函数；后半段会调用模型，需要已配置认证并消耗额度。
 
 ```python
-# 直接调用测试
-result = await calculate.handler({"expression": "2+2"})
-print(result)  # 应该输出 {"content": [{"type": "text", "text": "2+2 = 4"}]}
+import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
 
-# 然后在Agent中测试
-async for message in query(
-    prompt="请计算 2+2",
-    options=ClaudeAgentOptions(
-        mcp_servers={"tools": my_tools},
-        allowed_tools=["mcp__tools__calculate"]
-    )
-):
-    print(message)
+async def test_calculator():
+    # 3.3 节的 calculate 返回“计算结果：4”
+    result = await calculate.handler({"expression": "2+2"})
+    print(result)
+    assert result == {"content": [{"type": "text", "text": "计算结果：4"}]}
+
+    # 再通过模型验证工具发现与调用
+    async for message in query(
+        prompt="请使用 calculate 工具计算 2+2",
+        options=ClaudeAgentOptions(
+            mcp_servers={"tools": my_tools},
+            allowed_tools=["mcp__tools__calculate"],
+        ),
+    ):
+        print(message)
+
+if __name__ == "__main__":
+    asyncio.run(test_calculator())
 ```
 
 ---

@@ -1066,8 +1066,8 @@ Final human action:
 
 ```text
 1. 降频或停用。
-2. 改 prompt：无发现自动归档。
-3. 增加 Triage owner。
+2. 改 prompt：没有明确发现时不通知；在 Scheduled 中检查几次实际运行，确认降噪效果。
+3. 指定结果审阅负责人。
 4. 一周后复查。
 ```
 

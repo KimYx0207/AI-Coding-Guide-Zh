@@ -150,9 +150,9 @@ Agent 之间默认没有任何共享：
 |------|----------|------|
 | 工作空间 | 否 | 每个 Agent 有独立的工作目录 |
 | 记忆文件 | 否 | 每个 Agent 有独立的 MEMORY.md 和日志 |
-| 记忆后端 | 可选 | 可配置 Builtin(SQLite)、QMD、Honcho 等后端 |
+| 记忆后端 | 可选 | 内置 SQLite；插件方案按所用版本与插件说明配置，v2026.9.4 已移除 QMD |
 | 会话历史 | 否 | 每个 Agent 的对话记录完全隔离 |
-| 认证凭证 | 否 | 每个 Agent 的 auth-profiles.json 独立 |
+| 认证凭证 | 按认证流程 | 每个 Agent 有自己的 SQLite auth store；同名 OAuth profile 可按规则读取 main 的新凭据 |
 | 技能配置 | 可选 | 可以配置 Agent 级别的技能白名单 |
 | AI 模型 | 可选 | 可以为每个 Agent 指定不同的模型 |
 
@@ -217,7 +217,7 @@ openclaw agents add work
 # 每个 Agent 会自动创建：
 # - 独立的工作空间（SOUL.md, AGENTS.md, USER.md）
 # - 独立的 agentDir 和会话存储
-# - 独立的 auth-profiles.json
+# - 独立的 SQLite runtime store（模型认证与会话状态）
 ```
 
 ### 查看和管理 Agent
@@ -560,7 +560,7 @@ work Agent → 你：已创建 PROJ-101, PROJ-102, PROJ-103
 {
   "cron": {
     "enabled": true,
-    "store": "file",
+    // 省略 store，使用当前版本默认存储；它不是 file 后端枚举
     "maxConcurrentRuns": 2,
   },
 }
@@ -570,53 +570,31 @@ work Agent → 你：已创建 PROJ-101, PROJ-102, PROJ-103
 
 ```bash
 # 添加定时任务
-openclaw cron add --name "research-phase" --cron "0 9 * * 1-5" \
+openclaw cron add --tz Asia/Shanghai --name "research-phase" --cron "0 9 * * 1-5" \
   --agent research --message "搜索今天的行业新闻，整理成摘要，保存到 ~/.openclaw/shared/daily-news.md"
 
-openclaw cron add --name "writing-phase" --cron "30 9 * * 1-5" \
+openclaw cron add --tz Asia/Shanghai --name "writing-phase" --cron "30 9 * * 1-5" \
   --agent writer --message "读取 ~/.openclaw/shared/daily-news.md，基于今天的新闻写一篇简报，发送到 Slack #news 频道"
 
 # 列出所有定时任务
 openclaw cron list
 
 # 删除定时任务
-openclaw cron rm research-phase
+openclaw cron list
+openclaw cron rm <job-id>  # 替换成列表中的实际 ID
 ```
 
-**方式四：通过 HTTP 请求触发**
+**方式四：通过支持的入口触发**
 
-一个 Agent 完成任务后，可以通过 Gateway 的 HTTP API 触发另一个 Agent。在 coding Agent 的技能中，完成审查后通过 HTTP 请求触发 writer Agent：
-
-```markdown
-## 审查完成后
-
-1. 把审查结果保存到 ~/.openclaw/shared/review-result.json
-2. 通过 HTTP 请求通知 Gateway: POST http://localhost:18789/api/message
-   发送消息给 writer Agent，提示它读取审查结果并生成报告
-```
+需要从外部系统触发指定 Agent 时，使用官方 inbound webhook 的 `/hooks/agent`，先配置 hooks token、允许的 agent ID 和对应访问策略；或者使用已经授权的 `sessions_send` 工作流。`POST /api/message` 不是这里可直接使用的 Gateway 接口。不要把 Gateway token 和 hooks token 混用，实际请求字段按 [官方 webhook 文档](https://docs.openclaw.ai/automation/webhook)准备。
 
 ## 消息路由和绑定配置
 
 ### 路由规则详解
 
-Gateway 收到消息后，按以下顺序匹配 Agent：
+Gateway 按绑定的匹配精度选择 Agent：具体 peer 规则比 guild/team、账号或整个通道的规则更具体；同等精度时按 bindings 顺序匹配。未匹配时回到配置的默认 Agent。私聊也可以通过 direct peer 绑定，不能认定所有私聊必定进入 main。Agent 名单顺序不是绑定优先级。
 
-```
-消息进来
-    │
-    ▼
-1. 检查 bindings 配置
-   ├── 匹配到 → 路由到对应 Agent
-   └── 未匹配 → 继续
-    │
-    ▼
-2. 检查是否是私聊
-   ├── 是 → 路由到 main Agent（默认）
-   └── 否 → 继续
-    │
-    ▼
-3. 回退到默认 Agent（main）
-```
+用 `openclaw agents list --bindings` 核对实际绑定，再从目标通道发一条测试消息。配置能解析不等于收到的 peer ID 正确。
 
 ### 绑定类型
 
@@ -665,7 +643,7 @@ Gateway 收到消息后，按以下顺序匹配 Agent：
 ```
 
 - `chatId` -- Telegram 群组 ID（负数开头）
-- 私聊默认走 main Agent，不需要绑定
+- 未匹配私聊走所配置默认 Agent；需要按联系人区分时增加 kind 为 direct 的 peer 绑定。
 
 **Slack 绑定：**
 
@@ -1117,11 +1095,11 @@ openclaw agents add writer
 通过 CLI 添加定时任务来串联两个 Agent：
 
 ```bash
-openclaw cron add --name "translate-new-content" --cron "0 10 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "translate-new-content" --cron "0 10 * * *" \
   --agent translator \
   --message "检查 ~/.openclaw/shared/drafts/ 目录，翻译所有新的中文稿件，保存到 ~/.openclaw/shared/translations/"
 
-openclaw cron add --name "polish-translations" --cron "0 11 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "polish-translations" --cron "0 11 * * *" \
   --agent writer \
   --message "检查 ~/.openclaw/shared/translations/ 目录，润色所有新的翻译稿，保存到 ~/.openclaw/shared/published/"
 ```
@@ -1255,15 +1233,15 @@ openclaw agents add reviewer
 通过 CLI 添加定时任务来串联三个 Agent：
 
 ```bash
-openclaw cron add --name "weekly-research" --cron "0 9 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-research" --cron "0 9 * * 1" \
   --agent researcher \
   --message "进行本周的 AI 行业研究，收集最新动态、融资信息、产品发布，保存到 shared/research/"
 
-openclaw cron add --name "weekly-report" --cron "0 14 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-report" --cron "0 14 * * 1" \
   --agent report-writer \
   --message "基于 shared/research/ 中的资料，撰写本周 AI 行业研究报告，保存到 shared/reports/"
 
-openclaw cron add --name "weekly-review" --cron "0 16 * * 1" \
+openclaw cron add --tz Asia/Shanghai --name "weekly-review" --cron "0 16 * * 1" \
   --agent reviewer \
   --message "审核 shared/reports/ 中最新的报告草稿，生成审核报告保存到 shared/reviews/"
 ```
@@ -1651,30 +1629,19 @@ allowlist 中的工具是 Agent 在沙箱中可以调用的全部工具。denyli
 
 ### 认证隔离
 
-每个 Agent 的认证凭证是独立的：
+v2026.9.4 的模型认证资料存放在各 Agent 的 `<agentDir>/openclaw-agent.sqlite`。旧 `auth-profiles.json` 是迁移来源，不能当作当前凭据共享接口直接复制。
 
-```
-~/.openclaw/agents/<agentId>/agent/auth-profiles.json
-```
-
-main Agent 的 Google 凭证不会自动共享给 coding Agent。如果 coding Agent 也需要访问 Google，需要单独认证：
+非主 Agent 的同名 OAuth profile 在自身凭据过期或刷新失败时，可以读取 main 的更新凭据；因此“每个 Agent 的 OAuth 完全独立”并不准确。需要独立账号时，从目标 Agent 的认证流程登录。模型 provider 认证、gog 的 Google Workspace 授权和 gh 的 GitHub 授权是不同流程，不能互相替代。
 
 ```bash
-# 为 coding Agent 认证 Google
-openclaw models auth login --provider google --agent coding
+# 查看目标 Agent 的认证状态；不要输出或复制凭据内容
+openclaw models status --agent coding
 
-# 为 coding Agent 认证 GitHub
-openclaw models auth login --provider github --agent coding
+# GitHub 技能由 gh 管理认证，使用目标运行环境的 gh
+gh auth status
 ```
 
-如果你确实需要共享凭证，可以手动复制：
-
-```bash
-cp ~/.openclaw/agents/main/agent/auth-profiles.json \
-   ~/.openclaw/agents/coding/agent/auth-profiles.json
-```
-
-但不推荐这样做 -- 独立认证更安全，而且可以为不同 Agent 使用不同的账号。
+不要复用多个 Agent 的 agentDir，也不要复制 OAuth refresh token 或正在使用的 SQLite 文件。静态 key 的共享也应按实际 SecretRef 或认证管理流程处理。
 
 ## Agent 性能监控
 
@@ -1917,11 +1884,11 @@ journalctl --since "1 hour ago" --priority err --no-pager | tail -20
 通过 CLI 添加定时任务：
 
 ```bash
-openclaw cron add --name "health-check" --cron "*/30 * * * *" \
+openclaw cron add --tz Asia/Shanghai --name "health-check" --cron "*/30 * * * *" \
   --agent devops \
   --message "执行服务器健康检查，如果发现异常，通过 Slack 通知 #ops 频道"
 
-openclaw cron add --name "daily-report" --cron "0 18 * * *" \
+openclaw cron add --tz Asia/Shanghai --name "daily-report" --cron "0 18 * * *" \
   --agent devops \
   --message "生成今日运维日报，发送到 Slack #ops 频道"
 ```
@@ -2108,7 +2075,7 @@ openclaw gateway --port 18789
 
 ### Q4：删除 Agent 会丢失数据吗？
 
-删除 Agent 会移除 Agent 的状态目录（`~/.openclaw/agents/<agentId>/`），但不会删除工作空间目录。你的 SOUL.md、记忆文件、技能文件都还在。如果要彻底清理，需要手动删除工作空间目录。
+`openclaw agents delete <id>` 会从配置中删除 Agent，并处理对应 workspace、Agent 状态和会话目录，通常移到 Trash。执行前核对实际路径和备份，不能假定工作区会原地保留；路径清理失败时按命令报告处理。
 
 ### Q5：多个 Agent 绑定同一个频道会怎样？
 

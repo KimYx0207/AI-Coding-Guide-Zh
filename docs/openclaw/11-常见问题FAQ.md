@@ -392,31 +392,15 @@ docker rmi openclaw/openclaw:latest
 
 ### Q16: WhatsApp 扫码后频繁断开
 
-**现象：** 扫码配对成功，但过一会儿就断开，需要反复扫码。
-
-**原因：** WhatsApp Web 协议要求手机端保持在线。如果手机网络不稳定或 WhatsApp 应用被系统杀后台，连接就会断。
-
-**解决方案：**
+先查看 WhatsApp 通道状态和日志，区分连接网络、linked device 授权失效与 Gateway 退出：
 
 ```bash
-# 第一步：把 Gateway 安装为系统服务，保持持续运行
-openclaw onboard --install-daemon
-
-# 第二步：检查连接状态
+openclaw gateway status
 openclaw channels status
-
-# 第三步：如果断开了，重新连接
-openclaw channels logout --channel whatsapp
-openclaw channels login --channel whatsapp
-
-# 第四步：查看断开原因
-openclaw logs --limit 50 | grep whatsapp
+openclaw channels logs --channel whatsapp
 ```
 
-其他注意事项：
-- 确保手机上的 WhatsApp 没有被省电模式限制后台运行
-- 一个 WhatsApp 账号只能同时连接一个 Web 客户端，如果你在浏览器里也开了 WhatsApp Web，会冲突
-- 建议用一个专门的手机号来跑 OpenClaw
+需要重新配对时，按实际 account 执行 logout/login；不要删除整个 credentials。WhatsApp linked-device 模式不要求手机与 Gateway 在同一 Wi-Fi，也不是只能绑定一个 Web 客户端。手机需按 WhatsApp 当前 linked-device 规则定期使用主账号；具体上限和失效条件以平台说明及实际日志为准。
 
 ### Q17: Telegram Bot 不响应消息
 
@@ -530,28 +514,14 @@ openclaw config set agents.defaults.model "openai/gpt-5.2-mini"
 
 ### Q22: 飞书（Feishu/Lark）接入后收不到消息
 
-**现象：** 飞书 Bot 配置完成，但收不到用户消息。
-
-**原因：** 飞书的事件订阅配置不完整，或者回调地址不可达。
-
-**解决方案：**
+先确认已安装和启用官方 Feishu 插件，App ID/Secret、Bot 能力、权限及消息事件正确。默认连接方式是 WebSocket：在飞书开放平台选择长连接接收事件，不需要为了它开放 Gateway 公网端口。
 
 ```bash
-# 第一步：确认 Gateway 的公网地址可达
-curl https://your-domain.com:18789/health
-
-# 第二步：在飞书开放平台配置事件订阅
-# 事件订阅 URL：https://your-domain.com:18789/webhook/feishu
-# 需要订阅的事件：im.message.receive_v1
-
-# 第三步：检查日志
-openclaw logs --limit 50 | grep feishu
-
-# 第四步：确认 Bot 权限
-# 飞书开放平台 → 应用权限 → 确保开启了：
-# - 获取与发送单聊、群组消息
-# - 读取用户信息
+openclaw channels status
+openclaw channels logs --channel feishu
 ```
+
+只有显式选择 webhook 模式时，才按所用插件版本配置回调。新配置默认路径为 `/feishu/events`，同时配置对应验证和签名凭据；不要照抄 `/webhook/feishu`。完整流程见 [官方 Feishu 指南](https://docs.openclaw.ai/channels/feishu)。
 
 ### Q23: 控制面板（Dashboard）打不开
 
@@ -591,8 +561,8 @@ openclaw gateway --port 18789
 
 ```bash
 # 添加第二个 WhatsApp 账号
-openclaw channels add whatsapp --name "work-whatsapp"
-openclaw channels add whatsapp --name "personal-whatsapp"
+openclaw channels add --channel whatsapp --account work --name "Work"
+openclaw channels add --channel whatsapp --account personal --name "Personal"
 
 # 查看所有 Channel
 openclaw channels list
@@ -940,71 +910,36 @@ openclaw models aliases add quick-chat "openai/gpt-5.2-mini"
 
 ### Q36: 技能（Skill）不生效，AI 不执行
 
-**现象：** 你发消息让 AI 执行某个技能（比如「帮我搜索 xxx」），但 AI 只是用文字回复了一段话，并没有真正调用工具去执行操作。日志中也看不到工具调用记录。
+先查看 `openclaw skills list`、`openclaw skills info <skill-name>` 和 `openclaw skills check`，确认技能可见、依赖满足且未被禁用。模型根据技能的 description 决定是否读取正文；`triggers` 不是强制关键词匹配字段，`skills check` 也不会执行一个测试输入。
 
-**原因：** 技能没有正确加载，或者触发条件不匹配。
-
-**解决方案：**
-
-```bash
-# 第一步：检查技能是否已加载
-openclaw skills list
-# 确认目标技能在列表中且状态为 enabled
-
-# 第二步：检查技能的触发关键词
-openclaw skills info <skill-name>
-# 看 triggers 字段，确认你的消息包含触发词
-
-# 第三步：手动触发技能测试
-openclaw skills check
-
-# 第四步：重新加载技能
-openclaw skills list
-```
+在新对话中明确说要使用该技能，并观察实际工具调用。模型只回复文字，不能证明它执行了工具。
 
 ### Q37: 自定义技能报错
 
-**现象：** 在 `~/.openclaw/workspace/skills/` 目录下创建了自定义技能的 `.md` 文件，但执行 `openclaw skills list` 时该技能未出现，或者出现 `skill parse error`、`invalid skill format` 等报错信息。
-
-**原因：** 技能文件格式不对，或者引用了不存在的工具。
-
-**解决方案：**
+每个技能使用一个目录，核心文件叫 `SKILL.md`：
 
 ```bash
-# 第一步：检查技能文件格式
-openclaw skills check
-
-# 第二步：确认引用的工具都存在
+mkdir -p ~/.openclaw/workspace/skills/my-custom-skill
+nano ~/.openclaw/workspace/skills/my-custom-skill/SKILL.md
 openclaw skills list
-# 对照技能文件中引用的工具名称
-
-# 技能文件的基本格式：
-cat ~/.openclaw/workspace/skills/my-skill.md
+openclaw skills info my-custom-skill
+openclaw skills check
 ```
 
-正确的技能文件结构：
+最小内容：
 
 ```markdown
 ---
 name: my-custom-skill
-description: 我的自定义技能
-triggers:
-  - "帮我做xxx"
-  - "执行xxx"
-tools:
-  - file_read
-  - file_write
-  - web_search
+description: 用户要求整理一段记录为结构化草稿时使用。
 ---
 
-## 指令
+## 步骤
 
-当用户要求做 xxx 时，按以下步骤执行：
-
-1. 先搜索相关信息
-2. 读取必要的文件
-3. 生成结果并写入文件
+只按用户给出的材料整理草稿，缺信息先指出，不创建定时任务或发送外部消息。
 ```
+
+工具由 OpenClaw 或已安装插件提供；`tools/` 里放文件不会自动注册工具，Skill 中列权限也不会产生运行时授权。
 
 ### Q38: 工具（Tool）执行失败
 
@@ -1034,43 +969,17 @@ openclaw skills info <skill-name>
 
 ### Q39: 怎么禁用某个工具？
 
-**说明：** 出于安全考虑，你可能想禁用某些危险工具。
+使用 `tools.deny` 或按 Agent 配置工具允许列表，例如禁止文件写入和执行：
 
-```bash
-# 工具权限通过沙箱模式控制
-# 在 ~/.openclaw/openclaw.json 中配置沙箱：
-# {
-#   "agents": {
-#     "defaults": {
-#       "sandbox": { "mode": "all" }
-#     }
-#   }
-# }
-# sandbox.mode: "off"（默认，不限制）| "non-main"（限制非主 Agent）| "all"（限制所有 Agent）
-# 沙箱模式会限制文件系统访问和命令执行
-
-# 也可以在 SOUL.md 中明确告诉 AI 不要使用某些工具
-# 例如："永远不要执行 shell 命令，不要删除文件"
-
-# 查看当前工具权限配置
-openclaw doctor
+```json5
+{ tools: { deny: ["write", "edit", "exec"] } }
 ```
+
+还要核查已安装插件和外部服务的写入工具。Sandbox 改执行环境，不等于禁用某工具；`non-main` 指非主会话。SOUL.md 是辅助行为提示。
 
 ### Q40: 怎么给 AI 添加新工具？
 
-**说明：** OpenClaw 支持通过 MCP（Model Context Protocol）协议接入外部工具。
-
-```bash
-# 方案一：使用内置的 MCP 服务器
-openclaw plugins
-
-# 方案二：接入第三方 MCP 服务器
-# 在 ~/.openclaw/openclaw.json 中配置 MCP 服务器连接
-
-# 方案三：自己写工具（TypeScript）
-# 在 ~/.openclaw/workspace/tools/ 下创建工具文件
-# 参考文档：https://docs.openclaw.ai/tools/custom
-```
+按 [官方工具插件说明](https://docs.openclaw.ai/plugins/agent-tools)注册插件工具，或通过 [MCP](https://docs.openclaw.ai/tools/mcp)连接实际服务。把 TypeScript 文件放进 workspace/tools 不会自动注册工具。安装或连接以后核对工具列表、凭据和权限，再测试。
 
 ### Q41: 技能执行到一半中断了
 
@@ -1430,9 +1339,9 @@ du -sh ~/.openclaw/workspace/memory/
 # 删除过时的、不再需要的信息
 nano ~/.openclaw/workspace/MEMORY.md
 
-# 方案二：手动归档旧日志（OpenClaw 没有内置自动清理配置）
-mkdir -p ~/.openclaw/workspace/memory/archive
-find ~/.openclaw/workspace/memory -maxdepth 1 -name "20*.md" -mtime +30 -exec mv {} ~/.openclaw/workspace/memory/archive/ \;
+# 方案二：把不再检索的旧日志移到 memory 根目录及 extraPaths 之外
+mkdir -p ~/openclaw-memory-archive
+find ~/.openclaw/workspace/memory -maxdepth 1 -name "20*.md" -mtime +30 -exec mv {} ~/openclaw-memory-archive/ \;
 # 归档后运行 openclaw memory index 重建索引
 
 # 方案三：控制 MEMORY.md 大小（建议 500 行 / 3000 tokens 以内）
@@ -1519,7 +1428,7 @@ export OPENCLAW_GATEWAY_TOKEN="your-strong-random-token-here"
 # 方案一：配对系统（默认开启）
 # 陌生人发消息需要你手动批准
 openclaw pairing list          # 查看待批准的联系人
-openclaw pairing approve user1 # 批准
+openclaw pairing approve whatsapp <code>  # 使用已核对身份的实际待审配对码 # 批准
 # 不批准的联系人会保持在待审列表中
 
 # 方案二：白名单模式（通过 channels 配置 allowFrom）
@@ -1541,7 +1450,7 @@ openclaw pairing list --channel whatsapp  # 仅列待审批请求；已授权身
 
 ```bash
 # 第一步：启用沙箱模式限制工具执行
-# sandbox.mode 可选值："off"（关闭）| "non-main"（非主 Agent 隔离）| "all"（全部隔离）
+# sandbox.mode 可选值："off"（关闭）| "non-main"（非主会话 隔离）| "all"（全部隔离）
 openclaw config set agents.defaults.sandbox.mode "all"
 
 # 第二步：通过 SOUL.md 明确告诉 AI 哪些操作不能做
@@ -1715,12 +1624,14 @@ cd openclaw
 # 3. 创建功能分支
 git checkout -b feat/my-new-feature
 
-# 4. 安装依赖
-npm install
+# 4. 安装依赖并构建
+pnpm install
+pnpm ui:build
+pnpm build
 
 # 5. 开发和测试
-npm run dev
-npm test
+pnpm gateway:watch
+pnpm test
 
 # 6. 提交代码
 git add .
@@ -1733,21 +1644,7 @@ git push origin feat/my-new-feature
 
 ### Q70: 怎么创建和分享自定义技能？
 
-**解决方案：**
-
-```bash
-# 1. 创建技能文件
-mkdir -p ~/.openclaw/workspace/skills
-nano ~/.openclaw/workspace/skills/my-awesome-skill.md
-
-# 2. 测试技能
-openclaw skills list
-openclaw skills check
-
-# 3. 分享到社区
-# 在 GitHub 上创建一个仓库，或者提交到 OpenClaw 的技能市场
-# https://github.com/openclaw/openclaw-skills
-```
+建立 `<workspace>/skills/my-awesome-skill/SKILL.md`，写 name、description frontmatter 和操作步骤，再用 `skills list`、`skills info my-awesome-skill`、`skills check` 核查加载。在新对话中实际测试，确认结果和工具行为。分享时复制整个技能目录，保留所需脚本和示例，排除凭据及个人文件；社区发布按 [ClawHub 官方指南](https://docs.openclaw.ai/tools/clawhub)进行。
 
 ### Q71: 有中文社区吗？
 
@@ -1830,7 +1727,7 @@ openclaw --profile work gateway --port 19789
 openclaw config get agents.defaults.model
 
 # 查看特定配置项
-openclaw config get providers
+openclaw config get models.providers
 openclaw config get channels
 openclaw config get agents.defaults.model
 
