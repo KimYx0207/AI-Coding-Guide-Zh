@@ -1,4 +1,4 @@
-# Claude Code & OpenClaw & Codex & WorkBuddy 中文教程
+# 老金的 AI 编程教程：Claude Code、Codex、OpenClaw、WorkBuddy
 
 <div align="center">
 
@@ -13,13 +13,15 @@
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="WorkBuddy 参考版本" src="https://img.shields.io/badge/WorkBuddy-5.5.6-purple.svg"></a>
 </p>
 
-**AI Coding / Agent 工作流中文实战教程**
+**零基础入门 · 中文实战教程 · 练习材料与结果对照**
 
 </div>
 
 > **先做出一个能检查的成果，再把方法用到自己的工作里。**
 >
-> 老金基于游戏研发、项目管理和数据分析经验，把四款工具放进日常任务里讲：修代码、写周报、处理表格、查资料、整理待办。每条入门路线都有材料和结果对照，做完再按需要深入。
+> 这套中文 AI 编程教程由老金维护，面向第一次使用编程助手的学习者、产品经理和独立开发者。先用 Claude Code 或 Codex 完成一次小改动，再按需要学习 OpenClaw 助手和 WorkBuddy 办公工作流。每条入门路线都有材料和结果对照。
+>
+> **作者与原始来源**：老金 · 公众号「老金带你玩AI」 · GitHub [KimYx0207](https://github.com/KimYx0207)。本页是 [AI-Coding-Guide-Zh 原始教程仓库](https://github.com/KimYx0207/AI-Coding-Guide-Zh)的学习入口，作者署名与许可见 [NOTICE](NOTICE)。
 
 ## 把教程里的方法用进自己的项目
 
@@ -28,6 +30,10 @@
 Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/main/README.md) · [简体中文](https://github.com/KimYx0207/Meta_Kim/blob/main/README.zh-CN.md) · [日本語](https://github.com/KimYx0207/Meta_Kim/blob/main/README.ja-JP.md) · [한국어](https://github.com/KimYx0207/Meta_Kim/blob/main/README.ko-KR.md)。
 
 ## 今天先完成哪件事
+
+### 零基础怎么开始学 AI 编程？
+
+先选一种工具、完成一个小任务，再学后续功能。喜欢在终端操作，走下面的 Claude Code 路线；想在桌面 App 里查看改动，走 Codex 路线。暂时只想处理周报、表格或待办，也有对应的办公与助手练习。
 
 第一次只选一行。已安装并登录，可以直接进入练习；尚未准备环境，先完成同一行的安装说明。练习时长是阅读与操作的参考，安装、网络和登录耗时另计。
 
@@ -39,6 +45,12 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 | 让助手整理今天的待办 | [OpenClaw 安装](docs/openclaw/02-安装部署指南.md) → [待办简报](docs/openclaw/03-快速开始指南.md#先做一份今天的待办简报) | 去重、排除已完成、保留未知时间的行动列表 |
 
 [打开配套练习材料](examples/README.md)：代码、工作记录、7 行订单和三份新旧说明都已备好，使用虚构数据。先照着做一轮，再修改一个条件，看看自己能否判断结果。
+
+### AI 写完代码，怎么检查结果？
+
+以[进度计算练习](examples/progress-lab/README.md)为例：先运行原始测试，确认空列表会得到 `NaN`；让助手只修改指定源码，保留测试；再运行同一条测试，确认空列表为 `0`、正常比例和四舍五入仍正确。最后自己补一道“完成 3 项、共 8 项，百分比四舍五入应得到 `38`”的变式题。用 Codex App 跟练时，再按 [Review 四层阅读法](docs/codex/CX-10-Codex-Review-GitHub-PR完整指南.md#15-review-的四层阅读法)核对文件范围、行为变化与检查结果。
+
+这套教程与样例可免费阅读，采用 [MIT 许可](LICENSE)。工具账号、模型用量及你自己的部署费用按所选服务计算。这里的练习是教学样例，不是学员商业成绩。
 
 四条线保持各自重点：**Claude Code 编程、Codex App 工作流、OpenClaw 助手、WorkBuddy 办公**。CLI / Web / SDK / GitHub Action 在 Codex 系列中作为 App 生态补充。
 
