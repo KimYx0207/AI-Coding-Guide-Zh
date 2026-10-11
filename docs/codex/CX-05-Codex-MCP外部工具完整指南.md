@@ -349,6 +349,8 @@ MCP 的安全原则不是"绝不用"，而是"先只读、再小范围、可审�
 
 你应该看到：Codex 明确调用了文档工具，输出来源、差异和建议；Review 面板没有新增 diff。
 
+还没有可用的文档工具时，可以先做[匿名 MCP 搜索与网页读取练习](../../examples/parallel-search-lab/README.md)：用 Python SDK 通过 Streamable HTTP 调用 Parallel 的 `web_search` / `web_fetch`，检查来源 URL 与摘录，不需要 Parallel API Key。这个练习直接调用工具，不运行模型，也不替代 App 线程里的可见性和调用核对。
+
 ### 案例二：数据库 MCP 只读查 schema
 
 目标：练习“查数据库”和“改数据库”之间的权限边界。
