@@ -23,12 +23,15 @@ def arguments():
     fetch = commands.add_parser("fetch", help="读取指定公开网页")
     fetch.add_argument("urls", nargs="+", help="公开 HTTP/HTTPS URL，最多 20 个")
     args = parser.parse_args()
-    if args.command == "fetch" and (
-        len(args.urls) > 20
-        or any(httpx.URL(url).scheme not in {"http", "https"}
-               or not httpx.URL(url).host for url in args.urls)
-    ):
-        parser.error("fetch 需要 1–20 个有效的 HTTP/HTTPS URL")
+    if args.command == "fetch":
+        try:
+            urls = [httpx.URL(url) for url in args.urls]
+        except httpx.InvalidURL:
+            parser.error("fetch URL 格式无效")
+        if len(urls) > 20 or any(
+            url.scheme not in {"http", "https"} or not url.host for url in urls
+        ):
+            parser.error("fetch 需要 1–20 个有效的 HTTP/HTTPS URL")
     return args
 
 
