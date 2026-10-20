@@ -1,0 +1,12 @@
+[
+  {"id":"tasks-unique","operation":"unique","input":[{"id":"A","status":"done"},{"id":"B","status":"todo","due":null},{"id":"B","status":"todo","due":null}],"expected":[{"id":"A","status":"done"},{"id":"B","status":"todo","due":null}]},
+  {"id":"tasks-pending","operation":"pending","input":[{"id":"A","status":"done"},{"id":"B","status":"todo","due":null}],"expected":[{"id":"B","status":"todo","due":null}]},
+  {"id":"orders-unique","operation":"unique","input":[{"id":"O1","paid":10000,"refund":2000},{"id":"O1","paid":10000,"refund":2000},{"id":"O2","paid":null,"refund":0}],"expected":[{"id":"O1","paid":10000,"refund":2000},{"id":"O2","paid":null,"refund":0}]},
+  {"id":"orders-net","operation":"net","input":[{"id":"O1","paid":10000,"refund":2000},{"id":"O2","paid":null,"refund":0}],"expected":{"netCents":8000,"pending":["O2"]}},
+  {"id":"docs-effective","operation":"effective","input":{"asOf":"2026-10-01","documents":[{"id":"v1","status":"published","effective":"2026-09-01","price":100},{"id":"draft","status":"draft","effective":"2026-09-30","price":999},{"id":"v2","status":"published","effective":"2026-11-01","price":200}]},"expected":{"id":"v1","status":"published","effective":"2026-09-01","price":100}},
+  {"id":"docs-evidence","operation":"evidence","input":{"source":{"id":"v1","price":100},"claims":[{"sourceId":"v1","field":"price","value":100},{"sourceId":"v1","field":"discount","value":20}]},"expected":{"supported":[0],"unsupported":[1]}},
+  {"id":"code-progress","operation":"progress","input":[{"done":0,"total":0},{"done":3,"total":8}],"expected":[0,38]},
+  {"id":"code-diagnostics","operation":"diagnostics","input":[{"id":"L1","level":"error"},{"id":"L2","level":"info"},{"id":"L3","level":"warning"}],"expected":{"errors":["L1"],"warnings":["L3"]}},
+  {"id":"agent-plan","operation":"plan","input":[{"id":"review","deps":["write"]},{"id":"write","deps":["fetch"]},{"id":"fetch","deps":[]}],"expected":["fetch","write","review"]},
+  {"id":"agent-acceptance","operation":"acceptance","input":{"checks":[{"id":"syntax","status":"passed"},{"id":"business","status":"not_run"}],"required":["syntax","business"]},"expected":{"accepted":false,"missing":["business"]}}
+]

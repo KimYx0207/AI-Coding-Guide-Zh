@@ -46,6 +46,8 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 
 [打开配套练习材料](examples/README.md)：代码、工作记录、7 行订单和三份新旧说明都已备好，使用虚构数据。先照着做一轮，再修改一个条件，看看自己能否判断结果。
 
+完成入门后，继续 [AI Coding：10 个练习与 5 条 Agent 评估流程](examples/ai-coding-lab/README.md)，练习去重、金额、来源、代码诊断和依赖验收；配套三个离线脚本与 [一页速查卡](docs/ai-coding/速查卡.md)。脚本验证规则基线，实际 Agent 产物仍须由读者运行并评估。
+
 ### AI 写完代码，怎么检查结果？
 
 以[进度计算练习](examples/progress-lab/README.md)为例：先运行原始测试，确认空列表会得到 `NaN`；让助手只修改指定源码，保留测试；再运行同一条测试，确认空列表为 `0`、正常比例和四舍五入仍正确。最后自己补一道“完成 3 项、共 8 项，百分比四舍五入应得到 `38`”的变式题。用 Codex App 跟练时，再按 [Review 四层阅读法](docs/codex/CX-10-Codex-Review-GitHub-PR完整指南.md#15-review-的四层阅读法)核对文件范围、行为变化与检查结果。
