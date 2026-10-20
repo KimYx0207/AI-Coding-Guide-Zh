@@ -24,3 +24,5 @@ jobs:
           node-version: '24'
       - name: Check links, Markdown, and synthetic exercises
         run: python tools/check_docs.py
+      - name: Check AI Coding fixtures and evaluation boundaries
+        run: node examples/ai-coding-lab/check.cjs

@@ -8,6 +8,7 @@
 | 把零散记录写成周报 | [工作记录](office-lab/work-notes.md) | [WorkBuddy WB-01](../docs/workbuddy/WB-01-WorkBuddy项目介绍完整指南.md#13-把任务交给它) |
 | 去重、处理缺失值、汇总净收入 | [订单样例 CSV](office-lab/orders.csv) | [WorkBuddy WB-03](../docs/workbuddy/WB-03-WorkBuddy专家与专家团完整指南.md#13-第一次实战让数据分析师帮你看表格) |
 | 从新旧资料中找有依据的答案 | [旧版说明](office-lab/guide-v1.md)、[生效说明](office-lab/guide-v2.md)、[讨论草稿](office-lab/guide-draft.md) | [WorkBuddy WB-06](../docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md#第二步同一个问题查三份资料) |
+| 完成带评估的 AI Coding 实操 | [10 个练习与 5 条 Agent 评估流程](ai-coding-lab/README.md) | [一页速查卡](../docs/ai-coding/速查卡.md) |
 
 先保留原始材料，在自己新建的练习目录中操作。办公练习只需要保存或粘贴文本；进度计算练习需要本机能运行 `node --version`。Codex App 的 Review 跟练还需要 Git 和本地初始提交，CX-02 已给出步骤。不需要真实客户数据、付费连接器或部署服务。
 
