@@ -1,4 +1,4 @@
-# 老金的 AI 编程教程：Claude Code、Codex、WorkBuddy
+# 老金的 AI 编程教程：Claude Code、Codex、WorkBuddy、OpenClaw
 
 <div align="center">
 
@@ -10,6 +10,7 @@
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Claude Code 参考版本" src="https://img.shields.io/badge/Claude_Code-2.1.319-green.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="Codex App 功能快照" src="https://img.shields.io/badge/Codex_App-26.908-orange.svg"></a>
   <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="WorkBuddy 参考版本" src="https://img.shields.io/badge/WorkBuddy-5.11.0-purple.svg"></a>
+  <a href="https://github.com/KimYx0207/AI-Coding-Guide-Zh"><img alt="OpenClaw 参考版本" src="https://img.shields.io/badge/OpenClaw-v2026.9.4-blue.svg"></a>
 </p>
 
 **零基础入门 · 中文实战教程 · 练习材料与结果对照**
@@ -18,7 +19,7 @@
 
 > **先做出一个能检查的成果，再把方法用到自己的工作里。**
 >
-> 这套中文 AI 编程教程由老金维护，面向第一次使用编程助手的学习者、产品经理和独立开发者。先用 Claude Code 或 Codex 完成一次小改动，再按需要学习 WorkBuddy 办公工作流。每条入门路线都有材料和结果对照。
+> 这套中文 AI 编程教程由老金维护，面向第一次使用编程助手的学习者、产品经理和独立开发者。先用 Claude Code 或 Codex 完成一次小改动，再按需要学习 WorkBuddy 办公工作流，OpenClaw 助手排在最后，按需再看。每条入门路线都有材料和结果对照。
 >
 > **作者与原始来源**：老金 · 公众号「老金带你玩AI」 · GitHub [KimYx0207](https://github.com/KimYx0207)。本页是 [AI-Coding-Guide-Zh 原始教程仓库](https://github.com/KimYx0207/AI-Coding-Guide-Zh)的学习入口，作者署名与许可见 [NOTICE](NOTICE)。
 
@@ -41,6 +42,7 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 | 在终端里修一处代码错误 | [Claude Code 安装](docs/claude-code/01-Claude-Code完整安装指南.md) → [空列表进度练习](docs/claude-code/02-基础使用完整指南.md#先修一个小-bug空任务列表为什么显示-nan) | 复现 `NaN`，修复后通过检查，再独立补一道变式题 |
 | 用桌面 App 完成一次小改动 | [Codex App 安装](docs/codex/CX-01-Codex-App安装与认证完整指南.md) → [App 修错练习](docs/codex/CX-02-Codex-App桌面工作流完整指南.md#先用-app-修一个小-bug) | 一份能在 Review 中看懂、能用运行结果检查的改动 |
 | 把散乱记录整理成周报 | [WorkBuddy 安装](docs/workbuddy/WB-02-WorkBuddy安装与登录完整指南.md) → [第一份周报](docs/workbuddy/WB-01-WorkBuddy项目介绍完整指南.md#13-把任务交给它) | 保留未完成事项和改期信息的短周报、Word 草稿 |
+| 让助手整理今天的待办 | [OpenClaw 安装](docs/openclaw/02-安装部署指南.md) → [待办简报](docs/openclaw/03-快速开始指南.md#先做一份今天的待办简报) | 去重、排除已完成、保留未知时间的行动列表 |
 
 [打开配套练习材料](examples/README.md)：代码、工作记录、7 行订单和三份新旧说明都已备好，使用虚构数据。先照着做一轮，再修改一个条件，看看自己能否判断结果。
 
@@ -52,7 +54,7 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 
 这套教程与样例可免费阅读，采用 [MIT 许可](LICENSE)。工具账号、模型用量及你自己的部署费用按所选服务计算。这里的练习是教学样例，不是学员商业成绩。
 
-三条线保持各自重点：**Claude Code 编程、Codex App 工作流、WorkBuddy 办公**。CLI / Web / SDK / GitHub Action 在 Codex 系列中作为 App 生态补充。
+四条线保持各自重点：**Claude Code 编程、Codex App 工作流、WorkBuddy 办公、OpenClaw 助手**。CLI / Web / SDK / GitHub Action 在 Codex 系列中作为 App 生态补充。
 
 > 🔗 **GitHub 仓库**：[https://github.com/KimYx0207/AI-Coding-Guide-Zh](https://github.com/KimYx0207/AI-Coding-Guide-Zh)
 
@@ -60,14 +62,14 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 
 ## 📖 项目简介
 
-这是一套可以循序学习，也能用于团队培训和项目实践的 **AI Coding 与 Agent 工作流中文教程**，覆盖三类代表性工具：
+这是一套可以循序学习，也能用于团队培训和项目实践的 **AI Coding 与 Agent 工作流中文教程**，覆盖四类代表性工具：
 
-| | Claude Code | Codex | WorkBuddy |
-|--|-------------|-------|---------|
-| **是什么** | Anthropic 官方 AI 编程工具，提供 CLI、IDE、桌面和 Web 入口 | OpenAI 编程 Agent 平台 | 腾讯 AI 办公助手桌面 App |
-| **干什么** | 终端里理解项目、改代码、排查错误 | 在 App 中安排任务、审阅改动，配合其他入口协作 | 整理文档和表格，用专家、资料库与连接器处理办公任务 |
-| **谁出的** | Anthropic 官方 | OpenAI 官方（CLI 开源 Apache-2.0） | 腾讯云（与 CodeBuddy 同根生） |
-| **教程数** | 13 篇 + 1 速查卡 | 14 篇完整教程 | 11 篇完整教程 |
+| | Claude Code | Codex | WorkBuddy | OpenClaw |
+|--|-------------|-------|---------|----------|
+| **是什么** | Anthropic 官方 AI 编程工具，提供 CLI、IDE、桌面和 Web 入口 | OpenAI 编程 Agent 平台 | 腾讯 AI 办公助手桌面 App | 开源 AI 私人助手框架 |
+| **干什么** | 终端里理解项目、改代码、排查错误 | 在 App 中安排任务、审阅改动，配合其他入口协作 | 整理文档和表格，用专家、资料库与连接器处理办公任务 | 整理待办、查询资料，按需接入消息平台和定时任务 |
+| **谁出的** | Anthropic 官方 | OpenAI 官方（CLI 开源 Apache-2.0） | 腾讯云（与 CodeBuddy 同根生） | Peter Steinberger（原名 Clawdbot，因 Claude 商标被迫改名） |
+| **教程数** | 13 篇 + 1 速查卡 | 14 篇完整教程 | 11 篇完整教程 | 12 篇完整教程 |
 
 ### 👤 作者定位
 
@@ -83,10 +85,11 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 2. **多入口协作** — Codex 适合 App / CLI / Web / Cloud / GitHub 等分层协作
 3. **办公出活** — WorkBuddy 适合不写代码的同事，把周报、调研、文档和腾讯生态里的杂活交给 AI
 4. **培训与管理** — 用同类任务比较工具选择、权限边界和团队协作方式
+5. **日常自动化** — OpenClaw 适合把 AI 接到消息平台、个人助理和企业流程里
 
 ### ✨ 核心特色
 
-- **🎓 三线学习路径**：Claude Code 编程线 + Codex Agent 线 + WorkBuddy 办公线，按目标选择
+- **🎓 四线学习路径**：Claude Code 编程线 + Codex Agent 线 + WorkBuddy 办公线 + OpenClaw 助手线，按目标选择
 - **🧭 清晰路径**：从安装、第一轮任务到团队规范，按主线逐步推进
 - **📚 分层阅读**：新手看路线图，开发者看实操，团队负责人看规范和安全
 - **💻 有材料、有结果**：入门任务给出可复制素材、结果对照和常见错误，做完再换条件练一次
@@ -111,6 +114,8 @@ Meta_Kim 项目说明：[English](https://github.com/KimYx0207/Meta_Kim/blob/mai
 | 会开完了，还不知道谁该做什么 | [WorkBuddy：提取下一步](docs/workbuddy/WB-06-WorkBuddy知识库完整指南.md#42-工作记录和会议纪要提取可执行的下一步) | 整理行动、负责人、时间和原文依据 |
 | 文件太多，需要批量整理或写小脚本 | [WorkBuddy：编程任务](docs/workbuddy/WB-09-WorkBuddy-Coding-Mode编程模式完整指南.md) | 先看处理清单，用副本试运行，再处理自己的文件 |
 | 同一份检查、简报每天重复做 | [WorkBuddy 定时任务](docs/workbuddy/WB-07-WorkBuddy自动化与计划任务完整指南.md) / [Codex Automations](docs/codex/CX-09-Codex-Automations后台任务完整指南.md) | 先把手动流程跑顺，再设置触发、范围和失败处理 |
+| 待办重复，做完的还在催 | [OpenClaw：待办简报](docs/openclaw/03-快速开始指南.md#先做一份今天的待办简报) | 去重、筛选、更新状态，不补造时间 |
+| 每次都要重新交代偏好 | [OpenClaw：用户画像和偏好记忆](docs/openclaw/07-记忆系统指南.md#用户画像和偏好记忆) | 区分长期偏好与临时任务，核对记忆内容 |
 
 团队负责人可从 [Claude Code 企业实战](docs/claude-code/11-企业实战完整指南.md) 和 [Codex 安全与企业基线](docs/codex/CX-13-Codex安全企业完整指南.md) 补协作约定。带课时先选一条入门路线，让学员交出成果并解释一处改动，再安排后续章节。
 
@@ -159,9 +164,10 @@ Codex 学习主线：**只有 Codex App 一条主线**。先看 CX-01 安装认�
 | CX-13 | [安全与企业基线](docs/codex/CX-13-Codex安全企业完整指南.md) | 2-3h | ⭐⭐⭐ | 审批、沙盒、Rules、Hooks、MCP/Plugins/Automations 权限 |
 | CX-14 | [Codex 与 Claude Code 对比](docs/codex/CX-14-Codex与Claude-Code对比指南.md) | 1-2h | ⭐⭐ | 从 App 主线出发做双工具选择和共存 |
 
+
 ### 🐧 Part 3：WorkBuddy — 腾讯 AI 办公助手
 
-WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令行的人、用企业微信/腾讯文档的团队、想给非技术同事一个 AI 工具的人。跟另外两条开发者主线互补，不冲突。先看 WB-00 阅读指南找到学习路径，再按需学 WB-01~WB-10。
+WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令行的人、用企业微信/腾讯文档的团队、想给非技术同事一个 AI 工具的人。跟另外两条开发者主线和一条助手线互补，不冲突。先看 WB-00 阅读指南找到学习路径，再按需学 WB-01~WB-10。
 
 | 序号 | 教程名称 | 学时 | 难度 | 说明 |
 |------|---------|------|------|------|
@@ -176,6 +182,23 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 | WB-08 | [多端协同](docs/workbuddy/WB-08-WorkBuddy多端协同完整指南.md) | 1h | ⭐⭐ | 桌面与手机任务核对、助理绑定及运行条件 |
 | WB-09 | [编程任务与 Worktree](docs/workbuddy/WB-09-WorkBuddy-Coding-Mode编程模式完整指南.md) | 1-2h | ⭐⭐ | 小脚本、执行模式、Worktree 并行修改与本地合并 |
 | WB-10 | [企业账号、安全与对比](docs/workbuddy/WB-10-WorkBuddy企业账号安全与对比完整指南.md) | 1-2h | ⭐⭐⭐ | 账号积分、私有云、安全边界、四工具横向对比 |
+### 🦞 Part 4：OpenClaw — 开源 AI 助手（更新放缓，按需阅读）
+
+| 序号 | 教程名称 | 难度 | 说明 |
+|------|---------|------|------|
+| OC-00 | [阅读指南](docs/openclaw/00-阅读指南.md) | 🟢 | 术语表、文档地图、4条阅读路线 |
+| OC-01 | [项目介绍](docs/openclaw/01-OpenClaw项目介绍.md) | 🟢 | OpenClaw 是什么、发展历史、核心架构 |
+| OC-02 | [安装部署](docs/openclaw/02-安装部署指南.md) | 🟢 | macOS / Linux / Windows 全平台安装 |
+| OC-03 | [快速开始](docs/openclaw/03-快速开始指南.md) | 🟢 | 完成第一份待办简报，再学本地对话与基础检查 |
+| OC-04 | [AI 模型配置](docs/openclaw/04-模型配置指南.md) | 🟡 | 接入 OpenAI / Claude / Ollama 等模型 |
+| OC-05 | [消息平台接入](docs/openclaw/05-消息平台接入指南.md) | 🟡 | 连接 WhatsApp / Telegram / Discord / 飞书等平台 |
+| OC-06 | [技能系统](docs/openclaw/06-技能系统指南.md) | 🟡 | 技能生态与自定义技能开发 |
+| OC-07 | [记忆系统](docs/openclaw/07-记忆系统指南.md) | 🟡 | AI 如何记住你的偏好和上下文 |
+| OC-08 | [多 Agent 协作](docs/openclaw/08-多Agent协作指南.md) | 🔴 | 一个网关跑多个独立 AI 助手 |
+| OC-09 | [Docker 部署](docs/openclaw/09-Docker部署指南.md) | 🔴 | 容器化部署与 VPS 远程访问 |
+| OC-10 | [安全配置](docs/openclaw/10-安全配置指南.md) | 🔴 | 安全配置、CVE 防护、权限管理 |
+| OC-11 | [常见问题](docs/openclaw/11-常见问题FAQ.md) | 🟢 | 踩坑指南与解决方案 |
+
 
 ---
 
@@ -195,12 +218,18 @@ WorkBuddy 主线面向**办公人和国内团队**：会用电脑但不会命令
 - **CLI / Web / Cloud 辅助**：CLI 仅用于终端排查、CI、MCP / plugin 管理等辅助场景；Web / Cloud 用于远程仓库和长任务接力，版本以官方文档和当前账号能力为准
 - **认证方式**：ChatGPT 账户登录 或 OpenAI API Key
 
+
 ### WorkBuddy
 
 - **WorkBuddy 桌面 App**：腾讯云出品，账号与积分关系见当前套餐说明；Windows 使用官方支持的 x64 版本，macOS 按官网下载页提供的系统与芯片安装包选择。官方更新日志已列到 5.6.2（2026-09-21），安装从官网首页开始
 - **多端**：桌面与手机先核对同一账号和任务，微信/企业微信助理按官方流程绑定；各端可用材料和功能分别检查
 - **认证方式**：客户端打开官网登录页，可用微信、手机号、邮箱等方式；企业 SSO 按公司配置及当前页面使用
 - **网络**：按当前客户端与服务的可访问性核对；企业代理、VPN 和防火墙按团队配置
+### OpenClaw
+
+- **Node.js**：OpenClaw v2026.9.4 推荐 26.x（至少 26.1.0）；兼容 24.x 时至少 24.16.0。25.x 和 26.0.x 不在支持范围内，详见 [安装要求](docs/openclaw/02-安装部署指南.md#2-nodejs-环境安装)
+- **AI 模型 API Key**：OpenAI / Anthropic / Google 等（或使用 Ollama 本地模型免 Key）
+- **操作系统**：macOS / Linux / Windows（推荐 WSL2）
 
 ---
 
@@ -242,6 +271,15 @@ Step 3：自己改变一条事实 → 让它只修订相关段落，并核对结
 接下来：处理表格去 WB-03，查询资料去 WB-06
 ```
 
+### OpenClaw：从今天的简报开始
+
+```
+Step 1：OC-02 安装 → 版本检查、初始化；模型未就绪时对照 OC-04
+Step 2：OC-03 快速开始 → 确认模型能回复，再整理示例待办
+Step 3：更新一条完成状态 → 对照新的简报，检查是否仍在催已完成事项
+接下来：按需求学 OC-07 记忆或 OC-05 消息平台
+```
+
 ### 需要系统学习时
 
 下面是分阶段阅读参考，可只选择一条主线。时间取决于已有经验和练习结果，不代表按周读完就能掌握所有功能。
@@ -256,6 +294,9 @@ Week 8  ：项目指令 + MCP + Skills + Plugins / Connectors + Subagents
 Week 9  ：Automations + Review / GitHub / PR + Web/Cloud/CLI 辅助 + 安全
 Week 10：WorkBuddy 安装 + 项目介绍 + 专家与专家团
 Week 11：WorkBuddy 技能 + 连接器 + 知识库 + 自动化 + 多端 + 企业安全
+Week 12：OpenClaw 安装 + 快速开始 + 模型配置
+Week 13：OpenClaw 消息平台 + 技能系统 + 记忆系统
+Week 14：OpenClaw 多Agent + Docker部署 + 安全
 ```
 
 ---
@@ -270,14 +311,16 @@ Meta_Kim 的介绍与开始入口放在首页前面。学习 Hook 与 Skill 时�
 
 | 指标 | 数值 |
 |------|------|
-| **教程总数** | 38 篇完整教程（Claude Code 13 / Codex 14 / WorkBuddy 11）+ 1 速查卡 |
-| **内容体量** | 85万+ Markdown 字符（含正文、命令、代码、配置、提示词和 FAQ） |
-| **中文核心内容** | 26万+ 中文字 |
-| **代码 / 命令 / 配置示例** | 2100+ 个代码块与实操片段（核心示例按当前版本持续校验） |
-| **FAQ / 问答条目** | 400+ 个 |
+| **教程总数** | 50 篇完整教程（Claude Code 13 / OpenClaw 12 / Codex 14 / WorkBuddy 11）+ 1 速查卡 |
+| **内容体量** | 120万+ Markdown 字符（含正文、命令、代码、配置、提示词和 FAQ） |
+| **中文核心内容** | 36万+ 中文字 |
+| **代码 / 命令 / 配置示例** | 3100+ 个代码块与实操片段（核心示例按当前版本持续校验） |
+| **FAQ / 问答条目** | 500+ 个 |
+| **覆盖AI模型** | OpenClaw 支持多个主流模型提供商，具体目录以当前安装版本和官方 Models / Onboarding 为准 |
+| **覆盖消息平台** | WhatsApp、Telegram、Slack、Discord、Signal、Google Chat、iMessage、Microsoft Teams、Matrix、飞书、LINE、Mattermost、Nextcloud Talk、Nostr、Synology Chat、Twitch、Zalo、WeChat、QQ 等 |
 | **参考版本与测试范围** | 各章保留适用版本和功能引入日期；最新发布记录与本机核查范围见下表及[核查清单](docs/2026-10-03-核查清单.md) |
 
-统计范围是三个教程目录内的 38 篇教程和 1 张速查卡。字符数包含正文与示例，中文数量按汉字计，代码块按 Markdown 围栏计；FAQ 同时统计标题和粗体编号问答，按显示条目计数，跨章重复问题未去重。
+统计范围是四个教程目录内的 50 篇教程和 1 张速查卡。字符数包含正文与示例，中文数量按汉字计，代码块按 Markdown 围栏计；FAQ 同时统计标题和粗体编号问答，按显示条目计数，跨章重复问题未去重。
 
 ---
 
@@ -290,6 +333,7 @@ Meta_Kim 的介绍与开始入口放在首页前面。学习 Hook 与 Skill 时�
 | 产品 | 教程参考与本次核查范围 | 官方发布记录（2026-10-03 查询） | 官方来源 |
 |---|---|---|---|
 | Claude Code | 保留 2.1.270 的历史功能说明；按现行文档修正安装、权限、SDK 等。原 CLI 2.1.236 只读核查；隔离的官方 2.1.288 用于 Mods 离线检查 | changelog 最新条目 2.1.288；未改全局客户端或执行模型请求 | [Claude Code changelog](https://code.claude.com/docs/en/changelog) |
+| OpenClaw | 配置与 Docker 示例按 v2026.9.4 源码复核；本机 2026.7.1-2 只核 help，不验证新版服务行为 | 最新 Release v2026.9.8；不能由版本号推断旧状态可以直接降级 | [GitHub Releases](https://github.com/openclaw/openclaw/releases) |
 | ChatGPT / Codex 桌面 App | 26.908 为原功能快照，安装走当前 ChatGPT 桌面入口 | macOS 26.924.20706 修复 9 月 25 日公告的安全问题；安装取官网更新版本 | [ChatGPT & Codex changelog](https://learn.chatgpt.com/docs/changelog) |
 | Codex CLI | 本机 0.157.1 的 help 与已装入口，以及官方 0.160.0 源码、schema | rust-v0.160.0，10 月 1 日发布；没有升级本机 | [GitHub Release](https://github.com/openai/codex/releases/tag/rust-v0.160.0) |
 | WorkBuddy | 现行可访问的官方文档；账号界面与真实授权未实跑 | 更新日志 5.6.2；原价格表保留 9 月 14 日快照，未取得现价正文 | [WorkBuddy 更新日志](https://www.workbuddy.cn/docs/workbuddy/Changelog) |
@@ -302,9 +346,9 @@ Claude Code 把安装、认证和排障中的重复旧说明一起修正，区�
 
 Codex 的 Rules 示例改成真正注册规则，并用离线匹配确认效果；CLI 区分 JSONL 事件和最终回答，结构化练习补齐 schema。App 工作树、手机接续、Browser、Computer Use、录制技能、Memories、Computer History、当前 PR 插件、安全审查、事件任务和新 Cloud 的准备、发布与凭据入口，都说明了具体操作和适用条件。
 
-WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤，定时摘要使用明确日期的虚构日志；真实报价仍保留待核，不把旧价改成最新价。
+OpenClaw 保留 9.4 的固定部署参考，同时讲清 9.8 的 Windows 状态迁移和会话返回变化；修正后台服务重复启动、消息平台命令、技能与记忆入口，以及 Docker 初始化、更新和恢复中的矛盾。WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤，定时摘要使用明确日期的虚构日志；真实报价仍保留待核，不把旧价改成最新价。
 
-近期发布复核又补了一批实际操作：Claude Code 的 Mods 有从三个文件到加载、热重载、离线测试和停用的完整工坊，权限、插件和云任务说明也补了适用条件；Codex 补任务管理、工作树与 MCP 排障，并区分 ChatGPT 插件界面、MCP Events 和 Security Cloud；WorkBuddy 补原生手机 App、文件浏览器、专家和连接器的步骤。Mods 已通过隔离官方 2.1.288 客户端的离线检查，登录后的界面与手机流程仍未实跑。
+近期发布复核又补了一批实际操作：Claude Code 的 Mods 有从三个文件到加载、热重载、离线测试和停用的完整工坊，权限、插件和云任务说明也补了适用条件；Codex 补任务管理、工作树与 MCP 排障，并区分 ChatGPT 插件界面、MCP Events 和 Security Cloud；OpenClaw 讲清技能搜索与自学习、只读配置、媒体迁移和升级回滚；WorkBuddy 补原生手机 App、文件浏览器、专家和连接器的步骤。Mods 已通过隔离官方 2.1.288 客户端的离线检查，登录后的界面与手机流程仍未实跑。
 
 详细记录统一放在 [CHANGELOG.md](CHANGELOG.md)。[逐章核查清单](docs/2026-10-03-核查清单.md)列出了全部章节的修改与保留情况，并纠正了第二轮把功能简介当成完整覆盖的判断。精选功能记录不是产品全部发布项的覆盖率；参考答案用于对照事实，离线检查也不表示当天已经在 AI 客户端跑过所有流程。
 
@@ -312,12 +356,13 @@ WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤�
 
 ## 🔌 第三方模型配置说明
 
-下面两条开发者主线都支持多种模型接入方式，具体配置见各教程：
+下面几条主线都支持多种模型接入方式，具体配置见各教程：
 
 | 产品 | 支持方式 | 配置入口 |
 |------|---------|---------|
 | **Claude Code** | Anthropic Console / Claude 订阅 / 第三方兼容提供商（`ANTHROPIC_BASE_URL`） | [01-安装指南：API中转站配置](docs/claude-code/01-Claude-Code完整安装指南.md) |
 | **Codex** | ChatGPT 账户登录 / OpenAI API Key | [CX-01 App 安装与认证](docs/codex/CX-01-Codex-App安装与认证完整指南.md) |
+| **OpenClaw** | 多个主流提供商（OpenAI / Claude / Gemini / Ollama / 本地模型等，实际以当前模型目录为准） | [04-模型配置指南](docs/openclaw/04-模型配置指南.md) |
 
 > ⚠️ **第三方模型注意事项**：
 > - 第三方兼容提供商的 API 行为可能不完全等同于官方（速率限制、模型列表、功能支持可能有差异）
@@ -330,11 +375,11 @@ WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤�
 
 - ✅ **刚入门的读者**：从未接触过 AI 编程工具，想系统学习
 - ✅ **办公人 / 业务用户 / 国内团队**：想用 AI 出周报、调研、PPT，被英文 CLI 劝退过，WorkBuddy 主线为你准备
-- ✅ **开发者**：想用 Claude Code 和 Codex 提升编程效率
+- ✅ **开发者**：想用 Claude Code 提升编程效率 + 用 OpenClaw 自动化日常工作
 - ✅ **团队负责人 / PM**：为团队制定 AI 工具使用规范、评审流程和里程碑验收方式
 - ✅ **企业用户**：企业级部署、安全边界、权限管理和最佳实践
 - ✅ **高校 / 培训机构**：设计 AI Coding、Agent 工作流和企业实践课程
-- ✅ **AI 爱好者**：想把编程 Agent 用进自己的项目和日常工作
+- ✅ **AI 爱好者**：想搭建自己的 AI 私人助手
 
 ---
 
@@ -348,17 +393,21 @@ WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤�
 
 **想让 AI 帮忙出办公产物** → 从 WorkBuddy Part 3 开始（WB-00 → WB-02 → WB-01）
 
-**都想学** → 先走 Claude Code CLI 主线，再补 Codex App 桌面工作流；办公同事另走 WorkBuddy 主线
+**想搭建 AI 助手** → 从 OpenClaw Part 4 开始（OC-01 → OC-02 → OC-03），这条线更新放缓，排在最后按需学
+
+**都想学** → 先走 Claude Code CLI 主线，再补 Codex App 桌面工作流和 WorkBuddy 办公线；OpenClaw 助手框架放最后，按需再看
 
 ### 进阶者（有基础）
 
 - Claude Code 重点：04-MCP、05-Hooks、06-Subagent、07-Skills
 - Codex 重点：CX-04 项目指令与权限配置、CX-05 MCP、CX-06 Skills、CX-07 Plugins / Connectors
+- OpenClaw 重点：06-技能系统、08-多Agent路由
 
 ### 高级者（深度定制）
 
 - Claude Code：09-Agent-SDK、10-综合实战
 - Codex：CX-04 项目指令与权限、CX-08 Subagents、CX-09 Automations、CX-10 Review / PR、CX-13 安全企业
+- OpenClaw：08-多Agent、09-Docker部署、10-安全
 - **双工具协作**：Codex + Claude Code 的定位、边界和共存策略详见 CX-14
 - 长期 Skill 治理：可参考 [SkillClaw](https://github.com/AMAP-ML/SkillClaw)（skill 演化、去重、合并、共享；论文 [arXiv:2604.08377](https://arxiv.org/abs/2604.08377)）
 
@@ -415,7 +464,7 @@ WorkBuddy 补当前技能、积分、注销、定时通知与项目配置步骤�
 
 ## 🙏 致谢
 
-感谢所有为 Claude Code、Codex 和 WorkBuddy 生态做出贡献的开发者和社区成员！
+感谢所有为 Claude Code、Codex、WorkBuddy 和 OpenClaw 生态做出贡献的开发者和社区成员！
 
 ---
 
