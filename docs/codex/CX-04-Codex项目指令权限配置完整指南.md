@@ -478,6 +478,8 @@ App 主线中，普通读者不需要先手写它。推荐顺序：
 
 展示配置前先核对官方 schema 和当前界面。比如 `/goal` 不显示，先在 App 的 `/` 列表核对可用功能和版本；当前命令页没有要求启用 `features.goals`，CLI v0.160.0 的配置 schema 也未列出这个旧字段。无法使用时可以按明确阶段继续，不把旧实验开关当成所有版本的前提。
 
+CLI v0.165.0 起，Codex 内置 Google Cloud Vertex AI 作为 provider；走 Google Cloud 的团队可以在 `config.toml` 里按官方 Config Reference 选用它。
+
 ```toml
 # 只作为结构提示，实际字段以官方 Config Reference 和当前 App 为准。
 # 不要把模型名、实验开关或公司密钥硬写进教程示例。
@@ -610,7 +612,7 @@ Hook 是企业治理的强工具，但不适合用来弥补项目说明不清。
 
 ### 8.4 Memories 是回忆层，项目规则仍放 AGENTS.md
 
-本地 Codex Memories 默认关闭；桌面 App 可在 **Settings → Personalization → Enable memories** 开启，并用 `/memories` 分别控制当前聊天是否使用旧记忆、是否成为后续记忆的输入。当前聊天选择不会改全局设置。CLI/IDE 使用对应 Codex host 的本地记忆，网页 ChatGPT Work 使用 ChatGPT 的 memory 设置；它们不是同一个存储。团队必须始终适用的规则仍放 `AGENTS.md` 或版本管理的文档。
+CLI v0.165.0 起，memory v2 默认开启。新会话会自动带上本地记忆，对话也会沉淀成后续记忆，不用再先跑一趟设置把开关打开。桌面 App 可在 **Settings → Personalization → Enable memories** 管理开关，并用 `/memories` 分别控制当前聊天是否使用旧记忆、是否成为后续记忆的输入。当前聊天选择不会改全局设置。默认开启之后，不想被记住的任务要先用 `/memories` 关掉当前聊天的读取和生成，再开始。CLI/IDE 使用对应 Codex host 的本地记忆，网页 ChatGPT Work 使用 ChatGPT 的 memory 设置；它们不是同一个存储。团队必须始终适用的规则仍放 `AGENTS.md` 或版本管理的文档。
 
 例如临时分析一个外部PR时，先用 `/memories` 检查这次聊天的读取和生成选项，再引用明确的仓库文档。记忆不是每次聊天结束就立即生成，也不能作为团队强制规则唯一来源。详见 [官方 Memories 指南](https://learn.chatgpt.com/docs/customization/memories)。
 

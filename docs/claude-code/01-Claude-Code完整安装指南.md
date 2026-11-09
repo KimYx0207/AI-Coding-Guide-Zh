@@ -1044,6 +1044,8 @@ echo "分析这段代码" | claude -p
 
 若已设置 `ANTHROPIC_API_KEY`，客户端可能先要求确认使用该凭据，而不打开订阅登录流程。登录完成后，在 shell 运行 `claude auth status --text`，在会话中用 `/status` 核对实际认证。环境变量、浏览器登录和密钥存储各有用途，不能用星级断言一种总是最安全。
 
+v2.1.318 起，`claude auth status` 的输出里会显示登录到期时间 `loginExpiresAt`，到期前 10 天起给出警告。长时间运行的会话别等到调用失败才发现登录已经过期，定期看一眼这个时间。
+
 **第三方平台与 AWS Bedrock（v2.1.92，摘自官方 release）**：[v2.1.92](https://github.com/anthropics/claude-code/releases/tag/v2.1.92) 写明，在登录界面选择 **「3rd-party platform」** 时，可使用 **interactive Bedrock setup wizard**，引导完成 *AWS authentication, region configuration, credential verification, and model pinning*。菜单文案与步骤顺序以你安装的 CLI 版本为准；与仅使用 API Key / `modelOverrides` 走 Bedrock 的路径是否等价，请按官方文档区分场景。
 
 **配置步骤5：完成初始化**

@@ -315,6 +315,18 @@ Channels 支持**权限中继**（Permission Relay），但需要所用 channel 
 
 中继覆盖 Bash、Write、Edit 等工具审批，不覆盖工作区信任或 MCP 服务器同意对话框；后两类仍需在本地终端处理。如果插件没有权限中继能力，会话就会停在终端审批处，不能保证手机消息能解锁它。具体能力与格式见[官方权限中继参考](https://code.claude.com/docs/en/channels-reference#relay-permission-prompts)。
 
+没有权限中继时，还有一个本地配置能避免会话整夜卡在审批框上。v2.1.319 新增 `permissions.denyInsteadOfPrompting`：打开后，本该弹权限确认的调用直接被拒绝，Claude 拿这个结果继续本轮，终端会话和子代理都按这个规则走。无人值守和计划任务场景适合打开它，代价也要清楚：被拒绝的调用不会执行，任务可能因此缺一步，事后要看运行记录确认结果。
+
+```json
+{
+  "permissions": {
+    "denyInsteadOfPrompting": true
+  }
+}
+```
+
+它和 `blockWritesOutsideWorkingDirectories` 管的范围不同：后者只管写文件类工具的落点，工作目录之外一律不写；`denyInsteadOfPrompting` 改的是审批流程本身，凡是本该询问的调用都改为直接拒绝。前者适合长期开着防误写，后者适合没人守着的运行场景。
+
 ### 7.5 事件只在会话打开时到达
 
 Channel 只在 Claude Code 会话运行时把事件送进会话。关闭会话后能否补收消息取决于渠道服务器及外部平台的缓冲策略，不能保证补收，也不能一概说消息必然丢失。

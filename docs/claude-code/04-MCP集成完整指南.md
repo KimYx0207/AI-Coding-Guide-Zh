@@ -1245,6 +1245,8 @@ claude mcp add --transport http my-remote-server https://your-server.com/mcp
 - 每个工具有特定用途
 - AI选择合适的工具完成任务
 
+**工具的执行方式（v2.1.319 起）**：普通工具调用是同步的，Claude 发出调用，要等结果回来才继续。支持任务（task）方式的 MCP 工具多了一条路：这类工具以任务方式运行时自动转入后台执行，Claude 先推进手头的其他工作，任务完成后再收到通知。全量扫描、批量抓取这种一跑几分钟的工具适合走任务方式，会话不用停在原地干等。
+
 #### 2. Resources（资源）
 
 > **这是什么？** Resources是MCP服务器提供的"数据"，AI可以读取它们。

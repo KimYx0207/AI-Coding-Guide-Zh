@@ -4,6 +4,15 @@
 
 ---
 
+## [v5.6] - 2026-11-10
+
+- 下架 OpenClaw 全部 12 篇教程。OpenClaw 热度下降明显，停止跟版维护；README、目录、学习路径和统计同步改为 Claude Code、Codex、WorkBuddy 三条线，教程总数由 50 篇改为 38 篇。
+- Claude Code 按 2.1.307–2.1.319 补齐：02 篇补 ultrathink 的实际用法与 `blockWritesOutsideWorkingDirectories` 写入范围限制；04 篇补 MCP 工具以任务方式转后台执行；05 篇补 PreCompact 钩子定制压缩摘要；13 篇补 `denyInsteadOfPrompting`，并写清它与写入范围限制的区别；01 篇补 `claude auth status` 显示登录到期时间；11 篇补 `claude_code.safety_event` 拦截遥测。
+- Codex 按 CLI v0.164.0–v0.167.0 补齐：CX-03、CX-12 补 `/presets` 提示词预设，CX-12 补行内 `/model`、终端图片预览、`codex queue --resume` 与键盘驱动的会话记录搜索；CX-04 补 memory v2 默认开启与内置 Vertex AI provider；CX-08 新增 Agent 命令中心一节；CX-02、CX-14 的模型目录加入 GPT-6.1 Terra。GPT-5.5 已于 2026-10-14 从 ChatGPT 登录的 Codex 退役，CX-09、CX-12 的相关表述改为已退役口径。
+- WorkBuddy 按 5.9.0–5.11.0 补齐：WB-01、WB-02 的首页描述改为 5.11.0 改版口径（办公、开发、设计入口下线，统一任务栏与菜单）；WB-01 新增一节讲混元 Hy4 正式版的视觉理解与电脑操作，各配一个实操例子，并补「配置自定义模型」入口；WB-07 的定时任务操作补齐立即运行、编辑、重命名、启停、删除；WB-08 补 5.9.1 的跨电脑一键导入任务、空间与定时任务和云端记忆。
+
+---
+
 ## [v5.5] - 2026-10-03
 
 - 纠正 v5.4 将 Mods 简介视为完整覆盖的记录；Claude Code 08 增加可照做的 Mods 工坊，05/11/导航同步概念与托管边界。修正 Ctrl+L 回滚、alwaysLoad 工具级例外、代码审查路由、后台停止、auto 分类器计费和云任务恢复；收尾同步托管读取/沙箱、IDE 上下文、自动记忆开关、插件依赖/评测与云任务错峰。

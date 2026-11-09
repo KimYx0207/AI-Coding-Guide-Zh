@@ -239,7 +239,7 @@ codex --help
 1. 确认使用 ChatGPT 登录，还是 API Key / 自定义 provider。不要把一种登录方式的退役日期套到另一种。
 2. 检查自己的 `config.toml`、受管默认模型、自定义 agent 文件、定时任务和脚本中显式选择的模型。
 3. ChatGPT 登录范围内，`gpt-5.3-codex-spark` 已于 2026-09-14 退役；`gpt-5.4` / `gpt-5.4-mini` 已于 8 月 31 日退役；`gpt-5.2` / `gpt-5.3-codex` 也已废弃。改用账号实际可用的模型。
-4. `gpt-5.5` 将于 2026-10-14 从 ChatGPT、ChatGPT Work 与使用 ChatGPT 登录的 Codex 退役。官方迁移建议是 Plus/Pro/Business/Enterprise/Edu 在可用时选择 `gpt-6-sol`，Free/Go 在桌面 App 可用时选择 `gpt-6-luna`；若已有 6.1 Sol，也可按任务选择。此次 GPT-5.5 退役不适用于 OpenAI API；5.4 的这次 ChatGPT 登录退役也不影响用自有 API Key 的 Codex。API 和自定义 provider 的可用性要看相应模型目录。
+4. `gpt-5.5` 已于 2026-10-14 从 ChatGPT、ChatGPT Work 与使用 ChatGPT 登录的 Codex 退役。官方迁移建议是 Plus/Pro/Business/Enterprise/Edu 在可用时选择 `gpt-6-sol`，Free/Go 在桌面 App 可用时选择 `gpt-6-luna`；若已有 6.1 Sol，也可按任务选择。这次退役不适用于 OpenAI API；5.4 的 ChatGPT 登录退役也不影响用自有 API Key 的 Codex。API 和自定义 provider 的可用性要看相应模型目录。
 5. 在普通交互任务中确认模型可选、权限与输出正常，再更新无人值守任务。不要全局替换带日期的历史记录或 API 示例。
 
 依据：[Models 与迁移说明](https://learn.chatgpt.com/docs/models)、[0.159.1 默认模型更新](https://github.com/openai/codex/releases/tag/rust-v0.159.1)。
@@ -258,10 +258,12 @@ codex --help
 | CLI 工作树 | v0.154.0 的实验性说明是历史记录；v0.156.0 已默认启用，可从 agent command center 建立 worktree 会话。它仍需要 Git 仓库，检查实际目录后再写文件。 |
 | 任务中补充指令 | v0.159.0 的 `instant_interrupt` 是选择开启的功能，可在模型回答或长 code-mode 调用时用新输入调整任务；不能说所有旧版本默认即时中断。 |
 | 不在项目中启动与恢复 | v0.160.0 在策略允许时可使用 workspace defaults 启动无项目会话，并在恢复时保留已保存的权限。恢复后仍要核对实际目录、provider 和权限。 |
+| 提示词预设与行内切换 | v0.164.0 加入 `/presets`，用 10 个槽位保存常用提示词预设，存法和调法见第 6 节；同一版可在行内用 `/model` 设置模型与权限，终端内也能直接预览图片。 |
+| 诊断、恢复排队与会话搜索 | 排障先跑 `codex doctor`（沿革见 2.1 版本表）；v0.166.0 加入 `codex queue --resume`，会话记录改为键盘驱动的选择与搜索，找旧会话先搜关键词再打开。 |
 
 v0.159.0 已删除自动后续 prompt suggestions 及 `tui.prompt_suggestions`，也移除了随 CLI 捆绑的 `plugin-creator` skill；不要把旧设置或该 bundled skill 写成当前必需步骤。创建和分发 Plugin 继续按 CX-07 的当前官方流程处理。
 
-依据：[v0.156.0](https://github.com/openai/codex/releases/tag/rust-v0.156.0)、[v0.157.0](https://github.com/openai/codex/releases/tag/rust-v0.157.0)、[v0.158.0](https://github.com/openai/codex/releases/tag/rust-v0.158.0)、[v0.159.0](https://github.com/openai/codex/releases/tag/rust-v0.159.0)、[v0.160.0](https://github.com/openai/codex/releases/tag/rust-v0.160.0)。上述界面行为核到官方发布记录，没有启动登录后的 TUI 或语音会话。
+依据：[v0.156.0](https://github.com/openai/codex/releases/tag/rust-v0.156.0)、[v0.157.0](https://github.com/openai/codex/releases/tag/rust-v0.157.0)、[v0.158.0](https://github.com/openai/codex/releases/tag/rust-v0.158.0)、[v0.159.0](https://github.com/openai/codex/releases/tag/rust-v0.159.0)、[v0.160.0](https://github.com/openai/codex/releases/tag/rust-v0.160.0)、[v0.164.0](https://github.com/openai/codex/releases/tag/rust-v0.164.0)、[v0.166.0](https://github.com/openai/codex/releases/tag/rust-v0.166.0)。上述界面行为核到官方发布记录，没有启动登录后的 TUI 或语音会话。
 
 ## 3. 审批与沙盒
 
@@ -382,8 +384,11 @@ CLI TUI 用户重点掌握以下入口；桌面 App 的命令列表按 CX-03 和
 - `/plugins`
 - `/compact`
 - `/resume`
+- `/presets`
 
 如果这些命令没有出现在本机 TUI 的 `/` 列表，以实际列表和当前功能状态为准，不要按教程硬敲。
+
+`/presets`（v0.164.0）管常用提示词。它有 10 个槽位：打开 `/presets`，把一段常用提示词存进槽位；之后再打开它，选对应槽位，提示词就填回输入框，改几个变量就能发。它适合审查开场白、固定排障问法这类每次手打很烦的短提示。长流程仍按 CX-06 做成 Skill，预设只存提示词本身。
 
 ### 6.0 `/vim` 和键盘排查
 
@@ -417,8 +422,9 @@ session picker 在 v0.132.0 后更适合恢复旧线程：重命名线程会显�
 | 查看或切换工作目录 | v0.149.0 `/pwd`、`/cwd`、`/cd` | 切换后的真实目录、仓库与权限 |
 | 复制回复的一部分 | v0.150.0 为已有 `/copy` 增加目标选择器 | 选完整回复、代码块还是引文 |
 | 给现有任务补上下文 | v0.150.0 `@` 增加任务引用 | 选对任务，分清读取上下文与发送新指令 |
+| 翻找旧会话记录 | v0.166.0 键盘驱动的会话记录选择与搜索 | 先用关键词搜标题，再打开对应记录 |
 
-需要批量找任务或向已有任务排队发送消息时，先查看 `codex agents --help` 和 `codex queue --help`（v0.149.0 起）。这些命令会涉及具体任务；真正发送前要确认任务 ID、所在 host 和消息内容。
+需要批量找任务或向已有任务排队发送消息时，先查看 `codex agents --help` 和 `codex queue --help`（v0.149.0 起）。这些命令会涉及具体任务；真正发送前要确认任务 ID、所在 host 和消息内容。v0.166.0 起，排队流程中断后可用 `codex queue --resume` 恢复；恢复前同样先核对任务 ID 和所在 host。
 
 ### 6.2 找回、整理终端任务与工作树
 
